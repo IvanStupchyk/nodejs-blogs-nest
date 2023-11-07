@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 import { User, UserSchema } from './schemas/user.schema';
 import { UsersController } from './controllers/users/users.controller';
 import { UsersQueryRepository } from './repositories/users.query.repository';
@@ -29,6 +30,7 @@ dotenv.config();
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
