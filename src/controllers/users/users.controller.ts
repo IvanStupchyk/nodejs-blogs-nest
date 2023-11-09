@@ -8,13 +8,15 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersQueryRepository } from '../../repositories/users.query.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
 import { GetSortedUsersModel } from './models/Get.sorted.users.model';
-import { CreateUserModel } from './models/Create.user.model';
+import { NewUserDto } from './models/new-user.dto';
 import { UsersService } from '../../application/users.service';
 import { DeleteUserModel } from './models/Delete.user.model';
 import { Response } from 'express';
+import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 
 @Controller()
 export class UsersController {
@@ -23,17 +25,19 @@ export class UsersController {
     private readonly usersService: UsersService,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Get('users')
   async getUser(@Query() params: GetSortedUsersModel) {
     return await this.usersQueryRepository.getSortedUsers(params);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post('users')
-  async createUser(@Body() body: CreateUserModel) {
-    const { login, password, email } = body;
-    return await this.usersService.createUser(login, password, email);
+  async createUser(@Body() body: NewUserDto) {
+    return await this.usersService.createUser(body);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete('users/:id')
   async deleteUser(@Param() params: DeleteUserModel, @Res() res: Response) {
     const isUserExist = await this.usersService.deleteUser(params.id);

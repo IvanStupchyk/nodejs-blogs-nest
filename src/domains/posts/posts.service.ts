@@ -1,20 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../repositories/blogs.query.repository';
+import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs.query.repository';
 import { PostType } from './dto/post.dto';
 import { GetSortedPostsModel } from '../../controllers/posts/models/GetSortedPostsModel';
 import { PostViewModel } from '../../controllers/posts/models/PostViewModel';
 import { likesCounter } from '../../utils/likesCounter';
-import { LikesQueryRepository } from '../../repositories/likes.query.repository';
-import { LikesRepository } from '../../repositories/likesRepository';
+import { LikesQueryRepository } from '../../infrastructure/repositories/likes.query.repository';
+import { LikesRepository } from '../../infrastructure/repositories/likes.repository';
 import { PostLikeUserInfoType } from '../../types/postsLikesTypes';
-import { PostsRepository } from '../../repositories/postsRepository';
+import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
 import { likeStatus } from '../../types/generalTypes';
-import { PostsQueryRepository } from '../../repositories/posts.query.repository';
+import { PostsQueryRepository } from '../../infrastructure/repositories/posts.query.repository';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../../schemas/post.schema';
 import { PostLikeModelType, PostLikes } from '../../schemas/post.likes.schema';
-import { jwtService } from '../../application/jwt.service';
+import { NewPostDto } from '../../controllers/posts/models/New.post.dto';
+import { errorsConstants } from '../../constants/errors.contants';
+import { errorMessageGenerator } from '../../utils/errorMessageGenerator';
+import { PostForSpecificBlogDto } from '../../controllers/posts/models/Post.for.specific.blog.dto';
+import { BlogsService } from '../blogs/blogs.service';
+import { JwtService } from '../../application/jwt.service';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
 
 @Injectable()
 export class PostsService {
@@ -22,29 +28,31 @@ export class PostsService {
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsRepository: PostsRepository,
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
     private readonly likesQueryRepository: LikesQueryRepository,
     private readonly likesRepository: LikesRepository,
+    private readonly blogsService: BlogsService,
+    private readonly jwtService: JwtService,
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(PostLikes.name) private PostLikeModel: PostLikeModelType,
   ) {}
 
-  async createPost(
-    title: string,
-    content: string,
-    shortDescription: string,
-    blogId: ObjectId,
-  ): Promise<PostViewModel> {
+  async createPost(postData: NewPostDto): Promise<PostViewModel> {
+    const { title, content, shortDescription, blogId } = postData;
     const blog = await this.blogsQueryRepository.findBlogById(blogId);
 
     if (!blog) {
-      return null;
+      errorMessageGenerator([
+        { field: 'blogId', message: errorsConstants.post.blogId },
+      ]);
     }
+
     const initialPostModel = this.PostModel.createPost(
       title,
       shortDescription,
       content,
       blogId,
-      blog?.name ?? '',
+      blog.name,
       this.PostModel,
     );
 
@@ -65,6 +73,62 @@ export class PostsService {
         newestLikes: initialPostModel.extendedLikesInfo.newestLikes,
       },
     };
+  }
+
+  async createPostForSpecifiedBlog(
+    postData: PostForSpecificBlogDto,
+    blogId: string,
+  ): Promise<PostViewModel> {
+    const { title, content, shortDescription } = postData;
+
+    const foundBlog = await this.blogsService.findBlogById(blogId);
+
+    if (!foundBlog) {
+      errorMessageGenerator([
+        { field: 'blogId', message: errorsConstants.post.blogId },
+      ]);
+    }
+
+    return await this.createPost({
+      title,
+      content,
+      shortDescription,
+      blogId: new ObjectId(blogId),
+    });
+
+    // const { title, content, shortDescription, blogId } = postData;
+    // const blog = await this.blogsQueryRepository.findBlogById(blogId);
+    //
+    // if (!blog) {
+    //   errorMessageGenerator('blogId', errorsConstants.post.blogId);
+    // }
+    //
+    // const initialPostModel = this.PostModel.createPost(
+    //   title,
+    //   shortDescription,
+    //   content,
+    //   blogId,
+    //   blog.name,
+    //   this.PostModel,
+    // );
+    //
+    // await this.postsRepository.save(initialPostModel);
+    //
+    // return {
+    //   id: initialPostModel.id,
+    //   title: initialPostModel.title,
+    //   content: initialPostModel.content,
+    //   shortDescription: initialPostModel.shortDescription,
+    //   blogId: initialPostModel.blogId,
+    //   createdAt: initialPostModel.createdAt,
+    //   blogName: initialPostModel.blogName,
+    //   extendedLikesInfo: {
+    //     likesCount: initialPostModel.extendedLikesInfo.likesCount,
+    //     dislikesCount: initialPostModel.extendedLikesInfo.dislikesCount,
+    //     myStatus: likeStatus.None,
+    //     newestLikes: initialPostModel.extendedLikesInfo.newestLikes,
+    //   },
+    // };
   }
 
   async updatePostById(
@@ -90,13 +154,21 @@ export class PostsService {
     id: string,
     myStatus: string,
     userId: ObjectId,
-    login: string,
   ): Promise<boolean> {
+    if (!likeStatus[myStatus]) {
+      errorMessageGenerator([
+        { field: 'myStatus', message: 'status is incorrect' },
+      ]);
+    }
+
     if (!ObjectId.isValid(id)) return false;
     const postObjectId = new ObjectId(id);
     const foundPost =
       await this.postsQueryRepository.findPostById(postObjectId);
     if (!foundPost) return false;
+
+    const user = await this.usersQueryRepository.findUserById(userId);
+    if (!user) return false;
 
     const userPostLike =
       await this.likesQueryRepository.findPostLikeByUserIdAndPostId(
@@ -134,13 +206,9 @@ export class PostsService {
       const userPostLikeViewInfo: PostLikeUserInfoType = {
         addedAt: new Date().toISOString(),
         userId,
-        login,
+        login: user.login,
       };
-
-      await this.postsRepository.addNewUserLikeInfo(
-        postObjectId,
-        userPostLikeViewInfo,
-      );
+      foundPost.setNewUserPostLike(userPostLikeViewInfo);
     }
 
     if (newStatus === likeStatus.None || newStatus === likeStatus.Dislike) {
@@ -166,7 +234,7 @@ export class PostsService {
     let userId;
     if (accessTokenHeader) {
       const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await jwtService.getUserIdByAccessToken(accessToken);
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
     return await this.postsQueryRepository.getSortedPosts(params, userId);
@@ -182,7 +250,7 @@ export class PostsService {
     let userId;
     if (accessTokenHeader) {
       const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await jwtService.getUserIdByAccessToken(accessToken);
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
     let userLikeStatus = likeStatus.None;

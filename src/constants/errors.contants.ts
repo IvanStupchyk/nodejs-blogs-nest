@@ -12,7 +12,7 @@ export const errorsConstants = {
       'shortDescription should be a string and contains at least 1 but not more than 100 characters',
     content:
       'content should be a string and contains at least 1 but not more than 1000 characters',
-    blogId: 'such blogId must exist and be a string',
+    blogId: 'such blog must exist',
   },
   user: {
     login:

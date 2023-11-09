@@ -7,7 +7,7 @@ export class PostLikeUserInfo {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
   })
-  blogId: Types.ObjectId;
+  userId: Types.ObjectId;
 
   @Prop({
     required: true,

@@ -1,16 +1,16 @@
 import { ObjectId } from 'mongodb';
 import { likesCounter } from '../../utils/likesCounter';
-import { CommentsRepository } from '../../repositories/comentsRepository';
-import { CommentsQueryRepository } from '../../repositories/comentsQueryRepository';
-import { UsersQueryRepository } from '../../repositories/users.query.repository';
+import { CommentsRepository } from '../../infrastructure/repositories/comments.repository';
+import { CommentsQueryRepository } from '../../infrastructure/repositories/comments.query.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
 import { CommentType } from './dto/comment.dto';
-import { jwtService } from '../../application/jwt.service';
 import { CommentsType, likeStatus } from '../../types/generalTypes';
-import { UsersRepository } from '../../repositories/users.repository';
-import { PostsQueryRepository } from '../../repositories/posts.query.repository';
+import { UsersRepository } from '../../infrastructure/repositories/users.repository';
+import { PostsQueryRepository } from '../../infrastructure/repositories/posts.query.repository';
 import { CommentViewModel } from '../../controllers/comments/models/Comment.view.model';
 import { GetSortedCommentsModel } from '../../controllers/comments/models/Get.sorted.comments.model';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '../../application/jwt.service';
 
 @Injectable()
 export class CommentsService {
@@ -20,21 +20,34 @@ export class CommentsService {
     protected readonly commentsRepository: CommentsRepository,
     protected readonly commentsQueryRepository: CommentsQueryRepository,
     protected readonly postsQueryRepository: PostsQueryRepository,
+    protected readonly jwtService: JwtService,
   ) {}
 
   async createComment(
     content: string,
-    id: ObjectId,
-    userId: ObjectId,
-    userLogin: string,
-  ): Promise<CommentViewModel> {
+    id: string,
+    userId: string,
+  ): Promise<CommentViewModel | number> {
+    if (!ObjectId.isValid(id)) return HttpStatus.NOT_FOUND;
+    if (!ObjectId.isValid(userId)) return HttpStatus.NOT_FOUND;
+    const postObjectId = new ObjectId(id);
+    const userObjectId = new ObjectId(userId);
+
+    const foundPost =
+      await this.postsQueryRepository.findPostById(postObjectId);
+
+    if (!foundPost) return HttpStatus.NOT_FOUND;
+
+    const user = await this.usersQueryRepository.findUserById(userObjectId);
+    if (!user) return HttpStatus.NOT_FOUND;
+
     const newComment: CommentType = new CommentType(
       new ObjectId(),
       content,
-      id,
+      postObjectId,
       {
-        userId,
-        userLogin,
+        userId: user.id,
+        userLogin: user.login,
       },
       {
         likesCount: 0,
@@ -46,8 +59,29 @@ export class CommentsService {
     return await this.commentsRepository.createComment(newComment);
   }
 
-  async updateComment(content: string, id: string): Promise<boolean> {
-    return await this.commentsRepository.updateComment(content, id);
+  async updateComment(
+    content: string,
+    id: string,
+    currentUserId: ObjectId,
+  ): Promise<number> {
+    const foundComment = await this.findCommentByIdWithoutLikeStatus(id);
+
+    if (
+      foundComment &&
+      !new ObjectId(foundComment.commentatorInfo.userId).equals(currentUserId)
+    ) {
+      return HttpStatus.FORBIDDEN;
+    }
+
+    if (!ObjectId.isValid(id)) return HttpStatus.NOT_FOUND;
+    const isCommentUpdated = await this.commentsRepository.updateComment(
+      content,
+      new ObjectId(id),
+    );
+
+    if (isCommentUpdated) return HttpStatus.NO_CONTENT;
+
+    return HttpStatus.NOT_FOUND;
   }
 
   async findCommentById(
@@ -60,7 +94,7 @@ export class CommentsService {
     let userId;
     if (accessTokenHeader) {
       const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await jwtService.getUserIdByAccessToken(accessToken);
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
     let finalCommentStatus = likeStatus.None;
@@ -148,7 +182,7 @@ export class CommentsService {
     let userId;
     if (accessTokenHeader) {
       const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await jwtService.getUserIdByAccessToken(accessToken);
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
     return await this.commentsQueryRepository.getSortedComments(
@@ -165,7 +199,28 @@ export class CommentsService {
     return await this.commentsQueryRepository.findCommentById(new ObjectId(id));
   }
 
-  async deleteComment(commentId: string): Promise<boolean> {
-    return await this.commentsRepository.deleteComment(commentId);
+  async deleteComment(
+    commentId: string,
+    currentUserId: ObjectId,
+  ): Promise<number> {
+    if (!ObjectId.isValid(commentId)) return HttpStatus.NOT_FOUND;
+
+    const foundComment = await this.findCommentByIdWithoutLikeStatus(commentId);
+    if (!foundComment) return HttpStatus.NOT_FOUND;
+
+    if (
+      foundComment &&
+      !new ObjectId(foundComment.commentatorInfo.userId).equals(currentUserId)
+    ) {
+      return HttpStatus.FORBIDDEN;
+    }
+
+    const idDeleted = await this.commentsRepository.deleteComment(commentId);
+
+    if (idDeleted) {
+      return HttpStatus.NO_CONTENT;
+    } else {
+      return HttpStatus.NOT_FOUND;
+    }
   }
 }
