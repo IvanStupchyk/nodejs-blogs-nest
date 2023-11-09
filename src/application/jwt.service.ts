@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { settings } from '../settings';
 import { ObjectId } from 'mongodb';
+import { Injectable } from '@nestjs/common';
 
-class JwtService {
+@Injectable()
+export class JwtService {
   async createAccessJWT(userId: ObjectId) {
     return jwt.sign({ userId }, settings.JWT_ACCESS_SECRET, {
-      expiresIn: 5000,
+      expiresIn: 3000,
     });
   }
 
@@ -46,5 +48,3 @@ class JwtService {
     }
   }
 }
-
-export const jwtService = new JwtService();

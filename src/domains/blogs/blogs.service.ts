@@ -1,8 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../repositories/blogs.query.repository';
+import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs.query.repository';
 import { BlogType } from './dto/blog.dto';
-import { BlogsRepository } from '../../repositories/blogsRepository';
+import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
 
 @Injectable()
 export class BlogsService {

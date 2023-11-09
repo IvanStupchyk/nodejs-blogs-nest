@@ -2,9 +2,11 @@ import * as bcrypt from 'bcrypt';
 import { ObjectId } from 'mongodb';
 import { ViewUserModel } from '../controllers/users/models/View.user.model';
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from '../repositories/users.repository';
+import { UsersRepository } from '../infrastructure/repositories/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserModelType } from '../schemas/user.schema';
+import { NewUserDto } from '../controllers/users/models/new-user.dto';
+import { validateOrRejectModel } from '../utils/validateOrRejectModel';
 
 @Injectable()
 export class UsersService {
@@ -13,11 +15,10 @@ export class UsersService {
     @InjectModel(User.name) private UserModel: UserModelType,
   ) {}
 
-  async createUser(
-    login: string,
-    password: string,
-    email: string,
-  ): Promise<ViewUserModel> {
+  async createUser(userData: NewUserDto): Promise<ViewUserModel> {
+    await validateOrRejectModel(userData, NewUserDto);
+
+    const { login, password, email } = userData;
     const passwordHash = await bcrypt.hash(password, 10);
 
     const smartUserModel = this.UserModel.createUser(

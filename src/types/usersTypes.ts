@@ -17,6 +17,12 @@ export type UserMethodsType = {
   ) => void;
 };
 
+export type ShowOwnUserDataType = {
+  id: ObjectId;
+  login: string;
+  email: string;
+};
+
 // export type UserModelType = mongoose.Model<UserType, {}, UserMethodsType>;
 //
 // type UserModelStaticType = mongoose.Model<UserType> & {
