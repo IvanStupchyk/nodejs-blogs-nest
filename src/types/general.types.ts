@@ -8,8 +8,8 @@ import {
 import { ObjectId } from 'mongodb';
 import { BlogType } from '../domains/blogs/dto/blog.dto';
 import { PostType } from '../domains/posts/dto/post.dto';
-import { ViewUserModel } from '../controllers/users/models/View.user.model';
-import { CommentViewModel } from '../controllers/comments/models/Comment.view.model';
+import { ViewUserModel } from '../controllers/users/models/view-user.model';
+import { CommentViewModel } from '../controllers/comments/models/comment-view.model';
 
 export type BlogsType = {
   pagesCount: number;

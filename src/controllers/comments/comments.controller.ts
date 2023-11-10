@@ -12,19 +12,20 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { CommentsService } from '../../domains/comments/comments.service';
-import { GetCommentModel } from './models/Get.comment.model';
+import { GetCommentModel } from './models/get-comment.model';
 import { UpdateCommentDto } from './models/update-comment.dto';
-import { URIParamsCommentModel } from './models/URI.params.comment.model';
-import { DeleteCommentModel } from './models/Delete.comment.model';
+import { UriParamsCommentModel } from './models/uri-params-comment.model';
+import { DeleteCommentModel } from './models/delete-comment.model';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../auth/current-user.param.decorator';
+import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ObjectId } from 'mongodb';
 import { ChangeLikeCountDto } from '../posts/models/change-like-count.dto';
+import { RouterPaths } from '../../constants/router.paths';
 
 @Controller()
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
-  @Get('comments/:id')
+  @Get(`${RouterPaths.comments}/:id`)
   async getCurrentComment(
     @Param() params: GetCommentModel,
     @Req() req: Request,
@@ -41,9 +42,9 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('comments/:id')
+  @Put(`${RouterPaths.comments}/:id`)
   async updateComment(
-    @Param() params: URIParamsCommentModel,
+    @Param() params: UriParamsCommentModel,
     @Body() body: UpdateCommentDto,
     @CurrentUserId() currentUserId,
     @Res() res: Response,
@@ -58,9 +59,9 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('comments/:id/like-status')
+  @Put(`${RouterPaths.comments}/:id/like-status`)
   async likeComment(
-    @Param() params: URIParamsCommentModel,
+    @Param() params: UriParamsCommentModel,
     @Body() body: ChangeLikeCountDto,
     @Res() res: Response,
     @CurrentUserId() currentUserId,
@@ -77,7 +78,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('comments/:id')
+  @Delete(`${RouterPaths.comments}/:id`)
   async deleteComment(
     @Param() params: DeleteCommentModel,
     @Res() res: Response,

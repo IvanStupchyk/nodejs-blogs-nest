@@ -1,16 +1,18 @@
 import { ObjectId } from 'mongodb';
-import { likesCounter } from '../../utils/likesCounter';
+import { likesCounter } from '../../utils/likes-counter';
 import { CommentsRepository } from '../../infrastructure/repositories/comments.repository';
-import { CommentsQueryRepository } from '../../infrastructure/repositories/comments.query.repository';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
+import { CommentsQueryRepository } from '../../infrastructure/repositories/comments-query.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { CommentType } from './dto/comment.dto';
-import { CommentsType, likeStatus } from '../../types/generalTypes';
+import { CommentsType, likeStatus } from '../../types/general.types';
 import { UsersRepository } from '../../infrastructure/repositories/users.repository';
-import { PostsQueryRepository } from '../../infrastructure/repositories/posts.query.repository';
-import { CommentViewModel } from '../../controllers/comments/models/Comment.view.model';
-import { GetSortedCommentsModel } from '../../controllers/comments/models/Get.sorted.comments.model';
+import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
+import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
+import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '../../application/jwt.service';
+import { errorMessageGenerator } from '../../utils/error-message-generator';
+import { errorsConstants } from '../../constants/errors.contants';
 
 @Injectable()
 export class CommentsService {
@@ -125,6 +127,11 @@ export class CommentsService {
     myStatus: string,
     userId: ObjectId,
   ): Promise<boolean> {
+    if (!likeStatus[myStatus]) {
+      errorMessageGenerator([
+        { field: 'myStatus', message: errorsConstants.likeStatus },
+      ]);
+    }
     if (!ObjectId.isValid(id)) return false;
     const commentObjectId = new ObjectId(id);
     const foundComment =

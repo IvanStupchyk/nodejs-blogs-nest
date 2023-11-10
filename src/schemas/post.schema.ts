@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Model, Types } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { ExtendedPostLikesInfoSchema } from './extended.post.likes.info.schema';
+import { ExtendedPostLikesInfoSchema } from './extended-post-likes-info.schema';
 import {
   ExtendedLikesInfoType,
   PostLikeUserInfoType,
-} from '../types/postsLikesTypes';
+} from '../types/posts-likes.types';
 
 @Schema()
 export class Post {

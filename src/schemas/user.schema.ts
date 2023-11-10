@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Model, Types } from 'mongoose';
-import { AccountDataSchema } from './account.data.schema';
+import { AccountDataSchema } from './account-data.schema';
 import {
   AccountDataType,
   EmailConfirmationType,
   likeStatus,
   UserCommentLikesType,
-} from '../types/generalTypes';
-import { EmailConfirmationSchema } from './email.confirmation.schema';
-import { UserCommentLikesSchema } from './user.comment.likes.schema';
+} from '../types/general.types';
+import { EmailConfirmationSchema } from './email-confirmation-schema';
+import { UserCommentLikesSchema } from './user-comment-likes.schema';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';

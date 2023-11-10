@@ -1,14 +1,14 @@
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
-import { GetSortedPostsModel } from '../../controllers/posts/models/GetSortedPostsModel';
-import { PostViewModel } from '../../controllers/posts/models/PostViewModel';
-import { LikesQueryRepository } from './likes.query.repository';
-import { PostLikesType } from '../../dtos/post.likes.dto';
+import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
+import { PostViewModel } from '../../controllers/posts/models/post-view.model';
+import { LikesQueryRepository } from './likes-query.repository';
+import { PostLikesType } from '../../dtos/post-likes.dto';
 import { mockPostModel } from '../../constants/blanks';
-import { likeStatus } from '../../types/generalTypes';
-import { getPostsMapper } from '../../utils/dataMappers/postsMappers/getPostsMapper';
-import { PostsType } from '../../types/postsTypes';
+import { likeStatus } from '../../types/general.types';
+import { getPostsMapper } from '../../utils/dataMappers/postsMappers/get-posts-mapper';
+import { PostsType } from '../../types/posts.types';
 import { PostType } from '../../domains/posts/dto/post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -93,7 +93,14 @@ export class PostsQueryRepository {
                 (a: any, b: any) =>
                   new Date(b.addedAt).valueOf() - new Date(a.addedAt).valueOf(),
               )
-              .slice(0, 3),
+              .slice(0, 3)
+              .map((l) => {
+                return {
+                  login: l.login,
+                  userId: l.userId,
+                  addedAt: l.addedAt,
+                };
+              }),
           },
         }
       : null;

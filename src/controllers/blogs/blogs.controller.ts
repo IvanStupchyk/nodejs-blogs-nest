@@ -12,22 +12,23 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { GetSortedBlogsModel } from './models/GetSortedBlogsModel';
-import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs.query.repository';
-import { NewBlogDto } from './models/New.blog.dto';
+import { GetSortedBlogsModel } from './models/get-sorted-blogs.model';
+import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
+import { NewBlogDto } from './models/new-blog.dto';
 import { BlogsService } from '../../domains/blogs/blogs.service';
-import { GetBlogModel } from './models/GetBlogModel';
+import { GetBlogModel } from './models/get-blog.model';
 import { Response, Request } from 'express';
-import { URIParamsBlogIdModel } from './models/URIParamsBlogIdModel';
-import { UpdateBlogModel } from './models/UpdateBlogModel';
-import { DeleteBlogModel } from './models/DeleteBlogModel';
-import { PostForSpecificBlogDto } from '../posts/models/Post.for.specific.blog.dto';
+import { UriParamsBlogIdModel } from './models/uri-params-blog-id.model';
+import { UpdateBlogModel } from './models/update-blog.model';
+import { DeleteBlogModel } from './models/delete-blog.model';
+import { PostForSpecificBlogDto } from '../posts/models/post-for-specific-blog.dto';
 import { PostsService } from '../../domains/posts/posts.service';
-import { GetSortedPostsModel } from '../posts/models/GetSortedPostsModel';
-import { PostsQueryRepository } from '../../infrastructure/repositories/posts.query.repository';
-import { ApiRequestService } from '../../application/api.request.service';
+import { GetSortedPostsModel } from '../posts/models/get-sorted-posts.model';
+import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
+import { ApiRequestService } from '../../application/api-request.service';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { JwtService } from '../../application/jwt.service';
+import { RouterPaths } from '../../constants/router.paths';
 
 @Controller()
 export class BlogController {
@@ -39,23 +40,23 @@ export class BlogController {
     private readonly apiRequestCounter: ApiRequestService,
     private readonly jwtService: JwtService,
   ) {}
-  @Get('blogs')
+  @Get(`${RouterPaths.blogs}`)
   async getBlogs(@Query() params: GetSortedBlogsModel, @Req() req: Request) {
     await this.apiRequestCounter.countRequest(req);
     return await this.blogsQueryRepository.getSortedBlogs(params);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post('blogs')
+  @Post(`${RouterPaths.blogs}`)
   async createBlog(@Body() body: NewBlogDto) {
     const { name, websiteUrl, description } = body;
     return await this.blogsService.createBlog(name, description, websiteUrl);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post('blogs/:id/posts')
+  @Post(`${RouterPaths.blogs}/:id/posts`)
   async createPostForSpecifiedBlog(
-    @Param() params: URIParamsBlogIdModel,
+    @Param() params: UriParamsBlogIdModel,
     @Body() body: PostForSpecificBlogDto,
     @Res() res: Response,
   ) {
@@ -64,17 +65,17 @@ export class BlogController {
       params.id,
     );
 
-    !post ? res.sendStatus(HttpStatus.BAD_REQUEST) : res.send(post);
+    !post ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(post);
   }
 
-  @Get('blogs/:id')
+  @Get(`${RouterPaths.blogs}/:id`)
   async getCurrentBlog(@Param() params: GetBlogModel, @Res() res: Response) {
     const foundBlog = await this.blogsService.findBlogById(params.id);
 
     !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
   }
 
-  @Get('blogs/:id/posts')
+  @Get(`${RouterPaths.blogs}/:id/posts`)
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogModel,
     @Query() query: GetSortedPostsModel,
@@ -96,9 +97,9 @@ export class BlogController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put('blogs/:id')
+  @Put(`${RouterPaths.blogs}/:id`)
   async updateBlog(
-    @Param() params: URIParamsBlogIdModel,
+    @Param() params: UriParamsBlogIdModel,
     @Body() body: UpdateBlogModel,
     @Res() res: Response,
   ) {
@@ -117,7 +118,7 @@ export class BlogController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete('blogs/:id')
+  @Delete(`${RouterPaths.blogs}/:id`)
   async deleteBlog(@Param() params: DeleteBlogModel, @Res() res: Response) {
     const isBlogExist = await this.blogsService.deleteBlog(params.id);
 

@@ -1,5 +1,5 @@
 import { SortOrder } from '../../../constants/sort.order';
-import { CommentViewModel } from './Comment.view.model';
+import { CommentViewModel } from './comment-view.model';
 
 export type GetSortedCommentsModel = {
   searchNameTerm: string;

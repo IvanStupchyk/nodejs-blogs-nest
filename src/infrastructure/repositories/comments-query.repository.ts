@@ -1,15 +1,15 @@
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
-import { UsersQueryRepository } from './users.query.repository';
+import { UsersQueryRepository } from './users-query.repository';
 import {
   CommentsType,
   likeStatus,
   UserCommentLikesType,
-} from '../../types/generalTypes';
+} from '../../types/general.types';
 import { mockCommentModel } from '../../constants/blanks';
-import { CommentViewModel } from '../../controllers/comments/models/Comment.view.model';
-import { GetSortedCommentsModel } from '../../controllers/comments/models/Get.sorted.comments.model';
+import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
+import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentDocument } from '../../schemas/comment.schema';
 import { Model } from 'mongoose';

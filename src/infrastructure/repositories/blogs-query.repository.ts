@@ -7,8 +7,8 @@ import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockBlogModel } from '../../constants/blanks';
 import { BlogType } from '../../domains/blogs/dto/blog.dto';
 import { SortOrder } from '../../constants/sort.order';
-import { BlogsType } from '../../types/generalTypes';
-import { GetSortedBlogsModel } from '../../controllers/blogs/models/GetSortedBlogsModel';
+import { BlogsType } from '../../types/general.types';
+import { GetSortedBlogsModel } from '../../controllers/blogs/models/get-sorted-blogs.model';
 
 @Injectable()
 export class BlogsQueryRepository {

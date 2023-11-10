@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceViewType } from '../../types/generalTypes';
+import { DeviceViewType } from '../../types/general.types';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

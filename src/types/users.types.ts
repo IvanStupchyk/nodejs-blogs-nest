@@ -1,6 +1,6 @@
-import { likeStatus } from './generalTypes';
+import { likeStatus } from './general.types';
 import { ObjectId } from 'mongodb';
-import { ViewUserModel } from '../controllers/users/models/View.user.model';
+import { ViewUserModel } from '../controllers/users/models/view-user.model';
 
 export type UserMethodsType = {
   canBeConfirmed: (code: string) => boolean;
@@ -18,7 +18,7 @@ export type UserMethodsType = {
 };
 
 export type ShowOwnUserDataType = {
-  id: ObjectId;
+  userId: ObjectId;
   login: string;
   email: string;
 };

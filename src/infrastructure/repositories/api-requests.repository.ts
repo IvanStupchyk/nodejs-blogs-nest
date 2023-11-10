@@ -1,11 +1,11 @@
-import { APIRequestsCountType } from '../../types/generalTypes';
+import { APIRequestsCountType } from '../../types/general.types';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   ApiRequest,
   ApiRequestDocument,
-} from '../../schemas/api.request.schema';
+} from '../../schemas/api-request.schema';
 
 @Injectable()
 export class ApiRequestRepository {
@@ -31,12 +31,10 @@ export class ApiRequestRepository {
     ip: string,
     date: Date,
   ): Promise<number> {
-    const requestCount = await this.ApiRequestModel.countDocuments({
+    return this.ApiRequestModel.countDocuments({
       URL,
       ip,
       date: { $gte: date },
     });
-
-    return requestCount;
   }
 }

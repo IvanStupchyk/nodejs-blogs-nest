@@ -1,26 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs.query.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { PostType } from './dto/post.dto';
-import { GetSortedPostsModel } from '../../controllers/posts/models/GetSortedPostsModel';
-import { PostViewModel } from '../../controllers/posts/models/PostViewModel';
-import { likesCounter } from '../../utils/likesCounter';
-import { LikesQueryRepository } from '../../infrastructure/repositories/likes.query.repository';
+import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
+import { PostViewModel } from '../../controllers/posts/models/post-view.model';
+import { likesCounter } from '../../utils/likes-counter';
+import { LikesQueryRepository } from '../../infrastructure/repositories/likes-query.repository';
 import { LikesRepository } from '../../infrastructure/repositories/likes.repository';
-import { PostLikeUserInfoType } from '../../types/postsLikesTypes';
+import { PostLikeUserInfoType } from '../../types/posts-likes.types';
 import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
-import { likeStatus } from '../../types/generalTypes';
-import { PostsQueryRepository } from '../../infrastructure/repositories/posts.query.repository';
+import { likeStatus } from '../../types/general.types';
+import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../../schemas/post.schema';
-import { PostLikeModelType, PostLikes } from '../../schemas/post.likes.schema';
-import { NewPostDto } from '../../controllers/posts/models/New.post.dto';
+import { PostLikeModelType, PostLikes } from '../../schemas/post-likes.schema';
+import { NewPostDto } from '../../controllers/posts/models/new-post.dto';
 import { errorsConstants } from '../../constants/errors.contants';
-import { errorMessageGenerator } from '../../utils/errorMessageGenerator';
-import { PostForSpecificBlogDto } from '../../controllers/posts/models/Post.for.specific.blog.dto';
+import { errorMessageGenerator } from '../../utils/error-message-generator';
+import { PostForSpecificBlogDto } from '../../controllers/posts/models/post-for-specific-blog.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { JwtService } from '../../application/jwt.service';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 
 @Injectable()
 export class PostsService {
@@ -84,9 +84,7 @@ export class PostsService {
     const foundBlog = await this.blogsService.findBlogById(blogId);
 
     if (!foundBlog) {
-      errorMessageGenerator([
-        { field: 'blogId', message: errorsConstants.post.blogId },
-      ]);
+      throw new NotFoundException();
     }
 
     return await this.createPost({
@@ -95,40 +93,6 @@ export class PostsService {
       shortDescription,
       blogId: new ObjectId(blogId),
     });
-
-    // const { title, content, shortDescription, blogId } = postData;
-    // const blog = await this.blogsQueryRepository.findBlogById(blogId);
-    //
-    // if (!blog) {
-    //   errorMessageGenerator('blogId', errorsConstants.post.blogId);
-    // }
-    //
-    // const initialPostModel = this.PostModel.createPost(
-    //   title,
-    //   shortDescription,
-    //   content,
-    //   blogId,
-    //   blog.name,
-    //   this.PostModel,
-    // );
-    //
-    // await this.postsRepository.save(initialPostModel);
-    //
-    // return {
-    //   id: initialPostModel.id,
-    //   title: initialPostModel.title,
-    //   content: initialPostModel.content,
-    //   shortDescription: initialPostModel.shortDescription,
-    //   blogId: initialPostModel.blogId,
-    //   createdAt: initialPostModel.createdAt,
-    //   blogName: initialPostModel.blogName,
-    //   extendedLikesInfo: {
-    //     likesCount: initialPostModel.extendedLikesInfo.likesCount,
-    //     dislikesCount: initialPostModel.extendedLikesInfo.dislikesCount,
-    //     myStatus: likeStatus.None,
-    //     newestLikes: initialPostModel.extendedLikesInfo.newestLikes,
-    //   },
-    // };
   }
 
   async updatePostById(
@@ -157,7 +121,7 @@ export class PostsService {
   ): Promise<boolean> {
     if (!likeStatus[myStatus]) {
       errorMessageGenerator([
-        { field: 'myStatus', message: 'status is incorrect' },
+        { field: 'myStatus', message: errorsConstants.likeStatus },
       ]);
     }
 

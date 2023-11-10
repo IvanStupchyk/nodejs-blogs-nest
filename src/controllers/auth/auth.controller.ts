@@ -10,17 +10,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { RouterPaths } from '../../constants/routerPaths';
-import { LoginUserDto } from '../../domains/auth/models/Login.user.dto';
+import { RouterPaths } from '../../constants/router.paths';
+import { LoginUserDto } from '../../domains/auth/models/login-user.dto';
 import { AuthService } from '../../application/auth.service';
 import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
-import { CurrentUserId } from '../../auth/current-user.param.decorator';
-import { ApiRequestService } from '../../application/api.request.service';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { CurrentUserId } from '../../auth/current-user-param.decorator';
+import { ApiRequestService } from '../../application/api-request.service';
 import { NewUserDto } from '../users/models/new-user.dto';
-import { ConfirmEmailModel } from '../../domains/auth/models/ConfirmEmailModel';
+import { ConfirmEmailModel } from '../../domains/auth/models/confirm-email.model';
 import { ResendingCodeToEmailDto } from '../../domains/auth/models/resending-code-to-email.dto';
 import { RefreshTokenMiddleware } from '../../application/refresh-token.service';
 import { RecoveryCodeEmailDto } from '../../domains/auth/models/recovery-code-email.dto';
@@ -46,13 +46,18 @@ export class AuthController {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const result = await this.authService.loginUser(req, req.user.id);
-    res
-      .status(HTTP_STATUSES.OK_200)
-      .cookie('refreshToken', result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-      })
-      .send({ accessToken: result.accessToken });
+
+    if (result) {
+      res
+        .status(HTTP_STATUSES.OK_200)
+        .cookie('refreshToken', result.refreshToken, {
+          httpOnly: true,
+          secure: true,
+        })
+        .send({ accessToken: result.accessToken });
+    } else {
+      res.sendStatus(HttpStatus.UNAUTHORIZED);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
