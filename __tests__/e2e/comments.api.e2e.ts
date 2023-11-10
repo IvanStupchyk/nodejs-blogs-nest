@@ -362,7 +362,7 @@ describe('tests for /comments and posts/:id/comments', () => {
       .send(updateLike)
       .expect(HTTP_STATUSES.BAD_REQUEST_400, {
         errorsMessages: [
-          { field: 'myStatus', message: errorsConstants.likeStatus },
+          { field: 'likeStatus', message: errorsConstants.likeStatus },
         ],
       });
   });

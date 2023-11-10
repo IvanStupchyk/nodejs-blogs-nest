@@ -4,7 +4,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
 import { UserType } from '../../dtos/user.dto';
-import { JwtService } from '../../application/jwt.service';
+import { JwtService } from '../../infrastructure/jwt.service';
 import { isValidObjectId } from 'mongoose';
 import { ObjectId } from 'mongodb';
 

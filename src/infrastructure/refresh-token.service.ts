@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { JwtService } from './jwt.service';
-import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
+import { DevicesRepository } from './repositories/devices.repository';
 import { Injectable } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 

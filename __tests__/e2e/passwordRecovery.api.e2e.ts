@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { usersTestManager } from '../utils/users-test-manager';
-import { emailTemplatesManager } from '../../src/application/email-templates-manager';
+import { emailTemplatesManager } from '../../src/infrastructure/email-templates-manager';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
@@ -10,7 +10,7 @@ import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
 import { UserType } from '../../src/dtos/user.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { JwtService } from '../../src/application/jwt.service';
+import { JwtService } from '../../src/infrastructure/jwt.service';
 import { errorsConstants } from '../../src/constants/errors.contants';
 
 describe('tests for /auth password recovery', () => {

@@ -18,7 +18,6 @@ import { PostsService } from '../../domains/posts/posts.service';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
 import { NewPostDto } from './models/new-post.dto';
-import { UpdatePostModel } from './models/update-post.model';
 import { UriParamsPostIdModel } from './models/uri-params-post-id.model';
 import { DeletePostModel } from './models/delete-post.model';
 import { UriParamsCommentModel } from '../comments/models/uri-params-comment.model';
@@ -93,7 +92,7 @@ export class PostsController {
   @Put(`${RouterPaths.posts}/:id`)
   async updatePost(
     @Param() params: UriParamsPostIdModel,
-    @Body() body: UpdatePostModel,
+    @Body() body: NewPostDto,
     @Res() res: Response,
   ) {
     const { title, content, shortDescription, blogId } = body;

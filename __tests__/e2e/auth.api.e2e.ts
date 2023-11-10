@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { usersTestManager } from '../utils/users-test-manager';
-import { emailTemplatesManager } from '../../src/application/email-templates-manager';
+import { emailTemplatesManager } from '../../src/infrastructure/email-templates-manager';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
