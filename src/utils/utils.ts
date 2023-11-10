@@ -1,5 +1,5 @@
 import { SortOrder } from '../constants/sort.order';
-import { SortConditionsType } from '../types/generalTypes';
+import { SortConditionsType } from '../types/general.types';
 
 export const countSkipSizeForDb = (
   pageNumber: number,

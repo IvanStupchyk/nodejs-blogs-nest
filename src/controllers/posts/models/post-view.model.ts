@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { ExtendedLikesInfoViewType } from '../../../types/postsLikesTypes';
+import { ExtendedLikesInfoViewType } from '../../../types/posts-likes.types';
 
 export type PostViewModel = {
   id: ObjectId;

@@ -10,13 +10,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
-import { GetSortedUsersModel } from './models/Get.sorted.users.model';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { GetSortedUsersModel } from './models/get-sorted-users.model';
 import { NewUserDto } from './models/new-user.dto';
 import { UsersService } from '../../application/users.service';
-import { DeleteUserModel } from './models/Delete.user.model';
+import { DeleteUserModel } from './models/delete-user.model';
 import { Response } from 'express';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
+import { RouterPaths } from '../../constants/router.paths';
 
 @Controller()
 export class UsersController {
@@ -26,19 +27,19 @@ export class UsersController {
   ) {}
 
   @UseGuards(BasicAuthGuard)
-  @Get('users')
+  @Get(`${RouterPaths.users}`)
   async getUser(@Query() params: GetSortedUsersModel) {
     return await this.usersQueryRepository.getSortedUsers(params);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post('users')
+  @Post(`${RouterPaths.users}`)
   async createUser(@Body() body: NewUserDto) {
     return await this.usersService.createUser(body);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete('users/:id')
+  @Delete(`${RouterPaths.users}/:id`)
   async deleteUser(@Param() params: DeleteUserModel, @Res() res: Response) {
     const isUserExist = await this.usersService.deleteUser(params.id);
 

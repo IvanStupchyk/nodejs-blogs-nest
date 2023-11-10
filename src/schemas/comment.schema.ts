@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
-import { CommentatorInfoSchema } from './commentator.info.schema';
+import { CommentatorInfoSchema } from './commentator-info.schema';
 import {
   CommentatorInfoType,
   CommentLikesInfoType,
-} from '../types/generalTypes';
-import { CommentLikesInfoSchema } from './comment.likes.info.schema';
+} from '../types/general.types';
+import { CommentLikesInfoSchema } from './comment-likes-info.schema';
 
 @Schema()
 export class Comment {

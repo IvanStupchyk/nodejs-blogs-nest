@@ -1,4 +1,4 @@
-import { PostLikesDocument } from '../../schemas/post.likes.schema';
+import { PostLikesDocument } from '../../schemas/post-likes.schema';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

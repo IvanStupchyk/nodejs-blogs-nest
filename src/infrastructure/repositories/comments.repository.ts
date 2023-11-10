@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CommentLikesInfoType, likeStatus } from '../../types/generalTypes';
-import { CommentViewModel } from '../../controllers/comments/models/Comment.view.model';
+import { CommentLikesInfoType, likeStatus } from '../../types/general.types';
+import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
 import { CommentType } from '../../domains/comments/dto/comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

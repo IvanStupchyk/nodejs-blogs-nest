@@ -1,6 +1,7 @@
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
 import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
+import { RouterPaths } from '../../src/constants/router.paths';
 
 export const usersTestManager = {
   async createUser(
@@ -10,7 +11,7 @@ export const usersTestManager = {
     password = 'qwerty',
   ) {
     const response = await request(httpServer)
-      .post('users')
+      .post(RouterPaths.users)
       .auth('admin', password, { type: 'basic' })
       .send(data)
       .expect(expectedStatusCode);

@@ -5,18 +5,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { DeviceType } from '../domains/devices/dto/device.dto';
-import { UsersQueryRepository } from '../infrastructure/repositories/users.query.repository';
+import { UsersQueryRepository } from '../infrastructure/repositories/users-query.repository';
 import { JwtService } from './jwt.service';
-import { ViewUserModel } from '../controllers/users/models/View.user.model';
+import { ViewUserModel } from '../controllers/users/models/view-user.model';
 import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
 import { UsersRepository } from '../infrastructure/repositories/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../schemas/user.schema';
-import { emailTemplatesManager } from './emailTemplatesManager';
-// import { JwtService } from '@nestjs/jwt';
-import { ShowOwnUserDataType } from '../types/usersTypes';
-import { errorMessageGenerator } from '../utils/errorMessageGenerator';
+import { emailTemplatesManager } from './email-templates-manager';
+import { ShowOwnUserDataType } from '../types/users.types';
+import { errorMessageGenerator } from '../utils/error-message-generator';
 import { NewUserDto } from '../controllers/users/models/new-user.dto';
+import { errorsConstants } from '../constants/errors.contants';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +32,11 @@ export class AuthService {
     req: Request,
     userId: ObjectId,
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await this.usersQueryRepository.fetchAllUserDataById(
+      new ObjectId(userId),
+    );
+    if (!user.emailConfirmation.isConfirmed) return null;
+
     const deviceId = new ObjectId();
     const accessToken = await this.jwtService.createAccessJWT(userId);
     const refreshToken = await this.jwtService.createRefreshJWT(
@@ -52,7 +57,7 @@ export class AuthService {
   async getOwnData(id: ObjectId): Promise<ShowOwnUserDataType> {
     const user = await this.usersQueryRepository.findUserById(new ObjectId(id));
     return {
-      id: user.id,
+      userId: user.id,
       email: user.email,
       login: user.login,
     };
@@ -111,20 +116,20 @@ export class AuthService {
 
     if (foundUserByLogin && foundUserByEmail) {
       errorMessageGenerator([
-        { field: 'email', message: 'Email should be unique' },
-        { field: 'login', message: 'Login should be unique' },
+        { field: 'email', message: errorsConstants.email.uniqueEmail },
+        { field: 'login', message: errorsConstants.user.uniqueLogin },
       ]);
     }
 
     if (foundUserByLogin) {
       errorMessageGenerator([
-        { field: 'login', message: 'Login should be unique' },
+        { field: 'login', message: errorsConstants.user.uniqueLogin },
       ]);
     }
 
     if (foundUserByEmail) {
       errorMessageGenerator([
-        { field: 'email', message: 'Email should be unique' },
+        { field: 'email', message: errorsConstants.email.uniqueEmail },
       ]);
     }
 
@@ -176,7 +181,10 @@ export class AuthService {
       await this.jwtService.verifyPasswordRecoveryCode(recoveryCode);
     if (!result) {
       errorMessageGenerator([
-        { field: 'recoveryCode', message: 'recoveryCode is incorrect' },
+        {
+          field: 'recoveryCode',
+          message: errorsConstants.recoveryCode.recoveryCodeFirst,
+        },
       ]);
     }
 
@@ -187,7 +195,10 @@ export class AuthService {
     );
     if (!user) {
       errorMessageGenerator([
-        { field: 'recoveryCode', message: 'hm, recoveryCode is incorrect' },
+        {
+          field: 'recoveryCode',
+          message: errorsConstants.recoveryCode.recoveryCodeSecond,
+        },
       ]);
     }
 
@@ -230,12 +241,18 @@ export class AuthService {
 
     if (!user) {
       errorMessageGenerator([
-        { field: 'code', message: 'hm, code is invalid' },
+        {
+          field: 'code',
+          message: errorsConstants.confirmCode.invalidCodeFirst,
+        },
       ]);
     } else {
       if (!user.canBeConfirmed(code) || user.emailConfirmation.isConfirmed) {
         errorMessageGenerator([
-          { field: 'code', message: 'something wrong with code' },
+          {
+            field: 'code',
+            message: errorsConstants.confirmCode.invalidCodeSecond,
+          },
         ]);
       }
 
@@ -248,7 +265,7 @@ export class AuthService {
     const user = await this.usersQueryRepository.findUserByLoginOrEmail(email);
     if (!user || user.emailConfirmation.isConfirmed) {
       errorMessageGenerator([
-        { field: 'email', message: 'check you email again please' },
+        { field: 'email', message: errorsConstants.email.checkEmail },
       ]);
     }
 

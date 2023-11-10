@@ -1,8 +1,8 @@
-import { PostsLikesInfoType } from '../../../types/postsLikesTypes';
-import { PostLikesType } from '../../../dtos/post.likes.dto';
+import { PostsLikesInfoType } from '../../../types/posts-likes.types';
+import { PostLikesType } from '../../../dtos/post-likes.dto';
 import { PostType } from '../../../domains/posts/dto/post.dto';
-import { likeStatus } from '../../../types/generalTypes';
-import { PostViewModel } from '../../../controllers/posts/models/PostViewModel';
+import { likeStatus } from '../../../types/general.types';
+import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
 import { ObjectId } from 'mongodb';
 
 export const getPostsMapper = (

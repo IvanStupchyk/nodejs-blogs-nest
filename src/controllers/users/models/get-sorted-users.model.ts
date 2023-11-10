@@ -1,5 +1,5 @@
 import { SortOrder } from '../../../constants/sort.order';
-import { ViewUserModel } from './View.user.model';
+import { ViewUserModel } from './view-user.model';
 
 export type GetSortedUsersModel = {
   searchLoginTerm: string;

@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import {
   CommentatorInfoType,
   CommentLikesInfoType,
-} from '../../../types/generalTypes';
+} from '../../../types/general.types';
 
 export class CommentType {
   constructor(

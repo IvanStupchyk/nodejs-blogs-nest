@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { GetSortedUsersModel } from '../../controllers/users/models/Get.sorted.users.model';
+import { GetSortedUsersModel } from '../../controllers/users/models/get-sorted-users.model';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockUserModel } from '../../constants/blanks';
-import { UsersType } from '../../types/usersTypes';
+import { UsersType } from '../../types/users.types';
 import { UserType } from '../../dtos/user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
 import { Model } from 'mongoose';
-import { UserCommentLikesType } from '../../types/generalTypes';
-import { ViewUserModel } from '../../controllers/users/models/View.user.model';
+import { UserCommentLikesType } from '../../types/general.types';
+import { ViewUserModel } from '../../controllers/users/models/view-user.model';
 import { ObjectId } from 'mongodb';
 
 @Injectable()
@@ -51,6 +51,8 @@ export class UsersQueryRepository {
 
     const sortField = `accountData.${sortBy}`;
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
     const users: Array<UserType> = await this.UserModel.find(findCondition, {
       _id: 0,
       __v: 0,

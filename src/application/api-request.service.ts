@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { ApiRequestRepository } from '../infrastructure/repositories/api.requests.repository';
+import { ApiRequestRepository } from '../infrastructure/repositories/api-requests.repository';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 class TooManyRequestsException extends HttpException {

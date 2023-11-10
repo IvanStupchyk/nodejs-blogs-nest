@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { likeStatus } from './generalTypes';
+import { likeStatus } from './general.types';
 
 // export type PostLikesMethodsType = {
 //   updateExistingPostLike: (myStatus: likeStatus) => void

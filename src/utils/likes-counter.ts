@@ -1,4 +1,4 @@
-import { likeStatus } from '../types/generalTypes';
+import { likeStatus } from '../types/general.types';
 
 type LikesInfoType = {
   likesCount: number;

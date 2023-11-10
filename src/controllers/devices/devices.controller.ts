@@ -8,11 +8,11 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { RouterPaths } from '../../constants/routerPaths';
+import { RouterPaths } from '../../constants/router.paths';
 import { RefreshTokenMiddleware } from '../../application/refresh-token.service';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
 import { DevicesService } from '../../domains/devices/devices.service';
-import { DeleteDeviceModel } from './models/DeleteDeviceModel';
+import { DeleteDeviceModel } from './models/delete-device.model';
 
 @Controller()
 export class DevicesController {

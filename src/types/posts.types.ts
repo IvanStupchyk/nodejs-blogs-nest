@@ -1,4 +1,4 @@
-import { PostViewModel } from '../controllers/posts/models/PostViewModel';
+import { PostViewModel } from '../controllers/posts/models/post-view.model';
 
 export type PostsType = {
   pagesCount: number;

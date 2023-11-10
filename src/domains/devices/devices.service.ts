@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users.query.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
 import { UserType } from '../../dtos/user.dto';
 import { JwtService } from '../../application/jwt.service';

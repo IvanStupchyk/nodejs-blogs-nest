@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Model, Types } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { likeStatus } from '../types/generalTypes';
+import { likeStatus } from '../types/general.types';
 
 @Schema()
 export class PostLikes {

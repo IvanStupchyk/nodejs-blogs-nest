@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { PostLikeUserInfoTypeSchema } from './post.like.user.info.schema';
-import { PostLikeUserInfoType } from '../types/postsLikesTypes';
+import { PostLikeUserInfoTypeSchema } from './post-like-user-info.schema';
+import { PostLikeUserInfoType } from '../types/posts-likes.types';
 
 @Schema()
 export class ExtendedPostLikesInfo {
