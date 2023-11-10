@@ -27,7 +27,7 @@ import { GetSortedPostsModel } from '../posts/models/get-sorted-posts.model';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { ApiRequestService } from '../../application/api-request.service';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
-import { JwtService } from '../../application/jwt.service';
+import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
 
 @Controller()
@@ -92,7 +92,6 @@ export class BlogController {
       params.id,
       userId,
     );
-
     !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
   }
 

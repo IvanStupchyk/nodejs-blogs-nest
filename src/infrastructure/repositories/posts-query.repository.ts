@@ -125,13 +125,7 @@ export class PostsQueryRepository {
       });
 
     if (!ObjectId.isValid(id)) {
-      return {
-        pagesCount: 0,
-        page: pageNumber,
-        pageSize,
-        totalCount: 0,
-        items: [],
-      };
+      return null;
     }
     const blogObjectId = new ObjectId(id);
 
@@ -143,6 +137,10 @@ export class PostsQueryRepository {
       .skip(skipSize)
       .limit(pageSize)
       .lean();
+
+    if (!posts.length) {
+      return null;
+    }
 
     const postsCount = await this.PostModel.countDocuments({ blogId: id });
 

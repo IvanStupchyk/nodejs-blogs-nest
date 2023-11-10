@@ -1,5 +1,5 @@
 import { UserType } from '../dtos/user.dto';
-import { emailAdapter } from '../infrastructure/email.adapter';
+import { emailAdapter } from './email.adapter';
 
 export const emailTemplatesManager = {
   async sendEmailConfirmationMessage(user: UserType) {

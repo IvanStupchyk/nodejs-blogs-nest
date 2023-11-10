@@ -6,13 +6,12 @@ import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { DeviceType } from '../domains/devices/dto/device.dto';
 import { UsersQueryRepository } from '../infrastructure/repositories/users-query.repository';
-import { JwtService } from './jwt.service';
-import { ViewUserModel } from '../controllers/users/models/view-user.model';
+import { JwtService } from '../infrastructure/jwt.service';
 import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
 import { UsersRepository } from '../infrastructure/repositories/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../schemas/user.schema';
-import { emailTemplatesManager } from './email-templates-manager';
+import { emailTemplatesManager } from '../infrastructure/email-templates-manager';
 import { ShowOwnUserDataType } from '../types/users.types';
 import { errorMessageGenerator } from '../utils/error-message-generator';
 import { NewUserDto } from '../controllers/users/models/new-user.dto';
@@ -285,16 +284,6 @@ export class AuthService {
     }
 
     return true;
-  }
-
-  async checkAndFindUserByAccessToken(
-    token: string,
-  ): Promise<ViewUserModel | null> {
-    const userId: ObjectId | null =
-      await this.jwtService.getUserIdByAccessToken(token);
-    if (!userId) return null;
-
-    return await this.usersQueryRepository.findUserById(userId);
   }
 
   async _createRefreshTokenDeviceModel(

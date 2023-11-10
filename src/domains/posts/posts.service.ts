@@ -19,7 +19,7 @@ import { errorsConstants } from '../../constants/errors.contants';
 import { errorMessageGenerator } from '../../utils/error-message-generator';
 import { PostForSpecificBlogDto } from '../../controllers/posts/models/post-for-specific-blog.dto';
 import { BlogsService } from '../blogs/blogs.service';
-import { JwtService } from '../../application/jwt.service';
+import { JwtService } from '../../infrastructure/jwt.service';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 
 @Injectable()
@@ -100,10 +100,20 @@ export class PostsService {
     title: string,
     content: string,
     shortDescription: string,
-    blogId: string,
+    blogId: ObjectId,
   ): Promise<boolean> {
     if (!ObjectId.isValid(id)) return false;
     if (!ObjectId.isValid(blogId)) return false;
+
+    const blog = await this.blogsQueryRepository.findBlogById(
+      new ObjectId(blogId),
+    );
+
+    if (!blog) {
+      errorMessageGenerator([
+        { field: 'blogId', message: errorsConstants.post.blogId },
+      ]);
+    }
 
     const post = await this.postsQueryRepository.findPostById(new ObjectId(id));
     if (!post) return false;
@@ -121,7 +131,7 @@ export class PostsService {
   ): Promise<boolean> {
     if (!likeStatus[myStatus]) {
       errorMessageGenerator([
-        { field: 'myStatus', message: errorsConstants.likeStatus },
+        { field: 'likeStatus', message: errorsConstants.likeStatus },
       ]);
     }
 

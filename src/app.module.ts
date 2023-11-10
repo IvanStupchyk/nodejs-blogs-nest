@@ -37,8 +37,8 @@ import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
-import { JwtService } from './application/jwt.service';
-import { RefreshTokenMiddleware } from './application/refresh-token.service';
+import { JwtService } from './infrastructure/jwt.service';
+import { RefreshTokenMiddleware } from './infrastructure/refresh-token.service';
 import { DevicesController } from './controllers/devices/devices.controller';
 dotenv.config();
 

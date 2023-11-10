@@ -22,7 +22,7 @@ import { ApiRequestService } from '../../application/api-request.service';
 import { NewUserDto } from '../users/models/new-user.dto';
 import { ConfirmEmailModel } from '../../domains/auth/models/confirm-email.model';
 import { ResendingCodeToEmailDto } from '../../domains/auth/models/resending-code-to-email.dto';
-import { RefreshTokenMiddleware } from '../../application/refresh-token.service';
+import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.service';
 import { RecoveryCodeEmailDto } from '../../domains/auth/models/recovery-code-email.dto';
 import { NewPasswordDto } from '../../domains/auth/models/new-password.dto';
 

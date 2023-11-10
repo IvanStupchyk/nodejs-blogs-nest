@@ -10,7 +10,7 @@ import { PostsQueryRepository } from '../../infrastructure/repositories/posts-qu
 import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
 import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '../../application/jwt.service';
+import { JwtService } from '../../infrastructure/jwt.service';
 import { errorMessageGenerator } from '../../utils/error-message-generator';
 import { errorsConstants } from '../../constants/errors.contants';
 
@@ -129,7 +129,7 @@ export class CommentsService {
   ): Promise<boolean> {
     if (!likeStatus[myStatus]) {
       errorMessageGenerator([
-        { field: 'myStatus', message: errorsConstants.likeStatus },
+        { field: 'likeStatus', message: errorsConstants.likeStatus },
       ]);
     }
     if (!ObjectId.isValid(id)) return false;
