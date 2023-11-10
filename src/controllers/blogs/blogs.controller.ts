@@ -14,12 +14,11 @@ import {
 } from '@nestjs/common';
 import { GetSortedBlogsModel } from './models/get-sorted-blogs.model';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
-import { NewBlogDto } from './models/new-blog.dto';
+import { BlogDto } from './models/blog.dto';
 import { BlogsService } from '../../domains/blogs/blogs.service';
 import { GetBlogModel } from './models/get-blog.model';
 import { Response, Request } from 'express';
 import { UriParamsBlogIdModel } from './models/uri-params-blog-id.model';
-import { UpdateBlogModel } from './models/update-blog.model';
 import { DeleteBlogModel } from './models/delete-blog.model';
 import { PostForSpecificBlogDto } from '../posts/models/post-for-specific-blog.dto';
 import { PostsService } from '../../domains/posts/posts.service';
@@ -48,7 +47,7 @@ export class BlogController {
 
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.blogs}`)
-  async createBlog(@Body() body: NewBlogDto) {
+  async createBlog(@Body() body: BlogDto) {
     const { name, websiteUrl, description } = body;
     return await this.blogsService.createBlog(name, description, websiteUrl);
   }
@@ -99,7 +98,7 @@ export class BlogController {
   @Put(`${RouterPaths.blogs}/:id`)
   async updateBlog(
     @Param() params: UriParamsBlogIdModel,
-    @Body() body: UpdateBlogModel,
+    @Body() body: BlogDto,
     @Res() res: Response,
   ) {
     const { name, websiteUrl, description } = body;
