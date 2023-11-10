@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { NewBlogDto } from '../../src/controllers/blogs/models/new-blog.dto';
+import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
 
 export const blogsTestManager = {
   async createBlog(

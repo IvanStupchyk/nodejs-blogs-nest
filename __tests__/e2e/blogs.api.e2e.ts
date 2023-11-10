@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
-import { NewBlogDto } from '../../src/controllers/blogs/models/new-blog.dto';
+import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
 import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';

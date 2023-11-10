@@ -11,7 +11,7 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
 import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
-import { NewBlogDto } from '../../src/controllers/blogs/models/new-blog.dto';
+import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
