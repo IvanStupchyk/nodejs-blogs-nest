@@ -40,6 +40,7 @@ import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { JwtService } from './infrastructure/jwt.service';
 import { RefreshTokenMiddleware } from './infrastructure/refresh-token.service';
 import { DevicesController } from './controllers/devices/devices.controller';
+import { IsBlogExistConstraint } from './utils/validators/existing-blog.decorator';
 dotenv.config();
 
 @Module({
@@ -92,6 +93,7 @@ dotenv.config();
     JwtStrategy,
     BasicStrategy,
     RefreshTokenMiddleware,
+    IsBlogExistConstraint,
   ],
 })
 export class AppModule {}

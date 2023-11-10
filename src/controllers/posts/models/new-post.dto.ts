@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { IsMongoId, IsString, Length } from 'class-validator';
-import { IsNotEmptyString } from '../../../utils/validators/check-empty-string.validator';
+import { IsNotEmptyString } from '../../../utils/validators/check-empty-string.decorator';
+import { isBlogExist } from '../../../utils/validators/existing-blog.decorator';
 
 export class NewPostDto {
   @Length(1, 30)
@@ -18,6 +19,8 @@ export class NewPostDto {
   @IsNotEmptyString()
   content: string;
 
-  @IsMongoId()
+  @isBlogExist({
+    message: 'such blog should exist',
+  })
   blogId: ObjectId;
 }

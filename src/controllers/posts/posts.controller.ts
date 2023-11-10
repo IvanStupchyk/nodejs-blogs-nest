@@ -48,7 +48,7 @@ export class PostsController {
     );
   }
 
-  @Get('posts/:id')
+  @Get(`${RouterPaths.posts}/:id`)
   async getPost(
     @Param() params: GetPostModel,
     @Res() res: Response,
