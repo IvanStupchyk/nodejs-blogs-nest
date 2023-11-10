@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
-import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
+import { BlogDto } from '../../src/controllers/blogs/models/blog.dto';
 import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
@@ -15,13 +15,13 @@ import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { postsTestManager } from '../utils/posts-test-manager';
 
 describe('tests for /blogs', () => {
-  const invalidData: NewBlogDto = {
+  const invalidData: BlogDto = {
     name: '',
     description: '',
     websiteUrl: '',
   };
 
-  const validData: NewBlogDto = {
+  const validData: BlogDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',

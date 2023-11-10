@@ -10,7 +10,7 @@ import { appSettings } from '../../src/app.settings';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
-import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
+import { BlogDto } from '../../src/controllers/blogs/models/blog.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
 
@@ -22,7 +22,7 @@ describe('tests for /posts', () => {
     shortDescription: '',
   };
 
-  const validBlogData: NewBlogDto = {
+  const validBlogData: BlogDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',

@@ -11,7 +11,7 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
 import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
-import { NewBlogDto } from '../../src/controllers/blogs/models/blog.dto';
+import { BlogDto } from '../../src/controllers/blogs/models/blog.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
@@ -20,7 +20,7 @@ import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 
 describe('tests for /posts with likes logic', () => {
-  const blogData: NewBlogDto = {
+  const blogData: BlogDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',

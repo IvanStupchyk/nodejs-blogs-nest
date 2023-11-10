@@ -1,5 +1,5 @@
 import { IsString, Length, Matches } from 'class-validator';
-import { IsNotEmptyString } from '../../../utils/validators/check-empty-string.validator';
+import { IsNotEmptyString } from '../../../utils/validators/check-empty-string.decorator';
 
 export class BlogDto {
   @Length(1, 15)
