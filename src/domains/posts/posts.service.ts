@@ -41,12 +41,6 @@ export class PostsService {
     const { title, content, shortDescription, blogId } = postData;
     const blog = await this.blogsQueryRepository.findBlogById(blogId);
 
-    if (!blog) {
-      errorMessageGenerator([
-        { field: 'blogId', message: errorsConstants.post.blogId },
-      ]);
-    }
-
     const initialPostModel = this.PostModel.createPost(
       title,
       shortDescription,
@@ -104,16 +98,6 @@ export class PostsService {
   ): Promise<boolean> {
     if (!ObjectId.isValid(id)) return false;
     if (!ObjectId.isValid(blogId)) return false;
-
-    const blog = await this.blogsQueryRepository.findBlogById(
-      new ObjectId(blogId),
-    );
-
-    if (!blog) {
-      errorMessageGenerator([
-        { field: 'blogId', message: errorsConstants.post.blogId },
-      ]);
-    }
 
     const post = await this.postsQueryRepository.findPostById(new ObjectId(id));
     if (!post) return false;
