@@ -94,11 +94,11 @@ describe('tests for /blogs', () => {
       errorsMessages: [
         {
           field: 'name',
-          message: 'name must be longer than or equal to 1 characters',
+          message: 'name should not be an empty string',
         },
         {
           field: 'description',
-          message: 'description must be longer than or equal to 1 characters',
+          message: 'description should not be an empty string',
         },
         {
           field: 'websiteUrl',

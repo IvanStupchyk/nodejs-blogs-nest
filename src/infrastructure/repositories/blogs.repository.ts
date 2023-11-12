@@ -48,4 +48,8 @@ export class BlogsRepository {
 
     return result.deletedCount === 1;
   }
+
+  async findBlogById(id: ObjectId): Promise<BlogType | null> {
+    return await this.BlogModel.findOne({ id }, { _id: 0, __v: 0 }).exec();
+  }
 }

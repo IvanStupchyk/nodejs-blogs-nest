@@ -1,11 +1,9 @@
-import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../schemas/blog.schema';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockBlogModel } from '../../constants/blanks';
-import { BlogType } from '../../domains/blogs/dto/blog.dto';
 import { SortOrder } from '../../constants/sort.order';
 import { BlogsType } from '../../types/general.types';
 import { GetSortedBlogsModel } from '../../controllers/blogs/models/get-sorted-blogs.model';
@@ -48,9 +46,5 @@ export class BlogsQueryRepository {
       totalCount: blogsCount,
       items: [...blogsMongoose],
     };
-  }
-
-  async findBlogById(id: ObjectId): Promise<BlogType | null> {
-    return await this.BlogModel.findOne({ id }, { _id: 0, __v: 0 }).exec();
   }
 }

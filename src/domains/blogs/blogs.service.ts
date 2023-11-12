@@ -1,15 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { BlogType } from './dto/blog.dto';
 import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
 
 @Injectable()
 export class BlogsService {
-  constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly blogsQueryRepository: BlogsQueryRepository,
-  ) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async createBlog(
     name: string,
@@ -46,7 +42,7 @@ export class BlogsService {
 
   async findBlogById(id: string): Promise<BlogType | null> {
     if (!ObjectId.isValid(id)) return null;
-    return await this.blogsQueryRepository.findBlogById(new ObjectId(id));
+    return await this.blogsRepository.findBlogById(new ObjectId(id));
   }
 
   async deleteBlog(id: string): Promise<boolean> {

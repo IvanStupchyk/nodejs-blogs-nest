@@ -15,12 +15,10 @@ import { PostsController } from './controllers/posts/posts.controller';
 import { PostsQueryRepository } from './infrastructure/repositories/posts-query.repository';
 import { Post, PostSchema } from './schemas/post.schema';
 import { PostLikes, PostLikesSchema } from './schemas/post-likes.schema';
-import { LikesQueryRepository } from './infrastructure/repositories/likes-query.repository';
 import { LikesRepository } from './infrastructure/repositories/likes.repository';
 import { PostsRepository } from './infrastructure/repositories/posts.repository';
 import { PostsService } from './domains/posts/posts.service';
 import dotenv from 'dotenv';
-import { CommentsQueryRepository } from './infrastructure/repositories/comments-query.repository';
 import { CommentsRepository } from './infrastructure/repositories/comments.repository';
 import { CommentSchema, Comment } from './schemas/comment.schema';
 import { CommentsService } from './domains/comments/comments.service';
@@ -76,11 +74,9 @@ dotenv.config();
     BlogsRepository,
     BlogsService,
     PostsQueryRepository,
-    LikesQueryRepository,
     LikesRepository,
     PostsRepository,
     PostsService,
-    CommentsQueryRepository,
     CommentsRepository,
     CommentsService,
     ApiRequestRepository,
