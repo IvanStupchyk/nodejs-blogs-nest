@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { PostType } from './dto/post.dto';
 import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
 import { PostViewModel } from '../../controllers/posts/models/post-view.model';
 import { likesCounter } from '../../utils/likes-counter';
-import { LikesQueryRepository } from '../../infrastructure/repositories/likes-query.repository';
 import { LikesRepository } from '../../infrastructure/repositories/likes.repository';
 import { PostLikeUserInfoType } from '../../types/posts-likes.types';
 import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
@@ -20,16 +18,16 @@ import { errorMessageGenerator } from '../../utils/error-message-generator';
 import { PostForSpecificBlogDto } from '../../controllers/posts/models/post-for-specific-blog.dto';
 import { BlogsService } from '../blogs/blogs.service';
 import { JwtService } from '../../infrastructure/jwt.service';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
+import { UsersRepository } from '../../infrastructure/repositories/users.repository';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsRepository: PostsRepository,
-    private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly usersQueryRepository: UsersQueryRepository,
-    private readonly likesQueryRepository: LikesQueryRepository,
+    private readonly blogsRepository: BlogsRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly likesRepository: LikesRepository,
     private readonly blogsService: BlogsService,
     private readonly jwtService: JwtService,
@@ -39,13 +37,7 @@ export class PostsService {
 
   async createPost(postData: NewPostDto): Promise<PostViewModel> {
     const { title, content, shortDescription, blogId } = postData;
-    const blog = await this.blogsQueryRepository.findBlogById(blogId);
-
-    if (!blog) {
-      errorMessageGenerator([
-        { field: 'blogId', message: errorsConstants.post.blogId },
-      ]);
-    }
+    const blog = await this.blogsRepository.findBlogById(blogId);
 
     const initialPostModel = this.PostModel.createPost(
       title,
@@ -105,17 +97,7 @@ export class PostsService {
     if (!ObjectId.isValid(id)) return false;
     if (!ObjectId.isValid(blogId)) return false;
 
-    const blog = await this.blogsQueryRepository.findBlogById(
-      new ObjectId(blogId),
-    );
-
-    if (!blog) {
-      errorMessageGenerator([
-        { field: 'blogId', message: errorsConstants.post.blogId },
-      ]);
-    }
-
-    const post = await this.postsQueryRepository.findPostById(new ObjectId(id));
+    const post = await this.postsRepository.findPostById(new ObjectId(id));
     if (!post) return false;
 
     post.updatePost(title, content, shortDescription);
@@ -137,15 +119,14 @@ export class PostsService {
 
     if (!ObjectId.isValid(id)) return false;
     const postObjectId = new ObjectId(id);
-    const foundPost =
-      await this.postsQueryRepository.findPostById(postObjectId);
+    const foundPost = await this.postsRepository.findPostById(postObjectId);
     if (!foundPost) return false;
 
-    const user = await this.usersQueryRepository.findUserById(userId);
+    const user = await this.usersRepository.findUserById(userId);
     if (!user) return false;
 
     const userPostLike =
-      await this.likesQueryRepository.findPostLikeByUserIdAndPostId(
+      await this.likesRepository.findPostLikeByUserIdAndPostId(
         userId,
         postObjectId,
       );
@@ -196,7 +177,7 @@ export class PostsService {
 
   async findPostById(id: string): Promise<PostType | null> {
     if (!ObjectId.isValid(id)) return null;
-    return await this.postsQueryRepository.findPostByIdWithoutMongoId(
+    return await this.postsRepository.findPostByIdWithoutMongoId(
       new ObjectId(id),
     );
   }
@@ -211,7 +192,7 @@ export class PostsService {
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.postsQueryRepository.getSortedPosts(params, userId);
+    return await this.postsRepository.getSortedPosts(params, userId);
   }
 
   async getPostById(
@@ -231,7 +212,7 @@ export class PostsService {
 
     if (userId) {
       const userCommentsLikes =
-        await this.likesQueryRepository.findPostLikeByUserIdAndPostId(
+        await this.likesRepository.findPostLikeByUserIdAndPostId(
           userId,
           objectPostId,
         );
@@ -239,10 +220,7 @@ export class PostsService {
       if (userCommentsLikes) userLikeStatus = userCommentsLikes.myStatus;
     }
 
-    return await this.postsQueryRepository.getPost(
-      objectPostId,
-      userLikeStatus,
-    );
+    return await this.postsRepository.getPost(objectPostId, userLikeStatus);
   }
 
   async deletePost(id: string): Promise<boolean> {

@@ -93,20 +93,19 @@ describe('tests for /posts', () => {
       errorsMessages: [
         {
           field: 'title',
-          message: 'title must be longer than or equal to 1 characters',
+          message: 'title should not be an empty string',
         },
         {
           field: 'shortDescription',
-          message:
-            'shortDescription must be longer than or equal to 1 characters',
+          message: 'shortDescription should not be an empty string',
         },
         {
           field: 'content',
-          message: 'content must be longer than or equal to 1 characters',
+          message: 'content should not be an empty string',
         },
         {
           field: 'blogId',
-          message: 'blogId must be a mongodb id',
+          message: 'such blog should exist',
         },
       ],
     });

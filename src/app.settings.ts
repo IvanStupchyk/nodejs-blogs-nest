@@ -5,9 +5,12 @@ import {
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception.filter';
 import cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
+import { AppModule } from './app.module';
 
 export const appSettings = (app: INestApplication) => {
   app.use(cookieParser());
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

@@ -1,27 +1,23 @@
 import { ObjectId } from 'mongodb';
 import { likesCounter } from '../../utils/likes-counter';
 import { CommentsRepository } from '../../infrastructure/repositories/comments.repository';
-import { CommentsQueryRepository } from '../../infrastructure/repositories/comments-query.repository';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { CommentType } from './dto/comment.dto';
 import { CommentsType, likeStatus } from '../../types/general.types';
 import { UsersRepository } from '../../infrastructure/repositories/users.repository';
-import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
 import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { errorMessageGenerator } from '../../utils/error-message-generator';
 import { errorsConstants } from '../../constants/errors.contants';
+import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    protected readonly usersQueryRepository: UsersQueryRepository,
     protected readonly usersRepository: UsersRepository,
     protected readonly commentsRepository: CommentsRepository,
-    protected readonly commentsQueryRepository: CommentsQueryRepository,
-    protected readonly postsQueryRepository: PostsQueryRepository,
+    protected readonly postsRepository: PostsRepository,
     protected readonly jwtService: JwtService,
   ) {}
 
@@ -35,12 +31,11 @@ export class CommentsService {
     const postObjectId = new ObjectId(id);
     const userObjectId = new ObjectId(userId);
 
-    const foundPost =
-      await this.postsQueryRepository.findPostById(postObjectId);
+    const foundPost = await this.postsRepository.findPostById(postObjectId);
 
     if (!foundPost) return HttpStatus.NOT_FOUND;
 
-    const user = await this.usersQueryRepository.findUserById(userObjectId);
+    const user = await this.usersRepository.findUserById(userObjectId);
     if (!user) return HttpStatus.NOT_FOUND;
 
     const newComment: CommentType = new CommentType(
@@ -103,7 +98,7 @@ export class CommentsService {
 
     if (userId) {
       const userCommentsLikes =
-        await this.usersQueryRepository.findUserCommentLikesById(userId);
+        await this.usersRepository.findUserCommentLikesById(userId);
 
       if (Array.isArray(userCommentsLikes) && userCommentsLikes.length) {
         const initialCommentData = userCommentsLikes.find((c) =>
@@ -116,7 +111,7 @@ export class CommentsService {
       }
     }
 
-    return await this.commentsQueryRepository.findCommentById(
+    return await this.commentsRepository.findCommentById(
       commentObjectId,
       finalCommentStatus,
     );
@@ -135,11 +130,11 @@ export class CommentsService {
     if (!ObjectId.isValid(id)) return false;
     const commentObjectId = new ObjectId(id);
     const foundComment =
-      await this.commentsQueryRepository.findCommentById(commentObjectId);
+      await this.commentsRepository.findCommentById(commentObjectId);
     if (!foundComment) return false;
 
     const userCommentsLikes =
-      await this.usersQueryRepository.findUserCommentLikesById(userId);
+      await this.usersRepository.findUserCommentLikesById(userId);
     let initialCommentData;
 
     if (Array.isArray(userCommentsLikes) && userCommentsLikes.length) {
@@ -160,7 +155,7 @@ export class CommentsService {
       },
     );
 
-    const user = await this.usersQueryRepository.fetchAllUserDataById(userId);
+    const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user) return false;
 
     if (initialCommentData?.myStatus) {
@@ -182,8 +177,7 @@ export class CommentsService {
     if (!ObjectId.isValid(id)) return false;
     const postObjectId = new ObjectId(id);
 
-    const foundPost =
-      await this.postsQueryRepository.findPostById(postObjectId);
+    const foundPost = await this.postsRepository.findPostById(postObjectId);
     if (!foundPost) return false;
 
     let userId;
@@ -192,7 +186,7 @@ export class CommentsService {
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.commentsQueryRepository.getSortedComments(
+    return await this.commentsRepository.getSortedComments(
       query,
       postObjectId,
       userId,
@@ -203,7 +197,7 @@ export class CommentsService {
     id: string,
   ): Promise<CommentViewModel | null> {
     if (!ObjectId.isValid(id)) return null;
-    return await this.commentsQueryRepository.findCommentById(new ObjectId(id));
+    return await this.commentsRepository.findCommentById(new ObjectId(id));
   }
 
   async deleteComment(

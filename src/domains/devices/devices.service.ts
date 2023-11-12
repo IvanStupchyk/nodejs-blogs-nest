@@ -1,18 +1,18 @@
 import { Request } from 'express';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
 import { UserType } from '../../dtos/user.dto';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { isValidObjectId } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { UsersRepository } from '../../infrastructure/repositories/users.repository';
 
 @Injectable()
 export class DevicesService {
   constructor(
     protected readonly refreshTokenDevicesRepository: DevicesRepository,
-    protected readonly usersQueryRepository: UsersQueryRepository,
+    protected readonly usersRepository: UsersRepository,
     protected readonly jwtService: JwtService,
   ) {}
 
@@ -26,7 +26,7 @@ export class DevicesService {
     if (!result?.userId) return HttpStatus.UNAUTHORIZED;
 
     const user: UserType | null =
-      await this.usersQueryRepository.fetchAllUserDataById(result.userId);
+      await this.usersRepository.fetchAllUserDataById(result.userId);
     if (!user) return HttpStatus.UNAUTHORIZED;
 
     if (!isValidObjectId(deviceId)) return HttpStatus.NOT_FOUND;

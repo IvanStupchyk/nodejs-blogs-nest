@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { DeviceType } from '../domains/devices/dto/device.dto';
-import { UsersQueryRepository } from '../infrastructure/repositories/users-query.repository';
 import { JwtService } from '../infrastructure/jwt.service';
 import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
 import { UsersRepository } from '../infrastructure/repositories/users.repository';
@@ -21,7 +20,6 @@ import { errorsConstants } from '../constants/errors.contants';
 export class AuthService {
   constructor(
     protected readonly refreshTokenDevicesRepository: DevicesRepository,
-    protected readonly usersQueryRepository: UsersQueryRepository,
     protected readonly usersRepository: UsersRepository,
     @InjectModel(User.name) private UserModel: UserModelType,
     private readonly jwtService: JwtService,
@@ -31,7 +29,7 @@ export class AuthService {
     req: Request,
     userId: ObjectId,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await this.usersQueryRepository.fetchAllUserDataById(
+    const user = await this.usersRepository.fetchAllUserDataById(
       new ObjectId(userId),
     );
     if (!user.emailConfirmation.isConfirmed) return null;
@@ -54,7 +52,7 @@ export class AuthService {
   }
 
   async getOwnData(id: ObjectId): Promise<ShowOwnUserDataType> {
-    const user = await this.usersQueryRepository.findUserById(new ObjectId(id));
+    const user = await this.usersRepository.findUserById(new ObjectId(id));
     return {
       userId: user.id,
       email: user.email,
@@ -67,7 +65,7 @@ export class AuthService {
     password: string,
   ): Promise<UserDocument | null> {
     const user =
-      await this.usersQueryRepository.findUserByLoginOrEmail(loginOrEmail);
+      await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
     if (user) {
       const isCredentialsCorrect = await bcrypt.compare(
@@ -108,10 +106,10 @@ export class AuthService {
   async createUser(userData: NewUserDto): Promise<boolean> {
     const { login, email, password } = userData;
     const foundUserByLogin =
-      await this.usersQueryRepository.findUserByLoginOrEmail(login);
+      await this.usersRepository.findUserByLoginOrEmail(login);
 
     const foundUserByEmail =
-      await this.usersQueryRepository.findUserByLoginOrEmail(email);
+      await this.usersRepository.findUserByLoginOrEmail(email);
 
     if (foundUserByLogin && foundUserByEmail) {
       errorMessageGenerator([
@@ -153,7 +151,7 @@ export class AuthService {
   }
 
   async sendRecoveryPasswordCode(email: string): Promise<boolean> {
-    const user = await this.usersQueryRepository.findUserByLoginOrEmail(email);
+    const user = await this.usersRepository.findUserByLoginOrEmail(email);
 
     if (user) {
       try {
@@ -189,9 +187,7 @@ export class AuthService {
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-    const user = await this.usersQueryRepository.fetchAllUserDataById(
-      result.userId,
-    );
+    const user = await this.usersRepository.fetchAllUserDataById(result.userId);
     if (!user) {
       errorMessageGenerator([
         {
@@ -235,8 +231,7 @@ export class AuthService {
   }
 
   async confirmEmail(code: string): Promise<boolean> {
-    const user =
-      await this.usersQueryRepository.findUserByConfirmationCode(code);
+    const user = await this.usersRepository.findUserByConfirmationCode(code);
 
     if (!user) {
       errorMessageGenerator([
@@ -261,7 +256,7 @@ export class AuthService {
   }
 
   async resendEmail(email: string): Promise<boolean> {
-    const user = await this.usersQueryRepository.findUserByLoginOrEmail(email);
+    const user = await this.usersRepository.findUserByLoginOrEmail(email);
     if (!user || user.emailConfirmation.isConfirmed) {
       errorMessageGenerator([
         { field: 'email', message: errorsConstants.email.checkEmail },

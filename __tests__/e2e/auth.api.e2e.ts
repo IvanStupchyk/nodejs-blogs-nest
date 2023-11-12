@@ -7,7 +7,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
-import { UsersQueryRepository } from '../../src/infrastructure/repositories/users-query.repository';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
 import { UserType } from '../../src/dtos/user.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
@@ -15,6 +14,7 @@ import { User, UserDocument, UserSchema } from '../../src/schemas/user.schema';
 import mongoose from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { errorsConstants } from '../../src/constants/errors.contants';
+import { UsersRepository } from '../../src/infrastructure/repositories/users.repository';
 const { parse } = require('cookie');
 
 const sleep = (seconds: number) =>
@@ -42,7 +42,7 @@ describe('tests for /auth', () => {
   let app: INestApplication;
   let httpServer;
   let userModel;
-  let usersQueryRepository;
+  let usersRepository;
   const getRequest = () => {
     return request(httpServer);
   };
@@ -66,7 +66,7 @@ describe('tests for /auth', () => {
     httpServer = app.getHttpServer();
 
     userModel = moduleFixture.get(getModelToken(User.name));
-    usersQueryRepository = new UsersQueryRepository(userModel);
+    usersRepository = new UsersRepository(userModel);
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
 
@@ -144,7 +144,7 @@ describe('tests for /auth', () => {
       .send(secondUserData)
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-    const newUser = await usersQueryRepository.findUserByLoginOrEmail(
+    const newUser = await usersRepository.findUserByLoginOrEmail(
       secondUserData.email,
     );
 
@@ -209,7 +209,7 @@ describe('tests for /auth', () => {
       })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-    const newUser = await usersQueryRepository.findUserByLoginOrEmail(
+    const newUser = await usersRepository.findUserByLoginOrEmail(
       simpleUser.accountData.email,
     );
 
@@ -252,7 +252,7 @@ describe('tests for /auth', () => {
   });
 
   it('should not confirm email if email is already confirmed', async () => {
-    const adminUser = await usersQueryRepository.findUserByLoginOrEmail(
+    const adminUser = await usersRepository.findUserByLoginOrEmail(
       superAdminUser.email,
     );
 
@@ -289,7 +289,7 @@ describe('tests for /auth', () => {
       })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-    const currentUser = await usersQueryRepository.findUserByLoginOrEmail(
+    const currentUser = await usersRepository.findUserByLoginOrEmail(
       simpleUser.accountData.email,
     );
     expect(currentUser?.emailConfirmation.isConfirmed).toEqual(true);
