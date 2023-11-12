@@ -19,7 +19,7 @@ import { errorsConstants } from '../constants/errors.contants';
 @Injectable()
 export class AuthService {
   constructor(
-    protected readonly refreshTokenDevicesRepository: DevicesRepository,
+    protected readonly devicesRepository: DevicesRepository,
     protected readonly usersRepository: UsersRepository,
     @InjectModel(User.name) private UserModel: UserModelType,
     private readonly jwtService: JwtService,
@@ -47,7 +47,7 @@ export class AuthService {
       userId,
       refreshToken,
     );
-    await this.refreshTokenDevicesRepository.setNewDevice(newDevice);
+    await this.devicesRepository.setNewDevice(newDevice);
     return { accessToken, refreshToken };
   }
 
@@ -89,12 +89,12 @@ export class AuthService {
       );
       if (!result?.userId) return false;
 
-      const session = await this.refreshTokenDevicesRepository.findDeviceById(
+      const session = await this.devicesRepository.findDeviceById(
         result?.deviceId,
       );
       if (!session) return false;
 
-      return await this.refreshTokenDevicesRepository.removeSpecifiedSession(
+      return await this.devicesRepository.removeSpecifiedSession(
         result.userId,
         result.deviceId,
       );
@@ -218,7 +218,7 @@ export class AuthService {
       const lastActiveDate = new Date(result.iat * 1000);
       const expirationDate = new Date(result.exp * 1000);
 
-      await this.refreshTokenDevicesRepository.updateExistingSession(
+      await this.devicesRepository.updateExistingSession(
         deviceId,
         lastActiveDate,
         expirationDate,
