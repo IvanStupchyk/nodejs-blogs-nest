@@ -1,8 +1,8 @@
 import { ObjectId } from 'mongodb';
 
-export type ViewUserModel = {
+export class ViewUserModel {
   id: ObjectId;
   login: string;
   email: string;
   createdAt: string;
-};
+}

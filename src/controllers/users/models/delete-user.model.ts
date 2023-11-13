@@ -1,3 +1,3 @@
-export type DeleteUserModel = {
+export class DeleteUserModel {
   id: string;
-};
+}
