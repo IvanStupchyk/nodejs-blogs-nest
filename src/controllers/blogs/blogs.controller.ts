@@ -15,7 +15,6 @@ import {
 import { GetSortedBlogsModel } from './models/get-sorted-blogs.model';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { BlogDto } from '../../dtos/blogs/blog.dto';
-import { BlogsService } from '../../domains/blogs/blogs.service';
 import { GetBlogModel } from './models/get-blog.model';
 import { Response, Request } from 'express';
 import { UriParamsBlogIdModel } from './models/uri-params-blog-id.model';
@@ -29,12 +28,15 @@ import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostForSpecifiedBlogCommand } from '../../domains/posts/use-cases/create-post-for-specified-blog-use-case';
+import { CreateBlogCommand } from '../../domains/blogs/use-cases/create-blog-use-case';
+import { UpdateBlogCommand } from '../../domains/blogs/use-cases/update-blog-use-case';
+import { DeleteBlogCommand } from '../../domains/blogs/use-cases/delete-blog-use-case';
+import { FindBlogByIdCommand } from '../../domains/blogs/use-cases/find-blog-by-id-use-case';
 
 @Controller()
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly blogsService: BlogsService,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly apiRequestCounter: ApiRequestService,
     private readonly jwtService: JwtService,
@@ -49,8 +51,7 @@ export class BlogController {
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.blogs}`)
   async createBlog(@Body() body: BlogDto) {
-    const { name, websiteUrl, description } = body;
-    return await this.blogsService.createBlog(name, description, websiteUrl);
+    return await this.commandBus.execute(new CreateBlogCommand(body));
   }
 
   @UseGuards(BasicAuthGuard)
@@ -69,7 +70,9 @@ export class BlogController {
 
   @Get(`${RouterPaths.blogs}/:id`)
   async getCurrentBlog(@Param() params: GetBlogModel, @Res() res: Response) {
-    const foundBlog = await this.blogsService.findBlogById(params.id);
+    const foundBlog = await this.commandBus.execute(
+      new FindBlogByIdCommand(params.id),
+    );
 
     !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
   }
@@ -101,16 +104,11 @@ export class BlogController {
     @Body() body: BlogDto,
     @Res() res: Response,
   ) {
-    const { name, websiteUrl, description } = body;
-
-    const updatedBlog = await this.blogsService.updateBlogById(
-      params.id,
-      name,
-      description,
-      websiteUrl,
+    const isBlogUpdated = await this.commandBus.execute(
+      new UpdateBlogCommand(body, params.id),
     );
 
-    !updatedBlog
+    !isBlogUpdated
       ? res.sendStatus(HttpStatus.NOT_FOUND)
       : res.sendStatus(HttpStatus.NO_CONTENT);
   }
@@ -118,8 +116,13 @@ export class BlogController {
   @UseGuards(BasicAuthGuard)
   @Delete(`${RouterPaths.blogs}/:id`)
   async deleteBlog(@Param() params: DeleteBlogModel, @Res() res: Response) {
-    const isBlogExist = await this.blogsService.deleteBlog(params.id);
+    // const isBlogExist = await this.blogsService.deleteBlog(params.id);
+    const isBlogDeleted = await this.commandBus.execute(
+      new DeleteBlogCommand(params.id),
+    );
 
-    res.sendStatus(!isBlogExist ? HttpStatus.NOT_FOUND : HttpStatus.NO_CONTENT);
+    res.sendStatus(
+      !isBlogDeleted ? HttpStatus.NOT_FOUND : HttpStatus.NO_CONTENT,
+    );
   }
 }
