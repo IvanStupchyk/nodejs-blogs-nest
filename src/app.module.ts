@@ -30,14 +30,13 @@ import { ApiRequest, ApiRequestSchema } from './schemas/api-request.schema';
 import { ApiRequestService } from './application/api-request.service';
 import { DevicesRepository } from './infrastructure/repositories/devices.repository';
 import { Device, DeviceSchema } from './schemas/device.schema';
-import { DevicesService } from './domains/devices/devices.service';
 import { AuthController } from './controllers/auth/auth.controller';
 import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { JwtService } from './infrastructure/jwt.service';
-import { RefreshTokenMiddleware } from './infrastructure/refresh-token.service';
+import { RefreshTokenMiddleware } from './infrastructure/refresh-token.middleware';
 import { DevicesController } from './controllers/devices/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
 import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
@@ -48,6 +47,13 @@ import { ChangePostLikesCountUseCase } from './domains/posts/use-cases/change-po
 import { GetSortedPostsUseCase } from './domains/posts/use-cases/get-sorted-posts-use-case';
 import { GetPostByIdUseCase } from './domains/posts/use-cases/get-post-by-id-use-case';
 import { DeletePostUseCase } from './domains/posts/use-cases/delete-post-use-case';
+import { DeleteDeviceUseCase } from './domains/devices/use-cases/delete-device-use-case';
+import { CreateCommentUseCase } from './domains/comments/use-cases/create-comment-use-case';
+import { UpdateCommentUseCase } from './domains/comments/use-cases/update-comment-use-case';
+import { GetCommentByIdUseCase } from './domains/comments/use-cases/get-comment-by-id-use-case';
+import { ChangeCommentLikesCountUseCase } from './domains/comments/use-cases/change-comment-likes-count-use-case';
+import { GetSortedCommentsUseCase } from './domains/comments/use-cases/get-sorted-comments-use-case';
+import { DeleteCommentUseCase } from './domains/comments/use-cases/delete-comment-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -57,6 +63,13 @@ const useCases = [
   GetSortedPostsUseCase,
   GetPostByIdUseCase,
   DeletePostUseCase,
+  DeleteDeviceUseCase,
+  CreateCommentUseCase,
+  UpdateCommentUseCase,
+  GetCommentByIdUseCase,
+  ChangeCommentLikesCountUseCase,
+  GetSortedCommentsUseCase,
+  DeleteCommentUseCase,
 ];
 
 @Module({
@@ -101,7 +114,6 @@ const useCases = [
     ApiRequestRepository,
     ApiRequestService,
     DevicesRepository,
-    DevicesService,
     AuthService,
     JwtService,
     LocalStrategy,

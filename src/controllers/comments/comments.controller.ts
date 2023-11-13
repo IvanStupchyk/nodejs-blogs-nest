@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CommentsService } from '../../domains/comments/comments.service';
 import { GetCommentModel } from './models/get-comment.model';
 import { UpdateCommentDto } from '../../dtos/comments/update-comment.dto';
 import { UriParamsCommentModel } from './models/uri-params-comment.model';
@@ -21,19 +20,23 @@ import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ObjectId } from 'mongodb';
 import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 import { RouterPaths } from '../../constants/router.paths';
+import { CommandBus } from '@nestjs/cqrs';
+import { UpdateCommentCommand } from '../../domains/comments/use-cases/update-comment-use-case';
+import { GetCommentByIdCommand } from '../../domains/comments/use-cases/get-comment-by-id-use-case';
+import { ChangeCommentLikesCountCommand } from '../../domains/comments/use-cases/change-comment-likes-count-use-case';
+import { DeleteCommentCommand } from '../../domains/comments/use-cases/delete-comment-use-case';
 
 @Controller()
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private commandBus: CommandBus) {}
   @Get(`${RouterPaths.comments}/:id`)
   async getCurrentComment(
     @Param() params: GetCommentModel,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const foundComment = await this.commentsService.findCommentById(
-      params.id,
-      req.headers?.authorization,
+    const foundComment = await this.commandBus.execute(
+      new GetCommentByIdCommand(params.id, req.headers?.authorization),
     );
 
     !foundComment
@@ -49,13 +52,11 @@ export class CommentsController {
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
-    const statusCode = await this.commentsService.updateComment(
-      body.content,
-      params.id,
-      currentUserId,
+    res.sendStatus(
+      await this.commandBus.execute(
+        new UpdateCommentCommand(body.content, params.id, currentUserId),
+      ),
     );
-
-    res.sendStatus(statusCode);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,10 +67,12 @@ export class CommentsController {
     @Res() res: Response,
     @CurrentUserId() currentUserId,
   ) {
-    const isLikesCountChanges = await this.commentsService.changeLikesCount(
-      params.id,
-      body.likeStatus,
-      new ObjectId(currentUserId),
+    const isLikesCountChanges = await this.commandBus.execute(
+      new ChangeCommentLikesCountCommand(
+        params.id,
+        body.likeStatus,
+        new ObjectId(currentUserId),
+      ),
     );
 
     !isLikesCountChanges
@@ -84,10 +87,10 @@ export class CommentsController {
     @Res() res: Response,
     @CurrentUserId() currentUserId,
   ) {
-    const statusCode = await this.commentsService.deleteComment(
-      params.id,
-      currentUserId,
+    res.sendStatus(
+      await this.commandBus.execute(
+        new DeleteCommentCommand(params.id, currentUserId),
+      ),
     );
-    res.sendStatus(statusCode);
   }
 }

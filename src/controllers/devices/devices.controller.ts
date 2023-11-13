@@ -9,17 +9,18 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
-import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.service';
+import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.middleware';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
-import { DevicesService } from '../../domains/devices/devices.service';
 import { DeleteDeviceModel } from './models/delete-device.model';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteDeviceCommand } from '../../domains/devices/use-cases/delete-device-use-case';
 
 @Controller()
 export class DevicesController {
   constructor(
     private readonly devicesRepository: DevicesRepository,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
-    private readonly devicesService: DevicesService,
+    private commandBus: CommandBus,
   ) {}
 
   @Get(`${RouterPaths.security}/devices`)
@@ -55,7 +56,9 @@ export class DevicesController {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
-    const status = await this.devicesService.deleteSession(req, req.params.id);
+    const status = await this.commandBus.execute(
+      new DeleteDeviceCommand(req, req.params.id),
+    );
 
     res.sendStatus(status);
   }
