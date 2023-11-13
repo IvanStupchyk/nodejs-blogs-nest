@@ -1,12 +1,12 @@
 import * as bcrypt from 'bcrypt';
 import { ObjectId } from 'mongodb';
-import { ViewUserModel } from '../controllers/users/models/view-user.model';
+import { ViewUserModel } from '../../controllers/users/models/view-user.model';
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from '../infrastructure/repositories/users.repository';
+import { UsersRepository } from '../../infrastructure/repositories/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../schemas/user.schema';
-import { NewUserDto } from '../dtos/users/new-user.dto';
-import { validateOrRejectModel } from '../utils/validate-or-reject.model';
+import { User, UserModelType } from '../../schemas/user.schema';
+import { NewUserDto } from '../../dtos/users/new-user.dto';
+import { validateOrRejectModel } from '../../utils/validate-or-reject.model';
 
 @Injectable()
 export class UsersService {

@@ -6,7 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UsersController } from './controllers/users/users.controller';
 import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
-import { UsersService } from './application/users.service';
+import { UsersService } from './domains/users/users.service';
 import { UsersRepository } from './infrastructure/repositories/users.repository';
 import { BlogController } from './controllers/blogs/blogs.controller';
 import { BlogsQueryRepository } from './infrastructure/repositories/blogs-query.repository';
@@ -40,9 +40,28 @@ import { JwtService } from './infrastructure/jwt.service';
 import { RefreshTokenMiddleware } from './infrastructure/refresh-token.service';
 import { DevicesController } from './controllers/devices/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
+import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
+import { UpdatePostUseCase } from './domains/posts/use-cases/update-post-use-case';
+import { CqrsModule } from '@nestjs/cqrs';
+import { CreatePostForSpecifiedBlogUseCase } from './domains/posts/use-cases/create-post-for-specified-blog-use-case';
+import { ChangePostLikesCountUseCase } from './domains/posts/use-cases/change-post-likes-count-use-case';
+import { GetSortedPostsUseCase } from './domains/posts/use-cases/get-sorted-posts-use-case';
+import { GetPostByIdUseCase } from './domains/posts/use-cases/get-post-by-id-use-case';
+import { DeletePostUseCase } from './domains/posts/use-cases/delete-post-use-case';
+
+const useCases = [
+  CreatePostUseCase,
+  UpdatePostUseCase,
+  CreatePostForSpecifiedBlogUseCase,
+  ChangePostLikesCountUseCase,
+  GetSortedPostsUseCase,
+  GetPostByIdUseCase,
+  DeletePostUseCase,
+];
 
 @Module({
   imports: [
+    CqrsModule,
     configModule,
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
@@ -90,6 +109,7 @@ import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorato
     BasicStrategy,
     RefreshTokenMiddleware,
     IsBlogExistConstraint,
+    ...useCases,
   ],
 })
 export class AppModule {}
