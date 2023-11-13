@@ -13,17 +13,19 @@ import {
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { GetSortedUsersModel } from './models/get-sorted-users.model';
 import { NewUserDto } from '../../dtos/users/new-user.dto';
-import { UsersService } from '../../domains/users/users.service';
 import { DeleteUserModel } from './models/delete-user.model';
 import { Response } from 'express';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../../domains/users/use-cases/create-user-use-case';
+import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
 
 @Controller()
 export class UsersController {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
-    private readonly usersService: UsersService,
+    private commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
@@ -35,15 +37,17 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.users}`)
   async createUser(@Body() body: NewUserDto) {
-    return await this.usersService.createUser(body);
+    return await this.commandBus.execute(new CreateUserCommand(body));
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(`${RouterPaths.users}/:id`)
   async deleteUser(@Param() params: DeleteUserModel, @Res() res: Response) {
-    const isUserExist = await this.usersService.deleteUser(params.id);
+    const isUserDeleted = await this.commandBus.execute(
+      new DeleteUserCommand(params.id),
+    );
 
-    !isUserExist
+    !isUserDeleted
       ? res.sendStatus(HttpStatus.NOT_FOUND)
       : res.sendStatus(HttpStatus.NO_CONTENT);
   }
