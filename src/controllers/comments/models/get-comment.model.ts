@@ -1,3 +1,3 @@
-export type GetCommentModel = {
+export class GetCommentModel {
   id: string;
-};
+}

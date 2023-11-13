@@ -1,3 +1,3 @@
-export type UriParamsCommentModel = {
+export class UriParamsCommentModel {
   id: string;
-};
+}

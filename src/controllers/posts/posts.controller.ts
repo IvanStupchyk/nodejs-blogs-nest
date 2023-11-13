@@ -20,7 +20,6 @@ import { NewPostDto } from '../../dtos/posts/new-post.dto';
 import { UriParamsPostIdModel } from './models/uri-params-post-id.model';
 import { DeletePostModel } from './models/delete-post.model';
 import { UriParamsCommentModel } from '../comments/models/uri-params-comment.model';
-import { CommentsService } from '../../domains/comments/comments.service';
 import { GetSortedCommentsModel } from '../comments/models/get-sorted-comments.model';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
@@ -36,12 +35,13 @@ import { ChangePostLikesCountCommand } from '../../domains/posts/use-cases/chang
 import { GetSortedPostsCommand } from '../../domains/posts/use-cases/get-sorted-posts-use-case';
 import { GetPostByIdCommand } from '../../domains/posts/use-cases/get-post-by-id-use-case';
 import { DeletePostCommand } from '../../domains/posts/use-cases/delete-post-use-case';
+import { CreateCommentCommand } from '../../domains/comments/use-cases/create-comment-use-case';
+import { GetSortedCommentsCommand } from '../../domains/comments/use-cases/get-sorted-comments-use-case';
 
 @Controller()
 export class PostsController {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly commentsService: CommentsService,
     private commandBus: CommandBus,
   ) {}
 
@@ -80,10 +80,12 @@ export class PostsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const foundComments = await this.commentsService.getSortedComments(
-      params.id,
-      query,
-      req.headers?.authorization,
+    const foundComments = await this.commandBus.execute(
+      new GetSortedCommentsCommand(
+        params.id,
+        query,
+        req.headers?.authorization,
+      ),
     );
 
     !foundComments
@@ -111,10 +113,8 @@ export class PostsController {
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
-    const newComment = await this.commentsService.createComment(
-      body.content,
-      params.id,
-      currentUserId,
+    const newComment = await this.commandBus.execute(
+      new CreateCommentCommand(body.content, params.id, currentUserId),
     );
 
     if (typeof newComment === 'object') {
