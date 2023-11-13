@@ -1,5 +1,5 @@
 import { PostsLikesInfoType } from '../../../types/posts-likes.types';
-import { PostLikesType } from '../../../dtos/post-likes.dto';
+import { PostLikesType } from '../../../controllers/posts/models/post-likes.model';
 import { PostType } from '../../../domains/posts/dto/post.dto';
 import { likeStatus } from '../../../types/general.types';
 import { PostViewModel } from '../../../controllers/posts/models/post-view.model';

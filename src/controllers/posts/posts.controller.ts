@@ -17,7 +17,7 @@ import { PostsQueryRepository } from '../../infrastructure/repositories/posts-qu
 import { PostsService } from '../../domains/posts/posts.service';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
-import { NewPostDto } from './models/new-post.dto';
+import { NewPostDto } from '../../dtos/posts/new-post.dto';
 import { UriParamsPostIdModel } from './models/uri-params-post-id.model';
 import { DeletePostModel } from './models/delete-post.model';
 import { UriParamsCommentModel } from '../comments/models/uri-params-comment.model';
@@ -25,12 +25,12 @@ import { CommentsService } from '../../domains/comments/comments.service';
 import { GetSortedCommentsModel } from '../comments/models/get-sorted-comments.model';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
-import { UpdateCommentDto } from '../comments/models/update-comment.dto';
+import { UpdateCommentDto } from '../../dtos/comments/update-comment.dto';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ObjectId } from 'mongodb';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { HTTP_STATUSES } from '../../utils/utils';
-import { ChangeLikeCountDto } from './models/change-like-count.dto';
+import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 
 @Controller()
 export class PostsController {

@@ -2,7 +2,7 @@ import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
 import { likeStatus } from '../../src/types/general.types';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
+import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
 
 export const postsTestManager = {
   async createPost(

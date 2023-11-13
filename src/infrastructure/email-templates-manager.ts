@@ -1,4 +1,4 @@
-import { UserType } from '../dtos/user.dto';
+import { UserType } from '../controllers/users/models/user.model';
 import { emailAdapter } from './email.adapter';
 
 export const emailTemplatesManager = {

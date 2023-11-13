@@ -13,13 +13,13 @@ import {
 import { Request, Response } from 'express';
 import { CommentsService } from '../../domains/comments/comments.service';
 import { GetCommentModel } from './models/get-comment.model';
-import { UpdateCommentDto } from './models/update-comment.dto';
+import { UpdateCommentDto } from '../../dtos/comments/update-comment.dto';
 import { UriParamsCommentModel } from './models/uri-params-comment.model';
 import { DeleteCommentModel } from './models/delete-comment.model';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ObjectId } from 'mongodb';
-import { ChangeLikeCountDto } from '../posts/models/change-like-count.dto';
+import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 import { RouterPaths } from '../../constants/router.paths';
 
 @Controller()

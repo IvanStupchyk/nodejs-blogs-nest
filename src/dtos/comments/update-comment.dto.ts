@@ -1,5 +1,5 @@
 import { IsString, Length } from 'class-validator';
-import { IsNotEmptyString } from '../../../utils/validators/check-empty-string.decorator';
+import { IsNotEmptyString } from '../../utils/decorators/check-empty-string.decorator';
 
 export class UpdateCommentDto {
   @IsString()

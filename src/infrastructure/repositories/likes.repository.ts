@@ -1,7 +1,7 @@
 import { PostLikes, PostLikesDocument } from '../../schemas/post-likes.schema';
 import { Injectable } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
-import { PostLikesType } from '../../dtos/post-likes.dto';
+import { PostLikesType } from '../../controllers/posts/models/post-likes.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 

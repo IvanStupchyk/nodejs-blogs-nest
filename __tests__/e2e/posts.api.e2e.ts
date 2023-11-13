@@ -9,8 +9,8 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
-import { NewPostDto } from '../../src/controllers/posts/models/new-post.dto';
-import { BlogDto } from '../../src/controllers/blogs/models/blog.dto';
+import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
+import { BlogDto } from '../../src/dtos/blogs/blog.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
 

@@ -19,7 +19,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ApiRequestService } from '../../application/api-request.service';
-import { NewUserDto } from '../users/models/new-user.dto';
+import { NewUserDto } from '../../dtos/users/new-user.dto';
 import { ConfirmEmailModel } from '../../domains/auth/models/confirm-email.model';
 import { ResendingCodeToEmailDto } from '../../domains/auth/models/resending-code-to-email.dto';
 import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.service';

@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
-import { PostLikesType } from '../../dtos/post-likes.dto';
+import { PostLikesType } from '../../controllers/posts/models/post-likes.model';
 import { mockPostModel } from '../../constants/blanks';
 import { getPostsMapper } from '../../utils/dataMappers/postsMappers/get-posts-mapper';
 import { PostsType } from '../../types/posts.types';
