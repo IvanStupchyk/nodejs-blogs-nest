@@ -54,6 +54,10 @@ import { GetCommentByIdUseCase } from './domains/comments/use-cases/get-comment-
 import { ChangeCommentLikesCountUseCase } from './domains/comments/use-cases/change-comment-likes-count-use-case';
 import { GetSortedCommentsUseCase } from './domains/comments/use-cases/get-sorted-comments-use-case';
 import { DeleteCommentUseCase } from './domains/comments/use-cases/delete-comment-use-case';
+import { CreateBlogUseCase } from './domains/blogs/use-cases/create-blog-use-case';
+import { UpdateBlogUseCase } from './domains/blogs/use-cases/update-blog-use-case';
+import { DeleteBlogUseCase } from './domains/blogs/use-cases/delete-blog-use-case';
+import { FindBlogByIdUseCase } from './domains/blogs/use-cases/find-blog-by-id-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -70,6 +74,10 @@ const useCases = [
   ChangeCommentLikesCountUseCase,
   GetSortedCommentsUseCase,
   DeleteCommentUseCase,
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+  FindBlogByIdUseCase,
 ];
 
 @Module({

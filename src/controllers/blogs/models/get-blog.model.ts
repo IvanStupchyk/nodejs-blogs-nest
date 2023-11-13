@@ -1,3 +1,3 @@
-export type GetBlogModel = {
+export class GetBlogModel {
   id: string;
-};
+}
