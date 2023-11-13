@@ -58,7 +58,7 @@ import { CreateBlogUseCase } from './domains/blogs/use-cases/create-blog-use-cas
 import { UpdateBlogUseCase } from './domains/blogs/use-cases/update-blog-use-case';
 import { DeleteBlogUseCase } from './domains/blogs/use-cases/delete-blog-use-case';
 import { FindBlogByIdUseCase } from './domains/blogs/use-cases/find-blog-by-id-use-case';
-import { CreateUserUseCase } from './domains/users/use-cases/create-user-use-case';
+import { CreateSuperUserUseCase } from './domains/users/use-cases/create-super-user-use-case';
 import { DeleteUserUseCase } from './domains/users/use-cases/delete-user-use-case';
 
 const useCases = [
@@ -80,7 +80,7 @@ const useCases = [
   UpdateBlogUseCase,
   DeleteBlogUseCase,
   FindBlogByIdUseCase,
-  CreateUserUseCase,
+  CreateSuperUserUseCase,
   DeleteUserUseCase,
 ];
 

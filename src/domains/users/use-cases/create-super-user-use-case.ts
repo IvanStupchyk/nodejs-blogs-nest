@@ -3,15 +3,17 @@ import { UsersService } from '../users.service';
 import { NewUserDto } from '../../../dtos/users/new-user.dto';
 import { ViewUserModel } from '../../../controllers/users/models/view-user.model';
 
-export class CreateUserCommand {
+export class CreateSuperUserCommand {
   constructor(public userData: NewUserDto) {}
 }
 
-@CommandHandler(CreateUserCommand)
-export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
+@CommandHandler(CreateSuperUserCommand)
+export class CreateSuperUserUseCase
+  implements ICommandHandler<CreateSuperUserCommand>
+{
   constructor(private readonly usersService: UsersService) {}
 
-  async execute(command: CreateUserCommand): Promise<ViewUserModel> {
+  async execute(command: CreateSuperUserCommand): Promise<ViewUserModel> {
     return await this.usersService.createUser(command.userData);
   }
 }
