@@ -21,23 +21,24 @@ import { Response, Request } from 'express';
 import { UriParamsBlogIdModel } from './models/uri-params-blog-id.model';
 import { DeleteBlogModel } from './models/delete-blog.model';
 import { PostForSpecificBlogDto } from '../../dtos/posts/post-for-specific-blog.dto';
-import { PostsService } from '../../domains/posts/posts.service';
 import { GetSortedPostsModel } from '../posts/models/get-sorted-posts.model';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { ApiRequestService } from '../../application/api-request.service';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreatePostForSpecifiedBlogCommand } from '../../domains/posts/use-cases/create-post-for-specified-blog-use-case';
 
 @Controller()
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly blogsService: BlogsService,
-    private readonly postsService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly apiRequestCounter: ApiRequestService,
     private readonly jwtService: JwtService,
+    private commandBus: CommandBus,
   ) {}
   @Get(`${RouterPaths.blogs}`)
   async getBlogs(@Query() params: GetSortedBlogsModel, @Req() req: Request) {
@@ -59,9 +60,8 @@ export class BlogController {
     @Body() body: PostForSpecificBlogDto,
     @Res() res: Response,
   ) {
-    const post = await this.postsService.createPostForSpecifiedBlog(
-      body,
-      params.id,
+    const post = await this.commandBus.execute(
+      new CreatePostForSpecifiedBlogCommand(body, params.id),
     );
 
     !post ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(post);

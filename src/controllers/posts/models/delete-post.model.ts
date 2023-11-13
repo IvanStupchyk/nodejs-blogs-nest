@@ -1,3 +1,3 @@
-export type DeletePostModel = {
+export class DeletePostModel {
   id: string;
-};
+}

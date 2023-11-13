@@ -1,3 +1,3 @@
-export type UriParamsPostIdModel = {
+export class UriParamsPostIdModel {
   id: string;
-};
+}

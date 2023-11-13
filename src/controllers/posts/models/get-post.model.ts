@@ -1,3 +1,3 @@
-export type GetPostModel = {
+export class GetPostModel {
   id: string;
-};
+}

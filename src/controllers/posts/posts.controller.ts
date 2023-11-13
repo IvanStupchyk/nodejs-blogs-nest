@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
-import { PostsService } from '../../domains/posts/posts.service';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
 import { NewPostDto } from '../../dtos/posts/new-post.dto';
@@ -29,22 +28,27 @@ import { UpdateCommentDto } from '../../dtos/comments/update-comment.dto';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ObjectId } from 'mongodb';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { HTTP_STATUSES } from '../../utils/utils';
 import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { UpdatePostCommand } from '../../domains/posts/use-cases/update-post-use-case';
+import { CreatePostCommand } from '../../domains/posts/use-cases/create-post-use-case';
+import { ChangePostLikesCountCommand } from '../../domains/posts/use-cases/change-post-likes-count-use-case';
+import { GetSortedPostsCommand } from '../../domains/posts/use-cases/get-sorted-posts-use-case';
+import { GetPostByIdCommand } from '../../domains/posts/use-cases/get-post-by-id-use-case';
+import { DeletePostCommand } from '../../domains/posts/use-cases/delete-post-use-case';
 
 @Controller()
 export class PostsController {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly postsService: PostsService,
     private readonly commentsService: CommentsService,
+    private commandBus: CommandBus,
   ) {}
 
   @Get(`${RouterPaths.posts}`)
   async getPosts(@Query() query: GetSortedPostsModel, @Req() req: Request) {
-    return await this.postsService.getSortedPosts(
-      query,
-      req.headers?.authorization,
+    return await this.commandBus.execute(
+      new GetSortedPostsCommand(query, req.headers?.authorization),
     );
   }
 
@@ -54,9 +58,8 @@ export class PostsController {
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    const foundPost = await this.postsService.getPostById(
-      params.id,
-      req.headers?.authorization,
+    const foundPost = await this.commandBus.execute(
+      new GetPostByIdCommand(params.id, req.headers?.authorization),
     );
 
     !foundPost ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundPost);
@@ -65,7 +68,7 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.posts}`)
   async createPost(@Body() body: NewPostDto, @Res() res: Response) {
-    const post = await this.postsService.createPost(body);
+    const post = await this.commandBus.execute(new CreatePostCommand(body));
 
     !post ? res.sendStatus(HttpStatus.BAD_REQUEST) : res.send(post);
   }
@@ -95,19 +98,9 @@ export class PostsController {
     @Body() body: NewPostDto,
     @Res() res: Response,
   ) {
-    const { title, content, shortDescription, blogId } = body;
-
-    const updatedPost = await this.postsService.updatePostById(
-      params.id,
-      title,
-      content,
-      shortDescription,
-      blogId,
+    res.sendStatus(
+      await this.commandBus.execute(new UpdatePostCommand(params.id, body)),
     );
-
-    !updatedPost
-      ? res.sendStatus(HttpStatus.NOT_FOUND)
-      : res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -139,26 +132,22 @@ export class PostsController {
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
-    const isLikesCountChanges = await this.postsService.changeLikesCount(
-      params.id,
-      body.likeStatus,
-      new ObjectId(currentUserId),
-    );
-
     res.sendStatus(
-      isLikesCountChanges
-        ? HTTP_STATUSES.NO_CONTENT_204
-        : HTTP_STATUSES.NOT_FOUND_404,
+      await this.commandBus.execute(
+        new ChangePostLikesCountCommand(
+          params.id,
+          body.likeStatus,
+          new ObjectId(currentUserId),
+        ),
+      ),
     );
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(`${RouterPaths.posts}/:id`)
   async deleteUser(@Param() params: DeletePostModel, @Res() res: Response) {
-    const isPostExist = await this.postsService.deletePost(params.id);
-
-    !isPostExist
-      ? res.sendStatus(HttpStatus.NOT_FOUND)
-      : res.sendStatus(HttpStatus.NO_CONTENT);
+    res.sendStatus(
+      await this.commandBus.execute(new DeletePostCommand(params.id)),
+    );
   }
 }
