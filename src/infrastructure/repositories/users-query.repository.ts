@@ -3,7 +3,7 @@ import { GetSortedUsersModel } from '../../controllers/users/models/get-sorted-u
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockUserModel } from '../../constants/blanks';
 import { UsersType } from '../../types/users.types';
-import { UserType } from '../../dtos/user.dto';
+import { UserType } from '../../controllers/users/models/user.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../schemas/user.schema';
 import { Model } from 'mongoose';

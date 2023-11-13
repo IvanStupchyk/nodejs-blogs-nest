@@ -8,7 +8,7 @@ import { PostsType } from '../../types/posts.types';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockPostModel } from '../../constants/blanks';
 import { PostType } from '../../domains/posts/dto/post.dto';
-import { PostLikesType } from '../../dtos/post-likes.dto';
+import { PostLikesType } from '../../controllers/posts/models/post-likes.model';
 import { getPostsMapper } from '../../utils/dataMappers/postsMappers/get-posts-mapper';
 import { likeStatus } from '../../types/general.types';
 import { PostViewModel } from '../../controllers/posts/models/post-view.model';

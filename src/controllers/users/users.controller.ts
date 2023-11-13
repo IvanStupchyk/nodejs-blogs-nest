@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { GetSortedUsersModel } from './models/get-sorted-users.model';
-import { NewUserDto } from './models/new-user.dto';
+import { NewUserDto } from '../../dtos/users/new-user.dto';
 import { UsersService } from '../../application/users.service';
 import { DeleteUserModel } from './models/delete-user.model';
 import { Response } from 'express';

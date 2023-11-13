@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { likeStatus } from '../types/general.types';
+import { likeStatus } from '../../../types/general.types';
 
 export class PostLikesType {
   constructor(

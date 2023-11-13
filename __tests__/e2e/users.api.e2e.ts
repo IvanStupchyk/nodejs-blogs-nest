@@ -2,7 +2,7 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { mockBlogs, mockUsers } from '../../src/constants/blanks';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
+import { NewUserDto } from '../../src/dtos/users/new-user.dto';
 import { AppModule } from '../../src/app.module';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { Test, TestingModule } from '@nestjs/testing';

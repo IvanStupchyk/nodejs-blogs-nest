@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/repositories/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserModelType } from '../schemas/user.schema';
-import { NewUserDto } from '../controllers/users/models/new-user.dto';
+import { NewUserDto } from '../dtos/users/new-user.dto';
 import { validateOrRejectModel } from '../utils/validate-or-reject.model';
 
 @Injectable()

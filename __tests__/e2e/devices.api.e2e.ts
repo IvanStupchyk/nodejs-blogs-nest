@@ -5,9 +5,9 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
+import { NewUserDto } from '../../src/dtos/users/new-user.dto';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { UserType } from '../../src/dtos/user.dto';
+import { UserType } from '../../src/controllers/users/models/user.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 const { parse } = require('cookie');
 

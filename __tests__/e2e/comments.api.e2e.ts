@@ -9,14 +9,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { CreateCommentModel } from '../../src/controllers/comments/models/create-comment.model';
-import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
+import { NewUserDto } from '../../src/dtos/users/new-user.dto';
 import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
 import { CommentViewModel } from '../../src/controllers/comments/models/comment-view.model';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
 import { LoginUserDto } from '../../src/domains/auth/models/login-user.dto';
-import { UpdateCommentDto } from '../../src/controllers/comments/models/update-comment.dto';
+import { UpdateCommentDto } from '../../src/dtos/comments/update-comment.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
 import { errorsConstants } from '../../src/constants/errors.contants';
 

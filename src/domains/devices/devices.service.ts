@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
-import { UserType } from '../../dtos/user.dto';
+import { UserType } from '../../controllers/users/models/user.model';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { isValidObjectId } from 'mongoose';
 import { ObjectId } from 'mongodb';

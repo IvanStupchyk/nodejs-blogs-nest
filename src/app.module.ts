@@ -1,6 +1,8 @@
+import { ConfigModule } from '@nestjs/config';
+const configModule = ConfigModule.forRoot();
+
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
 import { User, UserSchema } from './schemas/user.schema';
 import { UsersController } from './controllers/users/users.controller';
 import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
@@ -18,7 +20,6 @@ import { PostLikes, PostLikesSchema } from './schemas/post-likes.schema';
 import { LikesRepository } from './infrastructure/repositories/likes.repository';
 import { PostsRepository } from './infrastructure/repositories/posts.repository';
 import { PostsService } from './domains/posts/posts.service';
-import dotenv from 'dotenv';
 import { CommentsRepository } from './infrastructure/repositories/comments.repository';
 import { CommentSchema, Comment } from './schemas/comment.schema';
 import { CommentsService } from './domains/comments/comments.service';
@@ -38,12 +39,11 @@ import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { JwtService } from './infrastructure/jwt.service';
 import { RefreshTokenMiddleware } from './infrastructure/refresh-token.service';
 import { DevicesController } from './controllers/devices/devices.controller';
-import { IsBlogExistConstraint } from './utils/validators/existing-blog.decorator';
-dotenv.config();
+import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    configModule,
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),

@@ -13,7 +13,7 @@ import { User, UserDocument, UserModelType } from '../schemas/user.schema';
 import { emailTemplatesManager } from '../infrastructure/email-templates-manager';
 import { ShowOwnUserDataType } from '../types/users.types';
 import { errorMessageGenerator } from '../utils/error-message-generator';
-import { NewUserDto } from '../controllers/users/models/new-user.dto';
+import { NewUserDto } from '../dtos/users/new-user.dto';
 import { errorsConstants } from '../constants/errors.contants';
 
 @Injectable()

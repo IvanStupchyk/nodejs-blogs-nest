@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewUserDto } from '../../src/controllers/users/models/new-user.dto';
+import { NewUserDto } from '../../src/dtos/users/new-user.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { User, UserDocument, UserSchema } from '../../src/schemas/user.schema';
 import mongoose from 'mongoose';

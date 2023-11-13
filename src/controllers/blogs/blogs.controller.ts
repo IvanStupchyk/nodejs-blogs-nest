@@ -14,13 +14,13 @@ import {
 } from '@nestjs/common';
 import { GetSortedBlogsModel } from './models/get-sorted-blogs.model';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
-import { BlogDto } from './models/blog.dto';
+import { BlogDto } from '../../dtos/blogs/blog.dto';
 import { BlogsService } from '../../domains/blogs/blogs.service';
 import { GetBlogModel } from './models/get-blog.model';
 import { Response, Request } from 'express';
 import { UriParamsBlogIdModel } from './models/uri-params-blog-id.model';
 import { DeleteBlogModel } from './models/delete-blog.model';
-import { PostForSpecificBlogDto } from '../posts/models/post-for-specific-blog.dto';
+import { PostForSpecificBlogDto } from '../../dtos/posts/post-for-specific-blog.dto';
 import { PostsService } from '../../domains/posts/posts.service';
 import { GetSortedPostsModel } from '../posts/models/get-sorted-posts.model';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
