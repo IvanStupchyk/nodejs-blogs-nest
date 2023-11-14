@@ -34,14 +34,12 @@ import { GetCurrentUserCommand } from '../../domains/auth/use-cases/get-current-
 import { LogInUserCommand } from '../../domains/auth/use-cases/log-in-user-use-case';
 import { LogOutUserCommand } from '../../domains/auth/use-cases/log-out-user-use-case';
 import { CreateCommonUserCommand } from '../../domains/auth/use-cases/create-common-user-use-case';
-import { UsersRepository } from '../../infrastructure/repositories/users.repository';
 
 @Controller()
 export class AuthController {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly apiRequestCounter: ApiRequestService,
-    private readonly usersRepository: UsersRepository,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
     private commandBus: CommandBus,
   ) {}
@@ -127,13 +125,7 @@ export class AuthController {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
-    const user = await this.usersRepository.fetchAllUserDataById(ids.userId);
-
-    if (user.isRefreshTokenInvalid(req.cookies?.refreshToken)) {
-      return res.sendStatus(HttpStatus.UNAUTHORIZED);
-    }
-
-    const { accessToken, refreshToken } = await this.commandBus.execute(
+    const tokens = await this.commandBus.execute(
       new RefreshTokenCommand(
         ids.userId,
         ids.deviceId,
@@ -141,10 +133,15 @@ export class AuthController {
       ),
     );
 
+    if (!tokens) return res.sendStatus(HttpStatus.UNAUTHORIZED);
+
     res
       .status(HttpStatus.OK)
-      .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
-      .send({ accessToken });
+      .cookie('refreshToken', tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      })
+      .send({ accessToken: tokens.accessToken });
   }
 
   @Post(`${RouterPaths.auth}/new-password`)
