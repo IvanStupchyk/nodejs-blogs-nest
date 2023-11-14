@@ -70,6 +70,7 @@ import { LogInUserUseCase } from './domains/auth/use-cases/log-in-user-use-case'
 import { LogOutUserUseCase } from './domains/auth/use-cases/log-out-user-use-case';
 import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-user-use-case';
 import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 const useCases = [
   CreatePostUseCase,
@@ -107,6 +108,12 @@ const useCases = [
 @Module({
   imports: [
     CqrsModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     configModule,
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

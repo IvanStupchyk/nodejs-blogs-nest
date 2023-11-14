@@ -34,6 +34,7 @@ import { GetCurrentUserCommand } from '../../domains/auth/use-cases/get-current-
 import { LogInUserCommand } from '../../domains/auth/use-cases/log-in-user-use-case';
 import { LogOutUserCommand } from '../../domains/auth/use-cases/log-out-user-use-case';
 import { CreateCommonUserCommand } from '../../domains/auth/use-cases/create-common-user-use-case';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller()
 export class AuthController {
@@ -44,7 +45,7 @@ export class AuthController {
     private commandBus: CommandBus,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post(`${RouterPaths.auth}/login`)
   async login(
     @Body() body: LoginUserDto,
