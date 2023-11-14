@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class LogOutUserCommand {
   constructor(public req: Request) {}
@@ -12,6 +13,7 @@ export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
   constructor(
     private readonly jwtService: JwtService,
     private readonly devicesRepository: DevicesRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async execute(command: LogOutUserCommand): Promise<boolean> {
@@ -24,6 +26,14 @@ export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
         req.cookies.refreshToken,
       );
       if (!result?.userId) return false;
+
+      const user = await this.usersRepository.fetchAllUserDataById(
+        result?.userId,
+      );
+
+      if (user.isRefreshTokenInvalid(req.cookies?.refreshToken)) {
+        return false;
+      }
 
       const session = await this.devicesRepository.findDeviceById(
         result?.deviceId,
