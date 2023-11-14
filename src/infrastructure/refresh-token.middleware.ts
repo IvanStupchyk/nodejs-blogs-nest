@@ -23,10 +23,11 @@ export class RefreshTokenMiddleware {
     );
 
     if (result?.userId) {
-      const session = await this.devicesRepository.findDeviceById(
+      const session = await this.devicesRepository.fetchAllDeviceDataById(
         result?.deviceId,
       );
-      if (!session) {
+
+      if (!session || session.refreshToken !== req.cookies.refreshToken) {
         return null;
       }
 
