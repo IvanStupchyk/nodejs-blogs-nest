@@ -4,6 +4,7 @@ import { AccountDataSchema } from './account-data.schema';
 import {
   AccountDataType,
   EmailConfirmationType,
+  InvalidRefreshTokensType,
   likeStatus,
   UserCommentLikesType,
 } from '../types/general.types';
@@ -12,6 +13,7 @@ import { UserCommentLikesSchema } from './user-comment-likes.schema';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
+import { InvalidRefreshTokensSchema } from './invalid-refresh-tokens.schema';
 
 @Schema()
 export class User {
@@ -38,6 +40,12 @@ export class User {
     type: [UserCommentLikesSchema],
   })
   commentsLikes: Array<UserCommentLikesType>;
+
+  @Prop({
+    required: true,
+    type: [InvalidRefreshTokensSchema],
+  })
+  invalidRefreshTokens: Array<InvalidRefreshTokensType>;
 
   changeUserPassword(passwordHash: string) {
     return (this.accountData.passwordHash = passwordHash);
@@ -67,6 +75,22 @@ export class User {
     this.commentsLikes.push({
       commentId,
       myStatus,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  isRefreshTokenInvalid(refreshToken: string): boolean {
+    const refreshTokens = this.invalidRefreshTokens;
+    const index = refreshTokens.findIndex(
+      (t) => t.refreshToken === refreshToken,
+    );
+    return index > -1;
+  }
+
+  setInvalidRefreshToken(refreshToken: string) {
+    this.invalidRefreshTokens.push({
+      id: new ObjectId(),
+      refreshToken,
       createdAt: new Date().toISOString(),
     });
   }
@@ -105,6 +129,7 @@ export class User {
         isConfirmed: superUser,
       },
       commentsLikes: [],
+      invalidRefreshTokens: [],
     });
   }
 }
@@ -119,6 +144,8 @@ UserSchema.methods = {
     User.prototype.updateConfirmationCodeAndExpirationTime,
   setNewUserCommentLike: User.prototype.setNewUserCommentLike,
   updateExistingUserCommentLike: User.prototype.updateExistingUserCommentLike,
+  setInvalidRefreshToken: User.prototype.setInvalidRefreshToken,
+  isRefreshTokenInvalid: User.prototype.isRefreshTokenInvalid,
 };
 
 const userStaticMethods: UserModelStaticType = {
