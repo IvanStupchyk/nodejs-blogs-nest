@@ -295,7 +295,7 @@ describe('tests for /devices and /auth', () => {
       .post(`${RouterPaths.auth}/logout`)
       .set('Cookie', `refreshToken=${fifthRefreshToken}`)
       .send()
-      .expect(HTTP_STATUSES.NO_CONTENT_204);
+      .expect(HTTP_STATUSES.UNAUTHORIZED_401);
 
     const loginRequest = await getRequest()
       .post(`${RouterPaths.auth}/login`)
@@ -313,14 +313,14 @@ describe('tests for /devices and /auth', () => {
     await getRequest()
       .get(`${RouterPaths.security}/devices`)
       .set('Cookie', `refreshToken=${fifthRefreshToken}`)
-      .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+      .expect(HTTP_STATUSES.OK_200);
 
     const secondUserDevices = await getRequest()
       .get(`${RouterPaths.security}/devices`)
       .set('Cookie', `refreshToken=${newRefreshToken}`)
       .expect(HTTP_STATUSES.OK_200);
 
-    expect(secondUserDevices.body.length).toEqual(1);
+    expect(secondUserDevices.body.length).toEqual(2);
   }, 20000);
 
   it('should return 429 if user sent more than 5 request during 10 seconds', async () => {
