@@ -10,6 +10,7 @@ export class RefreshTokenCommand {
   constructor(
     public userId: ObjectId,
     public deviceId: ObjectId,
+    public oldRefreshToken: string,
   ) {}
 }
 
@@ -26,8 +27,14 @@ export class RefreshTokenUseCase
 
   async execute(
     command: RefreshTokenCommand,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    const { userId, deviceId } = command;
+  ): Promise<{ accessToken: string; refreshToken: string } | null> {
+    const { userId, deviceId, oldRefreshToken } = command;
+
+    const user = await this.usersRepository.fetchAllUserDataById(userId);
+
+    if (user.isRefreshTokenInvalid(oldRefreshToken)) {
+      return null;
+    }
 
     const accessToken = await this.jwtService.createAccessJWT(userId);
     const refreshToken = await this.jwtService.createRefreshJWT(
@@ -46,6 +53,10 @@ export class RefreshTokenUseCase
         lastActiveDate,
         expirationDate,
       );
+
+      const user = await this.usersRepository.fetchAllUserDataById(userId);
+      user.setInvalidRefreshToken(oldRefreshToken);
+      await this.usersRepository.save(user);
     } catch (error) {
       console.log(error);
     }
