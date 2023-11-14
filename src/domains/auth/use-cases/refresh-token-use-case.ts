@@ -45,7 +45,6 @@ export class RefreshTokenUseCase
         deviceId,
         lastActiveDate,
         expirationDate,
-        refreshToken,
       );
     } catch (error) {
       console.log(error);

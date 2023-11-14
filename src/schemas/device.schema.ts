@@ -21,11 +21,6 @@ export class Device {
   @Prop({
     required: true,
   })
-  refreshToken: string;
-
-  @Prop({
-    required: true,
-  })
   lastActiveDate: Date;
 
   @Prop({

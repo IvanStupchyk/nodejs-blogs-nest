@@ -19,7 +19,6 @@ export class AuthService {
       (req.headers['x-forwarded-for'] as string) ||
         (req.socket.remoteAddress ?? ''),
       req.headers['user-agent'] ?? 'unknown',
-      refreshToken,
       new Date(),
       new Date(),
       deviceId,

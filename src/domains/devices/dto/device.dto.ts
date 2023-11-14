@@ -5,7 +5,6 @@ export class DeviceType {
     public id: ObjectId,
     public ip: string,
     public title: string,
-    public refreshToken: string,
     public lastActiveDate: Date,
     public expirationDate: Date,
     public deviceId: ObjectId,
