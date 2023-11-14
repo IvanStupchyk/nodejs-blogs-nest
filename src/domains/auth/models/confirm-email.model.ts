@@ -1,3 +1,3 @@
-export type ConfirmEmailModel = {
+export class ConfirmEmailModel {
   code: string;
-};
+}

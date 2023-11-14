@@ -12,7 +12,6 @@ import {
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
 import { LoginUserDto } from '../../domains/auth/models/login-user.dto';
-import { AuthService } from '../../application/auth.service';
 import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -25,14 +24,24 @@ import { ResendingCodeToEmailDto } from '../../domains/auth/models/resending-cod
 import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.middleware';
 import { RecoveryCodeEmailDto } from '../../domains/auth/models/recovery-code-email.dto';
 import { NewPasswordDto } from '../../domains/auth/models/new-password.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { UpdateUserPasswordCommand } from '../../domains/auth/use-cases/update-user-password-use-case';
+import { RefreshTokenCommand } from '../../domains/auth/use-cases/refresh-token-use-case';
+import { ConfirmEmailCommand } from '../../domains/auth/use-cases/confirm-email-use-case';
+import { ResendEmailConfirmationCodeCommand } from '../../domains/auth/use-cases/resend-email-confirmation-code-use-case';
+import { SendRecoveryPasswordCodeCommand } from '../../domains/auth/use-cases/send-recovery-password-code-use-case';
+import { GetCurrentUserCommand } from '../../domains/auth/use-cases/get-current-user-use-case';
+import { LogInUserCommand } from '../../domains/auth/use-cases/log-in-user-use-case';
+import { LogOutUserCommand } from '../../domains/auth/use-cases/log-out-user-use-case';
+import { CreateCommonUserCommand } from '../../domains/auth/use-cases/create-common-user-use-case';
 
 @Controller()
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly apiRequestCounter: ApiRequestService,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
+    private commandBus: CommandBus,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -40,12 +49,14 @@ export class AuthController {
   async login(
     @Body() body: LoginUserDto,
     @Req() req: Request,
+    @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
     await this.apiRequestCounter.countRequest(req);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const result = await this.authService.loginUser(req, req.user.id);
+
+    const result = await this.commandBus.execute(
+      new LogInUserCommand(req, currentUserId),
+    );
 
     if (result) {
       res
@@ -63,7 +74,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.auth}/me`)
   async getOwnData(@CurrentUserId() currentUserId) {
-    return await this.authService.getOwnData(currentUserId);
+    return await this.commandBus.execute(
+      new GetCurrentUserCommand(currentUserId),
+    );
   }
 
   @Post(`${RouterPaths.auth}/registration`)
@@ -71,7 +84,7 @@ export class AuthController {
   async registration(@Body() body: NewUserDto, @Req() req: Request) {
     await this.apiRequestCounter.countRequest(req);
 
-    return await this.authService.createUser(body);
+    return await this.commandBus.execute(new CreateCommonUserCommand(body));
   }
 
   @Post(`${RouterPaths.auth}/registration-confirmation`)
@@ -82,7 +95,7 @@ export class AuthController {
   ) {
     await this.apiRequestCounter.countRequest(req);
 
-    return await this.authService.confirmEmail(body.code);
+    return await this.commandBus.execute(new ConfirmEmailCommand(body.code));
   }
 
   @Post(`${RouterPaths.auth}/registration-email-resending`)
@@ -93,12 +106,14 @@ export class AuthController {
   ) {
     await this.apiRequestCounter.countRequest(req);
 
-    return await this.authService.resendEmail(body.email);
+    return await this.commandBus.execute(
+      new ResendEmailConfirmationCodeCommand(body.email),
+    );
   }
 
   @Post(`${RouterPaths.auth}/logout`)
   async logout(@Req() req: Request, @Res() res: Response) {
-    const isLogout = await this.authService.logoutUser(req);
+    const isLogout = await this.commandBus.execute(new LogOutUserCommand(req));
 
     isLogout
       ? res.clearCookie('refreshToken').sendStatus(HttpStatus.NO_CONTENT)
@@ -110,9 +125,8 @@ export class AuthController {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
-    const { accessToken, refreshToken } = await this.authService.refreshTokens(
-      ids.userId,
-      ids.deviceId,
+    const { accessToken, refreshToken } = await this.commandBus.execute(
+      new RefreshTokenCommand(ids.userId, ids.deviceId),
     );
 
     res
@@ -126,10 +140,7 @@ export class AuthController {
   async newPassword(@Body() body: NewPasswordDto, @Req() req: Request) {
     await this.apiRequestCounter.countRequest(req);
 
-    return await this.authService.updatePassword(
-      body.newPassword,
-      body.recoveryCode,
-    );
+    return await this.commandBus.execute(new UpdateUserPasswordCommand(body));
   }
 
   @Post(`${RouterPaths.auth}/password-recovery`)
@@ -140,6 +151,8 @@ export class AuthController {
   ) {
     await this.apiRequestCounter.countRequest(req);
 
-    return await this.authService.sendRecoveryPasswordCode(body.email);
+    return await this.commandBus.execute(
+      new SendRecoveryPasswordCodeCommand(body.email),
+    );
   }
 }
