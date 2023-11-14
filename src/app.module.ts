@@ -60,6 +60,16 @@ import { DeleteBlogUseCase } from './domains/blogs/use-cases/delete-blog-use-cas
 import { FindBlogByIdUseCase } from './domains/blogs/use-cases/find-blog-by-id-use-case';
 import { CreateSuperUserUseCase } from './domains/users/use-cases/create-super-user-use-case';
 import { DeleteUserUseCase } from './domains/users/use-cases/delete-user-use-case';
+import { UpdateUserPasswordUseCase } from './domains/auth/use-cases/update-user-password-use-case';
+import { RefreshTokenUseCase } from './domains/auth/use-cases/refresh-token-use-case';
+import { ConfirmEmailUseCase } from './domains/auth/use-cases/confirm-email-use-case';
+import { ResendEmailConfirmationCodeUseCase } from './domains/auth/use-cases/resend-email-confirmation-code-use-case';
+import { SendRecoveryPasswordCodeUseCase } from './domains/auth/use-cases/send-recovery-password-code-use-case';
+import { GetCurrentUserUseCase } from './domains/auth/use-cases/get-current-user-use-case';
+import { LogInUserUseCase } from './domains/auth/use-cases/log-in-user-use-case';
+import { LogOutUserUseCase } from './domains/auth/use-cases/log-out-user-use-case';
+import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-user-use-case';
+import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -82,6 +92,16 @@ const useCases = [
   FindBlogByIdUseCase,
   CreateSuperUserUseCase,
   DeleteUserUseCase,
+  UpdateUserPasswordUseCase,
+  RefreshTokenUseCase,
+  ConfirmEmailUseCase,
+  ResendEmailConfirmationCodeUseCase,
+  SendRecoveryPasswordCodeUseCase,
+  GetCurrentUserUseCase,
+  LogInUserUseCase,
+  LogOutUserUseCase,
+  CreateCommonUserUseCase,
+  ValidateUserUseCase,
 ];
 
 @Module({
