@@ -36,6 +36,12 @@ export type UserCommentLikesType = {
   createdAt: string;
 };
 
+export type InvalidRefreshTokensType = {
+  id: ObjectId;
+  refreshToken: string;
+  createdAt: string;
+};
+
 export type CommentLikesInfoType = {
   likesCount: number;
   dislikesCount: number;

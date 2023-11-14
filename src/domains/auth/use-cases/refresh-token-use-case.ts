@@ -2,6 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { ObjectId } from 'mongodb';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserModelType } from '../../../schemas/user.schema';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class RefreshTokenCommand {
   constructor(
@@ -17,6 +20,8 @@ export class RefreshTokenUseCase
   constructor(
     private readonly devicesRepository: DevicesRepository,
     private readonly jwtService: JwtService,
+    private readonly usersRepository: UsersRepository,
+    @InjectModel(User.name) private UserModel: UserModelType,
   ) {}
 
   async execute(
@@ -40,6 +45,7 @@ export class RefreshTokenUseCase
         deviceId,
         lastActiveDate,
         expirationDate,
+        refreshToken,
       );
     } catch (error) {
       console.log(error);

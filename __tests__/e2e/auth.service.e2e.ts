@@ -13,16 +13,12 @@ import {
   DeviceDocument,
   DeviceSchema,
 } from '../../src/schemas/device.schema';
-import { AuthService } from '../../src/application/auth.service';
-import { JwtService } from '../../src/infrastructure/jwt.service';
-import * as errorsGenerators from '../../src/utils/error-message-generator';
 import { emailTemplatesManager } from '../../src/infrastructure/email-templates-manager';
 
 describe('tests for auth service', () => {
   let app: INestApplication;
   let httpServer;
   let userModel;
-  let usersRepository;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -47,14 +43,6 @@ describe('tests for auth service', () => {
     httpServer = app.getHttpServer();
 
     userModel = moduleFixture.get(getModelToken(User.name));
-    usersRepository = new UsersRepository(userModel);
-    const jwtService = new JwtService();
-    authService = new AuthService(jwtService);
-
-    errorMessageGeneratorMock = jest.spyOn(
-      errorsGenerators,
-      'errorMessageGenerator',
-    );
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });

@@ -36,6 +36,7 @@ export class DevicesRepository {
     deviceInstance.id = device.id;
     deviceInstance.ip = device.ip;
     deviceInstance.title = device.title;
+    deviceInstance.refreshToken = device.refreshToken;
     deviceInstance.lastActiveDate = device.lastActiveDate;
     deviceInstance.expirationDate = device.expirationDate;
     deviceInstance.deviceId = device.deviceId;
@@ -48,10 +49,11 @@ export class DevicesRepository {
     deviceId: ObjectId,
     lastActiveDate: Date,
     expirationDate: Date,
+    refreshToken: string,
   ): Promise<boolean> {
     const isUpdated = await this.DeviceModel.updateOne(
       { deviceId },
-      { $set: { lastActiveDate, expirationDate } },
+      { $set: { lastActiveDate, expirationDate, refreshToken } },
     ).exec();
 
     return isUpdated.modifiedCount === 1;
@@ -71,6 +73,10 @@ export class DevicesRepository {
 
   async findDeviceById(deviceId: ObjectId): Promise<boolean> {
     return !!(await this.DeviceModel.findOne({ deviceId }).exec());
+  }
+
+  async fetchAllDeviceDataById(deviceId: ObjectId): Promise<DeviceDocument> {
+    return await this.DeviceModel.findOne({ deviceId }).exec();
   }
 
   async removeAllExceptCurrentSessions(
