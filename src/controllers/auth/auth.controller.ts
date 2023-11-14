@@ -125,21 +125,18 @@ export class AuthController {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
-    const newTokens = await this.commandBus.execute(
+    const { accessToken, refreshToken } = await this.commandBus.execute(
       new RefreshTokenCommand(
         ids.userId,
         ids.deviceId,
         req.cookies?.refreshToken,
       ),
     );
-    if (!newTokens) return res.sendStatus(HttpStatus.UNAUTHORIZED);
+
     res
       .status(HttpStatus.OK)
-      .cookie('refreshToken', newTokens.refreshToken, {
-        httpOnly: true,
-        secure: true,
-      })
-      .send({ accessToken: newTokens.accessToken });
+      .cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
+      .send({ accessToken });
   }
 
   @Post(`${RouterPaths.auth}/new-password`)

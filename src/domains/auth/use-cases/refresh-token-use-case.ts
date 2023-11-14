@@ -30,11 +30,11 @@ export class RefreshTokenUseCase
   ): Promise<{ accessToken: string; refreshToken: string } | null> {
     const { userId, deviceId, oldRefreshToken } = command;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
-
-    if (user.isRefreshTokenInvalid(oldRefreshToken)) {
-      return null;
-    }
+    // const user = await this.usersRepository.fetchAllUserDataById(userId);
+    //
+    // if (user.isRefreshTokenInvalid(oldRefreshToken)) {
+    //   return null;
+    // }
 
     const accessToken = await this.jwtService.createAccessJWT(userId);
     const refreshToken = await this.jwtService.createRefreshJWT(
