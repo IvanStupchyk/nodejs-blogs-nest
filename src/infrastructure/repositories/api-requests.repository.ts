@@ -17,11 +17,11 @@ export class ApiRequestRepository {
   async addAPIRequest(newRequest: APIRequestsCountType): Promise<boolean> {
     const apiRequestsCountInstance = new this.ApiRequestModel();
 
-    apiRequestsCountInstance.ip = newRequest.ip;
-    apiRequestsCountInstance.URL = newRequest.URL;
-    apiRequestsCountInstance.date = newRequest.date;
-
-    await apiRequestsCountInstance.save();
+    // apiRequestsCountInstance.ip = newRequest.ip;
+    // apiRequestsCountInstance.URL = newRequest.URL;
+    // apiRequestsCountInstance.date = newRequest.date;
+    //
+    // await apiRequestsCountInstance.save();
 
     return true;
   }

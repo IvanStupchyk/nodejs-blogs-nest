@@ -17,7 +17,6 @@ import { HTTP_STATUSES } from '../../utils/utils';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
-import { ApiRequestService } from '../../application/api-request.service';
 import { NewUserDto } from '../../dtos/users/new-user.dto';
 import { ConfirmEmailModel } from '../../domains/auth/models/confirm-email.model';
 import { ResendingCodeToEmailDto } from '../../domains/auth/models/resending-code-to-email.dto';
@@ -40,7 +39,6 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 export class AuthController {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
-    private readonly apiRequestCounter: ApiRequestService,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
     private commandBus: CommandBus,
   ) {}
@@ -53,8 +51,6 @@ export class AuthController {
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
-    await this.apiRequestCounter.countRequest(req);
-
     const result = await this.commandBus.execute(
       new LogInUserCommand(req, currentUserId),
     );
@@ -80,33 +76,24 @@ export class AuthController {
     );
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post(`${RouterPaths.auth}/registration`)
   @HttpCode(204)
-  async registration(@Body() body: NewUserDto, @Req() req: Request) {
-    await this.apiRequestCounter.countRequest(req);
-
+  async registration(@Body() body: NewUserDto) {
     return await this.commandBus.execute(new CreateCommonUserCommand(body));
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post(`${RouterPaths.auth}/registration-confirmation`)
   @HttpCode(204)
-  async registrationConfirmation(
-    @Body() body: ConfirmEmailModel,
-    @Req() req: Request,
-  ) {
-    await this.apiRequestCounter.countRequest(req);
-
+  async registrationConfirmation(@Body() body: ConfirmEmailModel) {
     return await this.commandBus.execute(new ConfirmEmailCommand(body.code));
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post(`${RouterPaths.auth}/registration-email-resending`)
   @HttpCode(204)
-  async resendEmail(
-    @Body() body: ResendingCodeToEmailDto,
-    @Req() req: Request,
-  ) {
-    await this.apiRequestCounter.countRequest(req);
-
+  async resendEmail(@Body() body: ResendingCodeToEmailDto) {
     return await this.commandBus.execute(
       new ResendEmailConfirmationCodeCommand(body.email),
     );
@@ -145,22 +132,17 @@ export class AuthController {
       .send({ accessToken: tokens.accessToken });
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post(`${RouterPaths.auth}/new-password`)
   @HttpCode(204)
-  async newPassword(@Body() body: NewPasswordDto, @Req() req: Request) {
-    await this.apiRequestCounter.countRequest(req);
-
+  async newPassword(@Body() body: NewPasswordDto) {
     return await this.commandBus.execute(new UpdateUserPasswordCommand(body));
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post(`${RouterPaths.auth}/password-recovery`)
   @HttpCode(204)
-  async passwordRecovery(
-    @Body() body: RecoveryCodeEmailDto,
-    @Req() req: Request,
-  ) {
-    await this.apiRequestCounter.countRequest(req);
-
+  async passwordRecovery(@Body() body: RecoveryCodeEmailDto) {
     return await this.commandBus.execute(
       new SendRecoveryPasswordCodeCommand(body.email),
     );

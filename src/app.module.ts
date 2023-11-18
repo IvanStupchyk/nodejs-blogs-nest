@@ -77,6 +77,7 @@ import { UsersSqlRepository } from './infrastructure/repositories-raw-sql/users-
 import { DevicesSqlRepository } from './infrastructure/repositories-raw-sql/devices-sql.repository';
 import { InvalidRefreshTokensSqlRepository } from './infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
 import { DevicesQuerySqlRepository } from './infrastructure/repositories-raw-sql/devices-query-sql.repository';
+import { ApiRequestsSqlRepository } from './infrastructure/repositories-raw-sql/api-requests-sql.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -161,6 +162,7 @@ const useCases = [
     DevicesSqlRepository,
     InvalidRefreshTokensSqlRepository,
     DevicesQuerySqlRepository,
+    ApiRequestsSqlRepository,
     UsersRepository,
     UsersService,
     BlogsQueryRepository,
