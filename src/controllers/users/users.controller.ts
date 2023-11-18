@@ -10,7 +10,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { GetSortedUsersModel } from './models/get-sorted-users.model';
 import { NewUserDto } from '../../dtos/users/new-user.dto';
 import { DeleteUserModel } from './models/delete-user.model';
@@ -20,18 +19,19 @@ import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateSuperUserCommand } from '../../domains/users/use-cases/create-super-user-use-case';
 import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
+import { UsersQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/users-query-sql.repository';
 
 @Controller()
 export class UsersController {
   constructor(
-    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
   @Get(`${RouterPaths.users}`)
   async getUser(@Query() params: GetSortedUsersModel) {
-    return await this.usersQueryRepository.getSortedUsers(params);
+    return await this.usersQuerySqlRepository.getSortedUsers(params);
   }
 
   @UseGuards(BasicAuthGuard)

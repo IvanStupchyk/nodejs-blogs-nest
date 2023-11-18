@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ObjectId } from 'mongodb';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
 
 export class DeleteUserCommand {
   constructor(public id: string) {}
@@ -8,10 +7,9 @@ export class DeleteUserCommand {
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserUseCase implements ICommandHandler<DeleteUserCommand> {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
 
   async execute(command: DeleteUserCommand): Promise<boolean> {
-    if (!ObjectId.isValid(command.id)) return false;
-    return await this.usersRepository.deleteUser(new ObjectId(command.id));
+    return await this.usersSqlRepository.deleteUser(command.id);
   }
 }

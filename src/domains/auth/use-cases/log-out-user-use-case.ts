@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
-import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { DevicesSqlRepository } from '../../../infrastructure/repositories-raw-sql/devices-sql.repository';
+import { InvalidRefreshTokensSqlRepository } from '../../../infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
 
 export class LogOutUserCommand {
   constructor(public req: Request) {}
@@ -12,8 +12,8 @@ export class LogOutUserCommand {
 export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly devicesRepository: DevicesRepository,
-    private readonly usersRepository: UsersRepository,
+    private readonly devicesSqlRepository: DevicesSqlRepository,
+    private readonly invalidRefreshTokensSqlRepository: InvalidRefreshTokensSqlRepository,
   ) {}
 
   async execute(command: LogOutUserCommand): Promise<boolean> {
@@ -27,20 +27,25 @@ export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
       );
       if (!result?.userId) return false;
 
-      const user = await this.usersRepository.fetchAllUserDataById(
-        result?.userId,
+      const invalidRefreshTokens =
+        await this.invalidRefreshTokensSqlRepository.getAllInvalidRefreshTokens(
+          result?.userId,
+        );
+
+      const index = invalidRefreshTokens?.findIndex(
+        (t) => t.refreshToken === req.cookies?.refreshToken,
       );
 
-      if (user.isRefreshTokenInvalid(req.cookies?.refreshToken)) {
+      if (index !== undefined && index > -1) {
         return false;
       }
 
-      const session = await this.devicesRepository.findDeviceById(
+      const session = await this.devicesSqlRepository.findDeviceById(
         result?.deviceId,
       );
       if (!session) return false;
 
-      return await this.devicesRepository.removeSpecifiedSession(
+      return await this.devicesSqlRepository.removeSpecifiedSession(
         result.userId,
         result.deviceId,
       );

@@ -53,7 +53,7 @@ export class AuthController {
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     const result = await this.commandBus.execute(
       new LogInUserCommand(req, currentUserId),
@@ -83,7 +83,7 @@ export class AuthController {
   @Post(`${RouterPaths.auth}/registration`)
   @HttpCode(204)
   async registration(@Body() body: NewUserDto, @Req() req: Request) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     return await this.commandBus.execute(new CreateCommonUserCommand(body));
   }
@@ -94,7 +94,7 @@ export class AuthController {
     @Body() body: ConfirmEmailModel,
     @Req() req: Request,
   ) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     return await this.commandBus.execute(new ConfirmEmailCommand(body.code));
   }
@@ -105,7 +105,7 @@ export class AuthController {
     @Body() body: ResendingCodeToEmailDto,
     @Req() req: Request,
   ) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     return await this.commandBus.execute(
       new ResendEmailConfirmationCodeCommand(body.email),
@@ -148,7 +148,7 @@ export class AuthController {
   @Post(`${RouterPaths.auth}/new-password`)
   @HttpCode(204)
   async newPassword(@Body() body: NewPasswordDto, @Req() req: Request) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     return await this.commandBus.execute(new UpdateUserPasswordCommand(body));
   }
@@ -159,7 +159,7 @@ export class AuthController {
     @Body() body: RecoveryCodeEmailDto,
     @Req() req: Request,
   ) {
-    await this.apiRequestCounter.countRequest(req);
+    // await this.apiRequestCounter.countRequest(req);
 
     return await this.commandBus.execute(
       new SendRecoveryPasswordCodeCommand(body.email),

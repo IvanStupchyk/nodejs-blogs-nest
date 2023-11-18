@@ -18,7 +18,7 @@ export type UserMethodsType = {
 };
 
 export type ShowOwnUserDataType = {
-  userId: ObjectId;
+  userId: string;
   login: string;
   email: string;
 };
