@@ -69,9 +69,11 @@ export type CommentsType = {
 };
 
 export type APIRequestsCountType = {
+  id: string;
   ip: string;
   URL: string;
-  date: Date;
+  date: string;
+  createdAt: string;
 };
 
 export type AccountDataType = {
