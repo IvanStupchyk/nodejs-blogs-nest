@@ -1,19 +1,18 @@
 import { Request } from 'express';
 import { JwtService } from './jwt.service';
-import { DevicesRepository } from './repositories/devices.repository';
 import { Injectable } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
+import { DevicesSqlRepository } from './repositories-raw-sql/devices-sql.repository';
 
 @Injectable()
 export class RefreshTokenMiddleware {
   constructor(
     protected readonly jwtService: JwtService,
-    protected readonly devicesRepository: DevicesRepository,
+    protected readonly devicesSqlRepository: DevicesSqlRepository,
   ) {}
 
   async checkRefreshToken(
     req: Request,
-  ): Promise<{ userId: ObjectId; deviceId: ObjectId } | null> {
+  ): Promise<{ userId: string; deviceId: string } | null> {
     if (!req.cookies?.refreshToken) {
       return null;
     }
@@ -23,7 +22,7 @@ export class RefreshTokenMiddleware {
     );
 
     if (result?.userId) {
-      const session = await this.devicesRepository.findDeviceById(
+      const session = await this.devicesSqlRepository.findDeviceById(
         result?.deviceId,
       );
       if (!session) {

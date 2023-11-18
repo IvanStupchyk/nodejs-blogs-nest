@@ -3,24 +3,26 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PostDocument, Post } from '../../schemas/post.schema';
 import { Blog, BlogDocument } from '../../schemas/blog.schema';
-import { User, UserDocument } from '../../schemas/user.schema';
 import { CommentDocument, Comment } from '../../schemas/comment.schema';
 import { PostLikes, PostLikesDocument } from '../../schemas/post-likes.schema';
-import { Device, DeviceDocument } from '../../schemas/device.schema';
 import {
   ApiRequest,
   ApiRequestDocument,
 } from '../../schemas/api-request.schema';
 import { RouterPaths } from '../../constants/router.paths';
+import { UsersQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/users-query-sql.repository';
+import { DevicesSqlRepository } from '../../infrastructure/repositories-raw-sql/devices-sql.repository';
+import { InvalidRefreshTokensSqlRepository } from '../../infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
 
 @Controller()
 export class ResetDbController {
   constructor(
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
     @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
-    @InjectModel(User.name) private UserModel: Model<UserDocument>,
+    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
+    private readonly devicesSqlRepository: DevicesSqlRepository,
+    private readonly invalidRefreshTokensSqlRepository: InvalidRefreshTokensSqlRepository,
     @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
-    @InjectModel(Device.name) private DeviceModel: Model<DeviceDocument>,
     @InjectModel(ApiRequest.name)
     private ApiRequestModel: Model<ApiRequestDocument>,
     @InjectModel(PostLikes.name)
@@ -32,10 +34,11 @@ export class ResetDbController {
   async resetDb() {
     await this.PostModel.deleteMany();
     await this.BlogModel.deleteMany();
-    await this.UserModel.deleteMany();
+    await this.usersQuerySqlRepository.deleteAllUsers();
+    await this.devicesSqlRepository.deleteAllSessions();
+    await this.invalidRefreshTokensSqlRepository.deleteInvalidRefreshTokens();
     await this.CommentModel.deleteMany();
     await this.PostLikesModel.deleteMany();
-    await this.DeviceModel.deleteMany();
     await this.ApiRequestModel.deleteMany();
   }
 }

@@ -31,17 +31,19 @@ export class DevicesRepository {
   }
 
   async setNewDevice(device: DeviceType): Promise<boolean> {
-    const deviceInstance = new this.DeviceModel();
+    // const deviceInstance = new this.DeviceModel();
+    //
+    // deviceInstance.id = device.id;
+    // deviceInstance.ip = device.ip;
+    // deviceInstance.title = device.title;
+    // deviceInstance.lastActiveDate = device.lastActiveDate;
+    // deviceInstance.expirationDate = device.expirationDate;
+    // deviceInstance.deviceId = device.deviceId;
+    // deviceInstance.userId = device.userId;
+    //
+    // return !!(await deviceInstance.save());
 
-    deviceInstance.id = device.id;
-    deviceInstance.ip = device.ip;
-    deviceInstance.title = device.title;
-    deviceInstance.lastActiveDate = device.lastActiveDate;
-    deviceInstance.expirationDate = device.expirationDate;
-    deviceInstance.deviceId = device.deviceId;
-    deviceInstance.userId = device.userId;
-
-    return !!(await deviceInstance.save());
+    return false;
   }
 
   async updateExistingSession(

@@ -1,22 +1,20 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
-import { ObjectId } from 'mongodb';
 import { ShowOwnUserDataType } from '../../../types/users.types';
+import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
 
 export class GetCurrentUserCommand {
-  constructor(public id: ObjectId) {}
+  constructor(public id: string) {}
 }
 
 @CommandHandler(GetCurrentUserCommand)
 export class GetCurrentUserUseCase
   implements ICommandHandler<GetCurrentUserCommand>
 {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
 
   async execute(command: GetCurrentUserCommand): Promise<ShowOwnUserDataType> {
-    const user = await this.usersRepository.findUserById(
-      new ObjectId(command.id),
-    );
+    const user = await this.usersSqlRepository.fetchAllUserDataById(command.id);
+
     return {
       userId: user.id,
       email: user.email,

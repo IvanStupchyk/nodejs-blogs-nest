@@ -56,8 +56,8 @@ export type CommentLikesViewType = {
 export type DeviceViewType = {
   ip: string;
   title: string;
-  lastActiveDate: Date;
-  deviceId: ObjectId;
+  lastActiveDate: string;
+  deviceId: string;
 };
 
 export type CommentsType = {

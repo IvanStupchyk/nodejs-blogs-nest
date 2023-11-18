@@ -1,24 +1,24 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { ObjectId } from 'mongodb';
 import { Request } from 'express';
-import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
 import { AuthService } from '../../../application/auth.service';
+import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { DevicesSqlRepository } from '../../../infrastructure/repositories-raw-sql/devices-sql.repository';
 
 export class LogInUserCommand {
   constructor(
     public req: Request,
-    public userId: ObjectId,
+    public userId: string,
   ) {}
 }
 
 @CommandHandler(LogInUserCommand)
 export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly jwtService: JwtService,
-    private readonly devicesRepository: DevicesRepository,
+    private readonly devicesSqlRepository: DevicesSqlRepository,
     private readonly authService: AuthService,
   ) {}
 
@@ -27,25 +27,23 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { userId, req } = command;
 
-    const user = await this.usersRepository.fetchAllUserDataById(
-      new ObjectId(userId),
-    );
-    if (!user.emailConfirmation.isConfirmed) return null;
+    const user = await this.usersSqlRepository.fetchAllUserDataById(userId);
+    if (!user.isConfirmed) return null;
 
-    const deviceId = new ObjectId();
+    const deviceId = uuidv4();
     const accessToken = await this.jwtService.createAccessJWT(userId);
     const refreshToken = await this.jwtService.createRefreshJWT(
       userId,
       deviceId,
     );
 
-    const newDevice = await this.authService._createRefreshTokenDeviceModel(
+    const newDevice = await this.authService._createDevice(
       req,
       deviceId,
       userId,
       refreshToken,
     );
-    await this.devicesRepository.setNewDevice(newDevice);
+    await this.devicesSqlRepository.setNewDevice(newDevice);
     return { accessToken, refreshToken };
   }
 }

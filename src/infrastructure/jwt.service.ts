@@ -1,23 +1,22 @@
 import jwt from 'jsonwebtoken';
 import { settings } from '../settings';
-import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class JwtService {
-  async createAccessJWT(userId: ObjectId) {
+  async createAccessJWT(userId: string) {
     return jwt.sign({ userId }, settings.JWT_ACCESS_SECRET, {
-      expiresIn: 10,
+      expiresIn: 1000,
     });
   }
 
-  async createRefreshJWT(userId: ObjectId, deviceId: ObjectId) {
+  async createRefreshJWT(userId: string, deviceId: string) {
     return jwt.sign({ userId, deviceId }, settings.JWT_REFRESH_SECRET, {
-      expiresIn: 20,
+      expiresIn: 2000,
     });
   }
 
-  async createPasswordRecoveryJWT(userId: ObjectId) {
+  async createPasswordRecoveryJWT(userId: string) {
     return jwt.sign({ userId }, settings.JWT_PASSWORD_RECOVERY, {
       expiresIn: '2h',
     });

@@ -1,12 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import bcrypt from 'bcrypt';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  User,
-  UserDocument,
-  UserModelType,
-} from '../../../schemas/user.schema';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UserType } from '../../../types/rawSqlTypes/user';
 
 export class ValidateUserCommand {
   constructor(
@@ -19,21 +14,18 @@ export class ValidateUserCommand {
 export class ValidateUserUseCase
   implements ICommandHandler<ValidateUserCommand>
 {
-  constructor(
-    @InjectModel(User.name) private UserModel: UserModelType,
-    private readonly usersRepository: UsersRepository,
-  ) {}
+  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
 
-  async execute(command: ValidateUserCommand): Promise<UserDocument | null> {
+  async execute(command: ValidateUserCommand): Promise<UserType | null> {
     const { loginOrEmail, password } = command;
 
     const user =
-      await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
+      await this.usersSqlRepository.findUserByLoginOrEmail(loginOrEmail);
 
     if (user) {
       const isCredentialsCorrect = await bcrypt.compare(
         password,
-        user.accountData.passwordHash,
+        user.passwordHash,
       );
 
       if (isCredentialsCorrect) {

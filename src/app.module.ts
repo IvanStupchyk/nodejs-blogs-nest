@@ -71,6 +71,12 @@ import { LogOutUserUseCase } from './domains/auth/use-cases/log-out-user-use-cas
 import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-user-use-case';
 import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersQuerySqlRepository } from './infrastructure/repositories-raw-sql/users-query-sql.repository';
+import { UsersSqlRepository } from './infrastructure/repositories-raw-sql/users-sql.repository';
+import { DevicesSqlRepository } from './infrastructure/repositories-raw-sql/devices-sql.repository';
+import { InvalidRefreshTokensSqlRepository } from './infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
+import { DevicesQuerySqlRepository } from './infrastructure/repositories-raw-sql/devices-query-sql.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -111,10 +117,20 @@ const useCases = [
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5,
+        limit: 5000,
       },
     ]),
     configModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'sa',
+      database: 'postgresqlNest',
+      autoLoadEntities: false,
+      synchronize: false,
+    }),
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
@@ -139,6 +155,11 @@ const useCases = [
   ],
   providers: [
     UsersQueryRepository,
+    UsersQuerySqlRepository,
+    UsersSqlRepository,
+    DevicesSqlRepository,
+    InvalidRefreshTokensSqlRepository,
+    DevicesQuerySqlRepository,
     UsersRepository,
     UsersService,
     BlogsQueryRepository,
