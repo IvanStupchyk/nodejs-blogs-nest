@@ -13,6 +13,8 @@ import { RouterPaths } from '../../constants/router.paths';
 import { UsersQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/users-query-sql.repository';
 import { DevicesSqlRepository } from '../../infrastructure/repositories-raw-sql/devices-sql.repository';
 import { InvalidRefreshTokensSqlRepository } from '../../infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
+import { BlogsSqlRepository } from '../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { PostsSqlRepository } from '../../infrastructure/repositories-raw-sql/posts-sql.repository';
 
 @Controller()
 export class ResetDbController {
@@ -22,6 +24,8 @@ export class ResetDbController {
     private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
     private readonly devicesSqlRepository: DevicesSqlRepository,
     private readonly invalidRefreshTokensSqlRepository: InvalidRefreshTokensSqlRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
     @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
     @InjectModel(ApiRequest.name)
     private ApiRequestModel: Model<ApiRequestDocument>,
@@ -37,6 +41,8 @@ export class ResetDbController {
     await this.usersQuerySqlRepository.deleteAllUsers();
     await this.devicesSqlRepository.deleteAllSessions();
     await this.invalidRefreshTokensSqlRepository.deleteInvalidRefreshTokens();
+    await this.blogsSqlRepository.deleteAllBlogs();
+    await this.postsSqlRepository.deleteAllPosts();
     await this.CommentModel.deleteMany();
     await this.PostLikesModel.deleteMany();
     await this.ApiRequestModel.deleteMany();

@@ -1,10 +1,10 @@
-import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { ObjectId } from 'mongodb';
 import { likeStatus } from '../../../types/general.types';
 import { LikesRepository } from '../../../infrastructure/repositories/likes.repository';
 import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
+import { isUUID } from '../../../utils/utils';
+import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
 
 export class GetPostByIdCommand {
   constructor(
@@ -16,14 +16,13 @@ export class GetPostByIdCommand {
 @CommandHandler(GetPostByIdCommand)
 export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
   constructor(
-    private readonly postsRepository: PostsRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
     private readonly jwtService: JwtService,
     private readonly likesRepository: LikesRepository,
   ) {}
 
   async execute(command: GetPostByIdCommand): Promise<PostViewModel | null> {
-    if (!ObjectId.isValid(command.id)) return null;
-    const objectPostId = new ObjectId(command.id);
+    if (!isUUID(command.id)) return null;
 
     let userId;
     if (command.accessTokenHeader) {
@@ -31,18 +30,18 @@ export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    let userLikeStatus = likeStatus.None;
+    const userLikeStatus = likeStatus.None;
 
     if (userId) {
-      const userCommentsLikes =
-        await this.likesRepository.findPostLikeByUserIdAndPostId(
-          userId,
-          objectPostId,
-        );
-
-      if (userCommentsLikes) userLikeStatus = userCommentsLikes.myStatus;
+      // const userCommentsLikes =
+      //   await this.likesRepository.findPostLikeByUserIdAndPostId(
+      //     userId,
+      //     command.id,
+      //   );
+      //
+      // if (userCommentsLikes) userLikeStatus = userCommentsLikes.myStatus;
     }
 
-    return await this.postsRepository.getPost(objectPostId, userLikeStatus);
+    return await this.postsSqlRepository.getPost(command.id, userLikeStatus);
   }
 }

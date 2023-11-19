@@ -50,7 +50,7 @@ export const postsTestManager = {
     password = 'qwerty',
   ) {
     const response = await request(httpServer)
-      .post(`${RouterPaths.blogs}/${blogId}/posts`)
+      .post(`${RouterPaths.saBlogs}/${blogId}/posts`)
       .auth('admin', password, { type: 'basic' })
       .send(data)
       .expect(expectedStatusCode);

@@ -6,7 +6,7 @@ import {
   mockUserModel,
 } from '../constants/blanks';
 import { ObjectId } from 'mongodb';
-import { BlogType } from '../domains/blogs/dto/blog.dto';
+import { BlogModel } from '../domains/blogs/dto/blog.dto';
 import { PostType } from '../domains/posts/dto/post.dto';
 import { ViewUserModel } from '../controllers/users/models/view-user.model';
 import { CommentViewModel } from '../controllers/comments/models/comment-view.model';
@@ -16,7 +16,7 @@ export type BlogsType = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: Array<BlogType>;
+  items: Array<BlogModel>;
 };
 
 export type CommentatorInfoType = {
@@ -93,7 +93,7 @@ export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;
   sortBy:
-    | keyof BlogType
+    | keyof BlogModel
     | keyof PostType
     | keyof ViewUserModel
     | keyof CommentViewModel;

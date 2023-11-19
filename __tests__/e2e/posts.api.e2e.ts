@@ -12,7 +12,8 @@ import { INestApplication } from '@nestjs/common';
 import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
 import { BlogDto } from '../../src/dtos/blogs/blog.dto';
 import { PostType } from '../../src/domains/posts/dto/post.dto';
-import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
+import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 describe('tests for /posts', () => {
   const invalidData = {
@@ -31,7 +32,7 @@ describe('tests for /posts', () => {
   let validPostData: NewPostDto = {
     title: 'title',
     content: 'content',
-    blogId: new ObjectId(),
+    blogId: uuidv4(),
     shortDescription: 'shortDescription',
   };
 
@@ -117,7 +118,7 @@ describe('tests for /posts', () => {
 
   let newPost: PostType;
   const newPosts: Array<PostType> = [];
-  let newBlog: BlogType;
+  let newBlog: BlogModel;
   it('should create a post if the user sent valid data with existing blog id', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,
@@ -125,7 +126,7 @@ describe('tests for /posts', () => {
     );
 
     await getRequest()
-      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
+      .get(`${RouterPaths.saBlogs}/${createdBlog.id}`)
       .expect(createdBlog);
 
     validPostData = {
@@ -256,7 +257,7 @@ describe('tests for /posts', () => {
     });
 
     await getRequest()
-      .get(RouterPaths.blogs)
+      .get(RouterPaths.saBlogs)
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,

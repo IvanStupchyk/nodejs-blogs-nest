@@ -1,11 +1,4 @@
-export type InvalidRefreshTokenType = {
-  id: string;
-  userId: string;
-  refreshToken: string;
-  createdAt: string;
-};
-
-export class PostType {
+export class PostModel {
   constructor(
     public id: string,
     public title: string,
