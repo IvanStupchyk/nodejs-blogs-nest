@@ -148,8 +148,8 @@ export class PostsSqlRepository {
   async updatePost(
     id: string,
     title: string,
-    shortDescription: string,
     content: string,
+    shortDescription: string,
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `
