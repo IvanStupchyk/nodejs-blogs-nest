@@ -39,6 +39,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { GetPostsForSpecifiedBlogCommand } from '../../domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { DeletePostModel } from './models/delete-post.model';
 import { DeletePostWithCheckingCommand } from '../../domains/blogs/use-cases/delete-post-with-checking-use-case';
+import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 
 @Controller()
 export class BlogController {
@@ -49,7 +50,7 @@ export class BlogController {
     private commandBus: CommandBus,
   ) {}
 
-  @UseGuards(ThrottlerGuard, JwtAuthGuard)
+  @UseGuards(ThrottlerGuard, BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}`)
   async getBlogsForSa(
     @Query() params: GetSortedBlogsModel,
@@ -64,13 +65,13 @@ export class BlogController {
     return await this.blogsQuerySqlRepository.getSortedBlogs(params);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.saBlogs}`)
   async createBlog(@Body() body: BlogDto, @UserIdFromGuard() userId) {
     return await this.commandBus.execute(new CreateBlogCommand(userId, body));
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.saBlogs}/:id/posts`)
   async createPostForSpecifiedBlog(
     @Param() params: UriParamsBlogIdModel,
@@ -94,7 +95,7 @@ export class BlogController {
     !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}/:id/posts`)
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogModel,
@@ -131,7 +132,7 @@ export class BlogController {
     !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Put(`${RouterPaths.saBlogs}/:blogId/posts/:postId`)
   async updateSpecifiedPost(
     @Param() params: UpdatePostModel,
@@ -152,7 +153,7 @@ export class BlogController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete(`${RouterPaths.saBlogs}/:blogId/posts/:postId`)
   async deleteSpecifiedPost(
     @Param() params: DeletePostModel,
@@ -167,7 +168,7 @@ export class BlogController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Put(`${RouterPaths.saBlogs}/:id`)
   async updateBlog(
     @Param() params: UriParamsBlogIdModel,
@@ -182,7 +183,7 @@ export class BlogController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete(`${RouterPaths.saBlogs}/:id`)
   async deleteBlog(
     @Param() params: DeleteBlogModel,

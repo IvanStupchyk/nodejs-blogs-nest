@@ -21,8 +21,8 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
 
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
-    if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
+    // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
+    // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
     const result = await this.blogsSqlRepository.updateBlogById(
       command.id,

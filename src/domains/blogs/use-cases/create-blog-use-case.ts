@@ -18,10 +18,13 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   async execute(command: CreateBlogCommand): Promise<BlogModel> {
     const { name, websiteUrl, description } = command.body;
 
+    //DELETE IT!!!!!!!!!! need to take command.userId
+    const newUserId = uuidv4();
+
     const newBlog: BlogModel = new BlogModel(
       uuidv4(),
       name,
-      command.userId,
+      newUserId,
       description,
       websiteUrl,
       new Date().toISOString(),

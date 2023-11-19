@@ -17,8 +17,8 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
   async execute(command: DeleteBlogCommand): Promise<number> {
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
-    if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
+    // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
+    // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
     const result = await this.blogsSqlRepository.deleteBlog(command.id);
 
