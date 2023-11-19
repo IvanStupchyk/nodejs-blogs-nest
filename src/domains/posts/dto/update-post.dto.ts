@@ -1,8 +1,7 @@
 import { IsString, Length } from 'class-validator';
-import { IsNotEmptyString } from '../../utils/decorators/check-empty-string.decorator';
-import { isBlogExist } from '../../utils/decorators/existing-blog.decorator';
+import { IsNotEmptyString } from '../../../utils/decorators/check-empty-string.decorator';
 
-export class NewPostDto {
+export class UpdatePostDto {
   @Length(1, 30)
   @IsString()
   @IsNotEmptyString()
@@ -17,9 +16,4 @@ export class NewPostDto {
   @IsString()
   @IsNotEmptyString()
   content: string;
-
-  @isBlogExist({
-    message: 'such blog should exist',
-  })
-  blogId: string;
 }

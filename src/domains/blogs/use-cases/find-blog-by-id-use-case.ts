@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogType } from '../dto/blog.dto';
+import { BlogModel } from '../dto/blog.dto';
 import { BlogsService } from '../blogs.service';
 
 export class FindBlogByIdCommand {
@@ -12,7 +12,7 @@ export class FindBlogByIdUseCase
 {
   constructor(private readonly blogsService: BlogsService) {}
 
-  async execute(command: FindBlogByIdCommand): Promise<BlogType | null> {
+  async execute(command: FindBlogByIdCommand): Promise<BlogModel | null> {
     return this.blogsService.findBlogById(command.id);
   }
 }

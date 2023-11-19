@@ -73,40 +73,41 @@ export class PostsRepository {
     id: ObjectId,
     userLikeStatus: likeStatus,
   ): Promise<PostViewModel | null> {
-    const post = await this.PostModel.findOne(
-      { id },
-      { _id: 0, __v: 0 },
-    ).exec();
-
-    return post
-      ? {
-          id: post.id,
-          title: post.title,
-          shortDescription: post.shortDescription,
-          content: post.content,
-          blogId: post.blogId,
-          blogName: post.blogName,
-          createdAt: post.createdAt,
-          extendedLikesInfo: {
-            likesCount: post.extendedLikesInfo.likesCount,
-            dislikesCount: post.extendedLikesInfo.dislikesCount,
-            myStatus: userLikeStatus,
-            newestLikes: post.extendedLikesInfo.newestLikes
-              .sort(
-                (a: any, b: any) =>
-                  new Date(b.addedAt).valueOf() - new Date(a.addedAt).valueOf(),
-              )
-              .slice(0, 3)
-              .map((l) => {
-                return {
-                  login: l.login,
-                  userId: l.userId,
-                  addedAt: l.addedAt,
-                };
-              }),
-          },
-        }
-      : null;
+    return null;
+    // const post = await this.PostModel.findOne(
+    //   { id },
+    //   { _id: 0, __v: 0 },
+    // ).exec();
+    //
+    // return post
+    //   ? {
+    //       id: post.id,
+    //       title: post.title,
+    //       shortDescription: post.shortDescription,
+    //       content: post.content,
+    //       blogId: post.blogId,
+    //       blogName: post.blogName,
+    //       createdAt: post.createdAt,
+    //       extendedLikesInfo: {
+    //         likesCount: post.extendedLikesInfo.likesCount,
+    //         dislikesCount: post.extendedLikesInfo.dislikesCount,
+    //         myStatus: userLikeStatus,
+    //         newestLikes: post.extendedLikesInfo.newestLikes
+    //           .sort(
+    //             (a: any, b: any) =>
+    //               new Date(b.addedAt).valueOf() - new Date(a.addedAt).valueOf(),
+    //           )
+    //           .slice(0, 3)
+    //           .map((l) => {
+    //             return {
+    //               login: l.login,
+    //               userId: l.userId,
+    //               addedAt: l.addedAt,
+    //             };
+    //           }),
+    //       },
+    //     }
+    //   : null;
   }
 
   async findPostById(id: ObjectId): Promise<PostDocument | null> {

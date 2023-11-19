@@ -78,6 +78,13 @@ import { DevicesSqlRepository } from './infrastructure/repositories-raw-sql/devi
 import { InvalidRefreshTokensSqlRepository } from './infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
 import { DevicesQuerySqlRepository } from './infrastructure/repositories-raw-sql/devices-query-sql.repository';
 import { ApiRequestsSqlRepository } from './infrastructure/repositories-raw-sql/api-requests-sql.repository';
+import { BlogsSqlRepository } from './infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsQuerySqlRepository } from './infrastructure/repositories-raw-sql/blogs-query-sql.repository';
+import { PostsSqlRepository } from './infrastructure/repositories-raw-sql/posts-sql.repository';
+import { PostsQuerySqlRepository } from './infrastructure/repositories-raw-sql/posts-query-sql.repository';
+import { GetPostsForSpecifiedBlogUseCase } from './domains/posts/use-cases/get-posts-for-specified-blog-use-case';
+import { UpdatePostWithCheckingUseCase } from './domains/blogs/use-cases/update-post-with-checking-use-case';
+import { DeletePostWithCheckingUseCase } from './domains/blogs/use-cases/delete-post-with-checking-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -110,6 +117,9 @@ const useCases = [
   LogOutUserUseCase,
   CreateCommonUserUseCase,
   ValidateUserUseCase,
+  GetPostsForSpecifiedBlogUseCase,
+  UpdatePostWithCheckingUseCase,
+  DeletePostWithCheckingUseCase,
 ];
 
 @Module({
@@ -118,7 +128,7 @@ const useCases = [
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5,
+        limit: 50000,
       },
     ]),
     configModule,
@@ -163,6 +173,10 @@ const useCases = [
     InvalidRefreshTokensSqlRepository,
     DevicesQuerySqlRepository,
     ApiRequestsSqlRepository,
+    BlogsSqlRepository,
+    BlogsQuerySqlRepository,
+    PostsSqlRepository,
+    PostsQuerySqlRepository,
     UsersRepository,
     UsersService,
     BlogsQueryRepository,

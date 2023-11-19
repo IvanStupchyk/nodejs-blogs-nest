@@ -1,14 +1,15 @@
-import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
-import { BlogType } from './dto/blog.dto';
-import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
+import { BlogModel } from './dto/blog.dto';
+import { BlogsSqlRepository } from '../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { isUUID } from '../../utils/utils';
 
 @Injectable()
 export class BlogsService {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
 
-  async findBlogById(id: string): Promise<BlogType | null> {
-    if (!ObjectId.isValid(id)) return null;
-    return await this.blogsRepository.findBlogById(new ObjectId(id));
+  async findBlogById(id: string): Promise<BlogModel | null> {
+    if (!isUUID(id)) return null;
+
+    return await this.blogsSqlRepository.findBlogById(id);
   }
 }

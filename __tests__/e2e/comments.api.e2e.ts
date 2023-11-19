@@ -10,7 +10,7 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { CreateCommentModel } from '../../src/controllers/comments/models/create-comment.model';
 import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { BlogType } from '../../src/domains/blogs/dto/blog.dto';
+import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
 import { CommentViewModel } from '../../src/controllers/comments/models/comment-view.model';
 import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
 import { RouterPaths } from '../../src/constants/router.paths';
@@ -77,7 +77,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   let newPost: PostType;
-  let newBlog: BlogType;
+  let newBlog: BlogModel;
   let user1: ViewUserModel;
   let user2: ViewUserModel;
   let user3: ViewUserModel;
@@ -163,7 +163,7 @@ describe('tests for /comments and posts/:id/comments', () => {
     });
 
     await getRequest()
-      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
+      .get(`${RouterPaths.saBlogs}/${createdBlog.id}`)
       .expect(createdBlog);
 
     const validPostData = {

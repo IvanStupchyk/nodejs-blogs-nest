@@ -6,13 +6,13 @@ import { Injectable } from '@nestjs/common';
 export class JwtService {
   async createAccessJWT(userId: string) {
     return jwt.sign({ userId }, settings.JWT_ACCESS_SECRET, {
-      expiresIn: 10,
+      expiresIn: 10000,
     });
   }
 
   async createRefreshJWT(userId: string, deviceId: string) {
     return jwt.sign({ userId, deviceId }, settings.JWT_REFRESH_SECRET, {
-      expiresIn: 20,
+      expiresIn: 20000,
     });
   }
 

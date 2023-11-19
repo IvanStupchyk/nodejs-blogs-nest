@@ -11,7 +11,7 @@ export const blogsTestManager = {
     password = 'qwerty',
   ) {
     const response = await request(httpServer)
-      .post(RouterPaths.blogs)
+      .post(RouterPaths.saBlogs)
       .auth('admin', password, { type: 'basic' })
       .send(data)
       .expect(expectedStatusCode);
