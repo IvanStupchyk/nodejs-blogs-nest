@@ -29,9 +29,10 @@ export class UpdatePostWithCheckingUseCase
     if (!isUUID(command.blogId)) return HttpStatus.NOT_FOUND;
     if (!isUUID(command.postId)) return HttpStatus.NOT_FOUND;
 
-    // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(
-    //   command.blogId,
-    // );
+    const blog = await this.blogsSqlRepository.fetchAllBlogDataById(
+      command.blogId,
+    );
+    if (!blog) return HttpStatus.NOT_FOUND;
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
     const result = await this.postsSqlRepository.updatePost(
