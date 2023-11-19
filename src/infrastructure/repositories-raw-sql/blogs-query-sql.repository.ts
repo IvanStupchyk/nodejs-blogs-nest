@@ -29,45 +29,45 @@ export class BlogsQuerySqlRepository {
     let blogs;
     let blogsCount;
 
-    if (userId) {
-      blogs = await this.dataSource.query(
-        `
+    // if (userId) {
+    //   blogs = await this.dataSource.query(
+    //     `
+    //     select "id", "name", "description", "websiteUrl", "isMembership", "createdAt"
+    //     from public.blogs
+    //     where("name" ilike $1)
+    //     and ("userId" = $4)
+    //     order by "${sortBy}" ${sortDirection}
+    //     limit $2 offset $3`,
+    //     [searchName, pageSize, skipSize, userId],
+    //   );
+    //
+    //   blogsCount = await this.dataSource.query(
+    //     `
+    //     select "id" "name"
+    //     from public.blogs
+    //     where("name" ilike $1)
+    //     and ("userId" = $2)`,
+    //     [searchName, userId],
+    //   );
+    // } else {
+    blogs = await this.dataSource.query(
+      `
         select "id", "name", "description", "websiteUrl", "isMembership", "createdAt"
         from public.blogs
         where("name" ilike $1)
-        and ("userId" = $4)
         order by "${sortBy}" ${sortDirection}
         limit $2 offset $3`,
-        [searchName, pageSize, skipSize, userId],
-      );
+      [searchName, pageSize, skipSize],
+    );
 
-      blogsCount = await this.dataSource.query(
-        `
-        select "id" "name"
-        from public.blogs
-        where("name" ilike $1)
-        and ("userId" = $2)`,
-        [searchName, userId],
-      );
-    } else {
-      blogs = await this.dataSource.query(
-        `
-        select "id", "name", "description", "websiteUrl", "isMembership", "createdAt"
-        from public.blogs
-        where("name" ilike $1)
-        order by "${sortBy}" ${sortDirection}
-        limit $2 offset $3`,
-        [searchName, pageSize, skipSize],
-      );
-
-      blogsCount = await this.dataSource.query(
-        `
+    blogsCount = await this.dataSource.query(
+      `
         select "id" "name"
         from public.blogs
         where("name" ilike $1)`,
-        [searchName],
-      );
-    }
+      [searchName],
+    );
+    // }
 
     const totalBlogsCount = blogsCount.length;
     const pagesCount = getPagesCount(totalBlogsCount, pageSize);

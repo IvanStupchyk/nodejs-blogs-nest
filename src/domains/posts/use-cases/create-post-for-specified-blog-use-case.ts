@@ -36,9 +36,9 @@ export class CreatePostForSpecifiedBlogUseCase
     if (!foundBlog) {
       throw new NotFoundException();
     }
-    if (foundBlog && foundBlog.userId !== command.userId) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
+    // if (foundBlog && foundBlog.userId !== command.userId) {
+    //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    // }
 
     return await this.postsService.createPost({
       title,

@@ -29,12 +29,12 @@ export class GetPostsForSpecifiedBlogUseCase
     const { query, blogId, userId } = command;
 
     if (!isUUID(blogId)) return null;
-    const foundBlog =
-      await this.blogsSqlRepository.fetchAllBlogDataById(blogId);
-
-    if (foundBlog && foundBlog.userId !== command.userId) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
+    // const foundBlog =
+    //   await this.blogsSqlRepository.fetchAllBlogDataById(blogId);
+    //
+    // if (foundBlog && foundBlog.userId !== command.userId) {
+    //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    // }
 
     return await this.postsQuerySqlRepository.findPostsByIdForSpecificBlog(
       query,
