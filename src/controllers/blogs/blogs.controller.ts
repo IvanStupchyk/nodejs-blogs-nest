@@ -30,33 +30,31 @@ import { DeleteBlogCommand } from '../../domains/blogs/use-cases/delete-blog-use
 import { FindBlogByIdCommand } from '../../domains/blogs/use-cases/find-blog-by-id-use-case';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { BlogsQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/blogs-query-sql.repository';
-import { PostsQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/posts-query-sql.repository';
 import { UpdatePostModel } from './models/update-post.model';
 import { UpdatePostDto } from '../../domains/posts/dto/update-post.dto';
 import { UpdatePostWithCheckingCommand } from '../../domains/blogs/use-cases/update-post-with-checking-use-case';
-import { UserIdFromGuard } from '../../utils/decorators/user-id-from-guard.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { GetPostsForSpecifiedBlogCommand } from '../../domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { DeletePostModel } from './models/delete-post.model';
 import { DeletePostWithCheckingCommand } from '../../domains/blogs/use-cases/delete-post-with-checking-use-case';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
+import { CurrentUserId } from '../../auth/current-user-param.decorator';
 
 @Controller()
 export class BlogController {
   constructor(
     private readonly blogsQuerySqlRepository: BlogsQuerySqlRepository,
-    private readonly postsQuerySqlRepository: PostsQuerySqlRepository,
     private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(ThrottlerGuard, BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}`)
-  async getBlogsForSa(
-    @Query() params: GetSortedBlogsModel,
-    @UserIdFromGuard() userId,
-  ) {
-    return await this.blogsQuerySqlRepository.getSortedBlogs(params, userId);
+  async getBlogsForSa(@Query() params: GetSortedBlogsModel) {
+    return await this.blogsQuerySqlRepository.getSortedBlogs(
+      params,
+      'id from CurrentUserId',
+    );
   }
 
   @UseGuards(ThrottlerGuard)
@@ -67,8 +65,10 @@ export class BlogController {
 
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.saBlogs}`)
-  async createBlog(@Body() body: BlogDto, @UserIdFromGuard() userId) {
-    return await this.commandBus.execute(new CreateBlogCommand(userId, body));
+  async createBlog(@Body() body: BlogDto) {
+    return await this.commandBus.execute(
+      new CreateBlogCommand('id from CurrentUserId', body),
+    );
   }
 
   @UseGuards(BasicAuthGuard)
@@ -76,7 +76,7 @@ export class BlogController {
   async createPostForSpecifiedBlog(
     @Param() params: UriParamsBlogIdModel,
     @Body() body: PostForSpecificBlogDto,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const post = await this.commandBus.execute(
@@ -95,13 +95,13 @@ export class BlogController {
     !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
   }
 
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  // @UseGuards(BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}/:id/posts`)
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogModel,
     @Query() query: GetSortedPostsModel,
-    @Req() req: Request,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const posts = await this.commandBus.execute(
@@ -115,20 +115,12 @@ export class BlogController {
   async getPostsForSpecifiedBlogForAllUsers(
     @Param() params: GetBlogModel,
     @Query() query: GetSortedPostsModel,
-    @Req() req: Request,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
-    let userId;
-    if (req.headers?.authorization) {
-      const accessToken = req.headers.authorization.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-    const posts =
-      await this.postsQuerySqlRepository.findPostsByIdForSpecificBlog(
-        query,
-        params.id,
-        userId,
-      );
+    const posts = await this.commandBus.execute(
+      new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
+    );
     !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
   }
 
@@ -137,7 +129,7 @@ export class BlogController {
   async updateSpecifiedPost(
     @Param() params: UpdatePostModel,
     @Body() body: UpdatePostDto,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -157,7 +149,7 @@ export class BlogController {
   @Delete(`${RouterPaths.saBlogs}/:blogId/posts/:postId`)
   async deleteSpecifiedPost(
     @Param() params: DeletePostModel,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -173,7 +165,7 @@ export class BlogController {
   async updateBlog(
     @Param() params: UriParamsBlogIdModel,
     @Body() body: BlogDto,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     res.sendStatus(
@@ -188,7 +180,7 @@ export class BlogController {
   async deleteBlog(
     @Param() params: DeleteBlogModel,
     @Res() res: Response,
-    @UserIdFromGuard() userId,
+    @CurrentUserId() userId,
   ) {
     res.sendStatus(
       await this.commandBus.execute(new DeleteBlogCommand(params.id, userId)),

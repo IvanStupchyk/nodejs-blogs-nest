@@ -1,14 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ObjectId } from 'mongodb';
 import { HttpStatus } from '@nestjs/common';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
-import { CommentsService } from '../comments.service';
+import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
+import { isUUID } from '../../../utils/utils';
 
 export class UpdateCommentCommand {
   constructor(
     public content: string,
     public id: string,
-    public currentUserId: string,
+    public userId: string,
   ) {}
 }
 
@@ -16,28 +15,22 @@ export class UpdateCommentCommand {
 export class UpdateCommentUseCase
   implements ICommandHandler<UpdateCommentCommand>
 {
-  constructor(
-    private readonly commentsService: CommentsService,
-    private readonly commentsRepository: CommentsRepository,
-  ) {}
+  constructor(private readonly commentsSqlRepository: CommentsSqlRepository) {}
 
   async execute(command: UpdateCommentCommand): Promise<number> {
-    const { id, currentUserId, content } = command;
+    const { id, userId, content } = command;
+    if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundComment =
-      await this.commentsService.findCommentByIdWithoutLikeStatus(id);
+    const foundComment = await this.commentsSqlRepository.findCommentById(id);
+    if (!foundComment) return HttpStatus.NOT_FOUND;
 
-    if (
-      foundComment &&
-      !new ObjectId(foundComment.commentatorInfo.userId).equals(currentUserId)
-    ) {
+    if (foundComment && foundComment.commentatorInfo.userId !== userId) {
       return HttpStatus.FORBIDDEN;
     }
 
-    if (!ObjectId.isValid(id)) return HttpStatus.NOT_FOUND;
-    const isCommentUpdated = await this.commentsRepository.updateComment(
+    const isCommentUpdated = await this.commentsSqlRepository.updateComment(
       content,
-      new ObjectId(id),
+      id,
     );
 
     if (isCommentUpdated) return HttpStatus.NO_CONTENT;

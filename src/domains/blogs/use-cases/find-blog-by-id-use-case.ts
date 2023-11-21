@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogModel } from '../dto/blog.dto';
-import { BlogsService } from '../blogs.service';
+import { isUUID } from '../../../utils/utils';
+import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
 
 export class FindBlogByIdCommand {
   constructor(public id: string) {}
@@ -10,9 +11,10 @@ export class FindBlogByIdCommand {
 export class FindBlogByIdUseCase
   implements ICommandHandler<FindBlogByIdCommand>
 {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
 
   async execute(command: FindBlogByIdCommand): Promise<BlogModel | null> {
-    return this.blogsService.findBlogById(command.id);
+    if (!isUUID(command.id)) return null;
+    return await this.blogsSqlRepository.findBlogById(command.id);
   }
 }

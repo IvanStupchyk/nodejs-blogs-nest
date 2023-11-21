@@ -7,11 +7,11 @@ type LikesInfoType = {
 
 export const likesCounter = (
   myStatus: string,
-  initialNewStatus: likeStatus,
-  initialStatus: likeStatus | undefined,
+  initialNewStatus: string,
+  initialStatus: string | undefined,
   initialLikesInfo: LikesInfoType,
-): { likesInfo: LikesInfoType; newStatus: likeStatus } => {
-  let newStatus: likeStatus = initialNewStatus;
+): { likesInfo: LikesInfoType; newStatus: string } => {
+  let newStatus: string = initialNewStatus;
 
   const likesInfo = { ...initialLikesInfo };
 

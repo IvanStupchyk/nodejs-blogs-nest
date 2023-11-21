@@ -2,10 +2,9 @@ import {
   CommentatorInfoType,
   CommentLikesViewType,
 } from '../../../types/general.types';
-import { ObjectId } from 'mongodb';
 
 export class CommentViewModel {
-  id: ObjectId;
+  id: string;
   content: string;
   commentatorInfo: CommentatorInfoType;
   likesInfo: CommentLikesViewType;

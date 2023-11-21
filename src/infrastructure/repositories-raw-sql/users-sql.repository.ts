@@ -125,7 +125,7 @@ export class UsersSqlRepository {
       [newPasswordHash, id],
     );
 
-    return isUpdated[1] === 1;
+    return !!isUpdated[1];
   }
 
   async deleteUser(id: string): Promise<boolean> {
@@ -137,6 +137,6 @@ export class UsersSqlRepository {
       [id],
     );
 
-    return result[1] === 1;
+    return !!result[1];
   }
 }

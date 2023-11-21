@@ -1,17 +1,20 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ObjectId } from 'mongodb';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { likeStatus } from '../../../types/general.types';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
-import { likesCounter } from '../../../utils/likes-counter';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { isUUID } from '../../../utils/utils';
+import { HttpStatus } from '@nestjs/common';
+import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
+import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
+import { CommentLikesSqlRepository } from '../../../infrastructure/repositories-raw-sql/comment-likes-sql.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { CommentLikeModel } from '../../../controllers/comments/models/Comment-like.model';
 
 export class ChangeCommentLikesCountCommand {
   constructor(
     public id: string,
     public myStatus: string,
-    public userId: ObjectId,
+    public userId: string,
   ) {}
 }
 
@@ -20,11 +23,11 @@ export class ChangeCommentLikesCountUseCase
   implements ICommandHandler<ChangeCommentLikesCountCommand>
 {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly commentsRepository: CommentsRepository,
+    private readonly commentsSqlRepository: CommentsSqlRepository,
+    private readonly commentLikesSqlRepository: CommentLikesSqlRepository,
   ) {}
 
-  async execute(command: ChangeCommentLikesCountCommand): Promise<boolean> {
+  async execute(command: ChangeCommentLikesCountCommand): Promise<number> {
     const { id, userId, myStatus } = command;
 
     if (!likeStatus[myStatus]) {
@@ -32,45 +35,48 @@ export class ChangeCommentLikesCountUseCase
         { field: 'likeStatus', message: errorsConstants.likeStatus },
       ]);
     }
-    if (!ObjectId.isValid(id)) return false;
-    const commentObjectId = new ObjectId(id);
-    const foundComment =
-      await this.commentsRepository.findCommentById(commentObjectId);
-    if (!foundComment) return false;
 
-    const userCommentsLikes =
-      await this.usersRepository.findUserCommentLikesById(userId);
-    let initialCommentData;
+    if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    if (Array.isArray(userCommentsLikes) && userCommentsLikes.length) {
-      initialCommentData = userCommentsLikes.find((c) =>
-        new ObjectId(c.commentId).equals(commentObjectId),
+    const foundComment: CommentViewModel =
+      await this.commentsSqlRepository.findCommentById(id);
+    if (!foundComment) return HttpStatus.NOT_FOUND;
+    console.log('foundComment', foundComment);
+    const userCommentLike =
+      await this.commentLikesSqlRepository.findCommentLikesByUserIdAndCommentId(
+        userId,
+        id,
       );
+    console.log('userCommentLike', userCommentLike);
+    if (
+      userCommentLike?.myStatus === myStatus ||
+      (!userCommentLike && myStatus === likeStatus.None)
+    ) {
+      return HttpStatus.NO_CONTENT;
     }
 
-    if (initialCommentData?.myStatus === myStatus) return true;
-
-    const { likesInfo, newStatus } = likesCounter(
-      myStatus,
-      likeStatus.None,
-      initialCommentData?.myStatus,
-      {
-        likesCount: foundComment.likesInfo.likesCount,
-        dislikesCount: foundComment.likesInfo.dislikesCount,
-      },
-    );
-
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
-    if (!user) return false;
-
-    if (initialCommentData?.myStatus) {
-      user.updateExistingUserCommentLike(newStatus, commentObjectId);
+    if (userCommentLike) {
+      if (myStatus === likeStatus.None) {
+        await this.commentLikesSqlRepository.deleteCommentLike(
+          userCommentLike.id,
+        );
+      }
+      await this.commentLikesSqlRepository.updateExistingCommentLike(
+        userId,
+        id,
+        myStatus,
+      );
     } else {
-      user.setNewUserCommentLike(newStatus, commentObjectId);
+      const newCommentLike = new CommentLikeModel(
+        uuidv4(),
+        userId,
+        id,
+        myStatus,
+        new Date().toISOString(),
+      );
+      await this.commentLikesSqlRepository.addCommentLike(newCommentLike);
     }
 
-    await this.usersRepository.save(user);
-
-    return await this.commentsRepository.changeLikesCount(id, likesInfo);
+    return HttpStatus.NO_CONTENT;
   }
 }

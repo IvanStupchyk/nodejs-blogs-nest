@@ -17,7 +17,6 @@ import { UriParamsCommentModel } from './models/uri-params-comment.model';
 import { DeleteCommentModel } from './models/delete-comment.model';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
-import { ObjectId } from 'mongodb';
 import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
@@ -29,14 +28,17 @@ import { DeleteCommentCommand } from '../../domains/comments/use-cases/delete-co
 @Controller()
 export class CommentsController {
   constructor(private commandBus: CommandBus) {}
+
+  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.comments}/:id`)
   async getCurrentComment(
     @Param() params: GetCommentModel,
     @Req() req: Request,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const foundComment = await this.commandBus.execute(
-      new GetCommentByIdCommand(params.id, req.headers?.authorization),
+      new GetCommentByIdCommand(params.id, userId),
     );
 
     !foundComment
@@ -67,17 +69,15 @@ export class CommentsController {
     @Res() res: Response,
     @CurrentUserId() currentUserId,
   ) {
-    const isLikesCountChanges = await this.commandBus.execute(
-      new ChangeCommentLikesCountCommand(
-        params.id,
-        body.likeStatus,
-        new ObjectId(currentUserId),
+    res.sendStatus(
+      await this.commandBus.execute(
+        new ChangeCommentLikesCountCommand(
+          params.id,
+          body.likeStatus,
+          currentUserId,
+        ),
       ),
     );
-
-    !isLikesCountChanges
-      ? res.sendStatus(HttpStatus.NOT_FOUND)
-      : res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @UseGuards(JwtAuthGuard)

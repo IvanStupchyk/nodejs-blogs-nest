@@ -8,11 +8,10 @@ import {
   Post,
   Put,
   Query,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
@@ -25,7 +24,6 @@ import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
 import { UpdateCommentDto } from '../../dtos/comments/update-comment.dto';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
-import { ObjectId } from 'mongodb';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 import { CommandBus } from '@nestjs/cqrs';
@@ -45,21 +43,26 @@ export class PostsController {
     private commandBus: CommandBus,
   ) {}
 
+  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}`)
-  async getPosts(@Query() query: GetSortedPostsModel, @Req() req: Request) {
+  async getPosts(
+    @Query() query: GetSortedPostsModel,
+    @CurrentUserId() currentUserId,
+  ) {
     return await this.commandBus.execute(
-      new GetSortedPostsCommand(query, req.headers?.authorization),
+      new GetSortedPostsCommand(query, currentUserId),
     );
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}/:id`)
   async getPost(
     @Param() params: GetPostModel,
     @Res() res: Response,
-    @Req() req: Request,
+    @CurrentUserId() currentUserId,
   ) {
     const foundPost = await this.commandBus.execute(
-      new GetPostByIdCommand(params.id, req.headers?.authorization),
+      new GetPostByIdCommand(params.id, currentUserId),
     );
 
     !foundPost ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundPost);
@@ -73,19 +76,16 @@ export class PostsController {
     !post ? res.sendStatus(HttpStatus.BAD_REQUEST) : res.send(post);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}/:id/comments`)
   async getComments(
     @Param() params: UriParamsCommentModel,
     @Query() query: GetSortedCommentsModel,
-    @Req() req: Request,
+    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const foundComments = await this.commandBus.execute(
-      new GetSortedCommentsCommand(
-        params.id,
-        query,
-        req.headers?.authorization,
-      ),
+      new GetSortedCommentsCommand(params.id, query, userId),
     );
 
     !foundComments
@@ -137,7 +137,7 @@ export class PostsController {
         new ChangePostLikesCountCommand(
           params.id,
           body.likeStatus,
-          new ObjectId(currentUserId),
+          currentUserId,
         ),
       ),
     );

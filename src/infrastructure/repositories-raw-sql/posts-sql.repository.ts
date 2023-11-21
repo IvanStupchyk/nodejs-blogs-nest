@@ -3,7 +3,6 @@ import { likeStatus } from '../../types/general.types';
 import { PostViewModel } from '../../controllers/posts/models/post-view.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { LikesRepository } from '../repositories/likes.repository';
 import { PostModel } from '../../controllers/posts/models/Post.model';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
@@ -12,10 +11,7 @@ import { PostsType } from '../../types/posts.types';
 
 @Injectable()
 export class PostsSqlRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-    private likesRepository: LikesRepository,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async createPost(newPost: PostModel): Promise<PostViewModel> {
     const {
@@ -56,7 +52,7 @@ export class PostsSqlRepository {
 
   async getSortedPosts(
     params: GetSortedPostsModel,
-    userId: string | undefined,
+    userId: string,
   ): Promise<PostsType> {
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
       createDefaultSortedParams({
@@ -69,12 +65,47 @@ export class PostsSqlRepository {
 
     const posts = await this.dataSource.query(
       `
-      select "id", "title", "content", "blogId", "blogName", "createdAt", "shortDescription", "likesCount", "dislikesCount"
-      from public.posts
-      order by "${sortBy}" ${sortDirection}
-      limit $1 offset $2 
+      select p."id", 
+      p."title", 
+      p."content", 
+      p."blogId", 
+      p."blogName", 
+      p."createdAt", 
+      p."shortDescription",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Like'
+        and "postId" = p."id"
+      ) as "likesCount",
+            ( 
+        select "myStatus"
+        from public."postLikes"
+        where "userId" = $3
+        and "postId" = p."id"
+      ) as "userStatus",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Dislike'
+        and "postId" = p."id"
+      ) as "dislikesCount",
+                          ( select jsonb_agg(json_build_object('addedAt', to_char(
+                          agg."addedAt"::timestamp at time zone 'UTC',
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                                                   'login', agg."login")
+                                 order by "addedAt" desc)
+                from ( select "addedAt", "id", "login"
+                       from public."postLikes" 
+                       where "postId" = p.id
+                       and "myStatus" = 'Like'
+                       order by "addedAt" desc
+                       limit 3 ) as agg )  as "newestLikes"
+      from public.posts p
+         order by "${sortBy}" ${sortDirection}
+         limit $1 offset $2 
     `,
-      [pageSize, skipSize],
+      [pageSize, skipSize, userId],
     );
 
     const postsCount = await this.dataSource.query(
@@ -105,25 +136,55 @@ export class PostsSqlRepository {
           extendedLikesInfo: {
             likesCount: p.likesCount,
             dislikesCount: p.dislikesCount,
-            myStatus: likeStatus.None,
-            newestLikes: [],
+            myStatus: p.userStatus ?? likeStatus.None,
+            newestLikes: p.newestLikes ?? [],
           },
         };
       }),
     };
   }
 
-  async getPost(
-    id: string,
-    userLikeStatus: likeStatus,
-  ): Promise<PostViewModel | null> {
+  async getPost(id: string, userId: string): Promise<PostViewModel | null> {
     const post = await this.dataSource.query(
       `
-      select "id", "title", "content", "blogId", "blogName", "createdAt", "shortDescription", "likesCount", "dislikesCount"
-      from public.posts
-      where("id" = $1)
+      select p."id", 
+      p."title", 
+      p."content", 
+      p."blogId", 
+      p."blogName", 
+      p."createdAt", 
+      p."shortDescription",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Like'
+      ) as "likesCount",
+            ( 
+        select "myStatus"
+        from public."postLikes"
+        where "userId" = $2
+        and "postId" = $1
+      ) as "userStatus",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Dislike'
+      ) as "dislikesCount",
+                    ( select jsonb_agg(json_build_object('addedAt', to_char(
+                          agg."addedAt"::timestamp at time zone 'UTC',
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                                                   'login', agg."login")
+                                 order by "addedAt" desc)
+                from ( select "addedAt", "id", "login"
+                       from public."postLikes" 
+                       where "postId" = p.id
+                       and "myStatus" = 'Like'
+                       order by "addedAt" desc
+                       limit 3 ) as agg )  as "newestLikes"
+      from public.posts p
+       where p."id" = $1   
     `,
-      [id],
+      [id, userId],
     );
 
     return post.length
@@ -138,11 +199,122 @@ export class PostsSqlRepository {
           extendedLikesInfo: {
             likesCount: post[0].likesCount,
             dislikesCount: post[0].dislikesCount,
-            myStatus: userLikeStatus,
-            newestLikes: [],
+            myStatus: post[0].userStatus ?? likeStatus.None,
+            newestLikes: post[0].newestLikes ?? [],
           },
         }
       : null;
+  }
+
+  async getPostsByIdForSpecificBlog(
+    params: GetSortedPostsModel,
+    id: string,
+    userId: string | undefined,
+  ): Promise<PostsType | null> {
+    const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
+      createDefaultSortedParams({
+        sortBy: params.sortBy,
+        sortDirection: params.sortDirection,
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        model: mockPostModel,
+      });
+
+    const posts = await this.dataSource.query(
+      `
+      select p."id", 
+      p."title", 
+      p."content", 
+      p."blogId", 
+      p."blogName", 
+      p."createdAt", 
+      p."shortDescription",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Like'
+        and "postId" = p."id"
+      ) as "likesCount",
+            ( 
+        select "myStatus"
+        from public."postLikes"
+        where "userId" = $3
+        and "postId" = p."id"
+      ) as "userStatus",
+      ( 
+        select count("myStatus")
+        from public."postLikes"
+        where "myStatus" = 'Dislike'
+        and "postId" = p."id"
+      ) as "dislikesCount",
+                          ( select jsonb_agg(json_build_object('addedAt', to_char(
+                          agg."addedAt"::timestamp at time zone 'UTC',
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                                                   'login', agg."login")
+                                 order by "addedAt" desc)
+                from ( select "addedAt", "id", "login"
+                       from public."postLikes" 
+                       where "postId" = p.id
+                       and "myStatus" = 'Like'
+                       order by "addedAt" desc
+                       limit 3 ) as agg )  as "newestLikes"
+      from public.posts p
+         where "blogId" = $4
+         order by "${sortBy}" ${sortDirection}
+         limit $1 offset $2 
+    `,
+      [pageSize, skipSize, userId, id],
+    );
+
+    const postsCount = await this.dataSource.query(
+      `
+    select "id", "blogId"
+    from public.posts
+    where ("blogId" = $1)`,
+      [id],
+    );
+
+    if (!postsCount.length) return null;
+
+    const totalPostsCount = postsCount.length;
+    const pagesCount = getPagesCount(totalPostsCount, pageSize);
+
+    return {
+      pagesCount,
+      page: pageNumber,
+      pageSize,
+      totalCount: totalPostsCount,
+      items: posts.map((p) => {
+        return {
+          id: p.id,
+          title: p.title,
+          shortDescription: p.shortDescription,
+          content: p.content,
+          blogId: p.blogId,
+          blogName: p.blogName,
+          createdAt: p.createdAt,
+          extendedLikesInfo: {
+            likesCount: p.likesCount,
+            dislikesCount: p.dislikesCount,
+            myStatus: p.userStatus ?? likeStatus.None,
+            newestLikes: p.newestLikes ?? [],
+          },
+        };
+      }),
+    };
+  }
+
+  async findPostById(id: string): Promise<PostModel | null> {
+    const post = await this.dataSource.query(
+      `
+      select "id", "title", "content", "blogId", "blogName", "createdAt", "shortDescription"
+      from public.posts
+      where("id" = $1)
+    `,
+      [id],
+    );
+
+    return post[0];
   }
 
   async updatePost(
