@@ -158,8 +158,9 @@ export class PostsSqlRepository {
         select count("myStatus")
         from public."postLikes"
         where "myStatus" = 'Like'
+        and "postId" = p."id"
       ) as "likesCount",
-            ( 
+      ( 
         select "myStatus"
         from public."postLikes"
         where "userId" = $2
@@ -169,6 +170,7 @@ export class PostsSqlRepository {
         select count("myStatus")
         from public."postLikes"
         where "myStatus" = 'Dislike'
+        and "postId" = p."id"
       ) as "dislikesCount",
                     ( select jsonb_agg(json_build_object('addedAt', to_char(
                           agg."addedAt"::timestamp at time zone 'UTC',
@@ -235,7 +237,7 @@ export class PostsSqlRepository {
         where "myStatus" = 'Like'
         and "postId" = p."id"
       ) as "likesCount",
-            ( 
+      ( 
         select "myStatus"
         from public."postLikes"
         where "userId" = $3
