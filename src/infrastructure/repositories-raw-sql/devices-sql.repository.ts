@@ -61,7 +61,7 @@ export class DevicesSqlRepository {
       [deviceId, lastActiveDate, expirationDate],
     );
 
-    return isUpdated[1] === 1;
+    return !!isUpdated[1];
   }
 
   async findDeviceById(deviceId: string): Promise<DeviceType> {
@@ -90,6 +90,6 @@ export class DevicesSqlRepository {
       [userId, deviceId],
     );
 
-    return isDeleted[1] === 1;
+    return !!isDeleted[1];
   }
 }

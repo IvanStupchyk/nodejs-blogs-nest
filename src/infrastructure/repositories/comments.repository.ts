@@ -6,7 +6,6 @@ import {
   UserCommentLikesType,
 } from '../../types/general.types';
 import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
-import { CommentType } from '../../domains/comments/dto/comment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CommentDocument, Comment } from '../../schemas/comment.schema';
@@ -64,7 +63,7 @@ export class CommentsRepository {
         model: mockCommentModel,
       });
 
-    const comments: Array<CommentType> = await this.CommentModel.find(
+    const comments: Array<any> = await this.CommentModel.find(
       { postId },
       { _id: 0, __v: 0 },
     )
@@ -109,32 +108,33 @@ export class CommentsRepository {
     };
   }
 
-  async createComment(comment: CommentType): Promise<CommentViewModel> {
-    const commentInstance = new this.CommentModel();
-
-    commentInstance.id = comment.id;
-    commentInstance.content = comment.content;
-    commentInstance.postId = comment.postId;
-    commentInstance.commentatorInfo = comment.commentatorInfo;
-    commentInstance.likesInfo = comment.likesInfo;
-    commentInstance.createdAt = comment.createdAt;
-
-    await commentInstance.save();
-
-    return {
-      id: commentInstance.id,
-      content: commentInstance.content,
-      commentatorInfo: {
-        userId: commentInstance.commentatorInfo.userId,
-        userLogin: commentInstance.commentatorInfo.userLogin,
-      },
-      likesInfo: {
-        likesCount: commentInstance.likesInfo.likesCount,
-        dislikesCount: commentInstance.likesInfo.dislikesCount,
-        myStatus: likeStatus.None,
-      },
-      createdAt: commentInstance.createdAt,
-    };
+  async createComment(comment: any): Promise<CommentViewModel | null> {
+    return null;
+    // const commentInstance = new this.CommentModel();
+    //
+    // commentInstance.id = comment.id;
+    // commentInstance.content = comment.content;
+    // commentInstance.postId = comment.postId;
+    // commentInstance.commentatorInfo = comment.commentatorInfo;
+    // commentInstance.likesInfo = comment.likesInfo;
+    // commentInstance.createdAt = comment.createdAt;
+    //
+    // await commentInstance.save();
+    //
+    // return {
+    //   id: commentInstance.id,
+    //   content: commentInstance.content,
+    //   commentatorInfo: {
+    //     userId: commentInstance.commentatorInfo.userId,
+    //     userLogin: commentInstance.commentatorInfo.userLogin,
+    //   },
+    //   likesInfo: {
+    //     likesCount: commentInstance.likesInfo.likesCount,
+    //     dislikesCount: commentInstance.likesInfo.dislikesCount,
+    //     myStatus: likeStatus.None,
+    //   },
+    //   createdAt: commentInstance.createdAt,
+    // };
   }
 
   async updateComment(content: string, id: ObjectId): Promise<boolean> {

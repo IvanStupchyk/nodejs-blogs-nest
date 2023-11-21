@@ -12,7 +12,6 @@ import { BlogController } from './controllers/blogs/blogs.controller';
 import { BlogsQueryRepository } from './infrastructure/repositories/blogs-query.repository';
 import { Blog, BlogSchema } from './schemas/blog.schema';
 import { BlogsRepository } from './infrastructure/repositories/blogs.repository';
-import { BlogsService } from './domains/blogs/blogs.service';
 import { PostsController } from './controllers/posts/posts.controller';
 import { PostsQueryRepository } from './infrastructure/repositories/posts-query.repository';
 import { Post, PostSchema } from './schemas/post.schema';
@@ -22,7 +21,6 @@ import { PostsRepository } from './infrastructure/repositories/posts.repository'
 import { PostsService } from './domains/posts/posts.service';
 import { CommentsRepository } from './infrastructure/repositories/comments.repository';
 import { CommentSchema, Comment } from './schemas/comment.schema';
-import { CommentsService } from './domains/comments/comments.service';
 import { CommentsController } from './controllers/comments/comments.controller';
 import { ResetDbController } from './controllers/testing/reset-db.controller';
 import { ApiRequestRepository } from './infrastructure/repositories/api-requests.repository';
@@ -81,10 +79,12 @@ import { ApiRequestsSqlRepository } from './infrastructure/repositories-raw-sql/
 import { BlogsSqlRepository } from './infrastructure/repositories-raw-sql/blogs-sql.repository';
 import { BlogsQuerySqlRepository } from './infrastructure/repositories-raw-sql/blogs-query-sql.repository';
 import { PostsSqlRepository } from './infrastructure/repositories-raw-sql/posts-sql.repository';
-import { PostsQuerySqlRepository } from './infrastructure/repositories-raw-sql/posts-query-sql.repository';
 import { GetPostsForSpecifiedBlogUseCase } from './domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { UpdatePostWithCheckingUseCase } from './domains/blogs/use-cases/update-post-with-checking-use-case';
 import { DeletePostWithCheckingUseCase } from './domains/blogs/use-cases/delete-post-with-checking-use-case';
+import { PostLikesSqlRepository } from './infrastructure/repositories-raw-sql/post-likes-sql.repository';
+import { CommentsSqlRepository } from './infrastructure/repositories-raw-sql/comments-sql.repository';
+import { CommentLikesSqlRepository } from './infrastructure/repositories-raw-sql/comment-likes-sql.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -176,18 +176,18 @@ const useCases = [
     BlogsSqlRepository,
     BlogsQuerySqlRepository,
     PostsSqlRepository,
-    PostsQuerySqlRepository,
+    PostLikesSqlRepository,
+    CommentsSqlRepository,
+    CommentLikesSqlRepository,
     UsersRepository,
     UsersService,
     BlogsQueryRepository,
     BlogsRepository,
-    BlogsService,
     PostsQueryRepository,
     LikesRepository,
     PostsRepository,
     PostsService,
     CommentsRepository,
-    CommentsService,
     ApiRequestRepository,
     ApiRequestService,
     DevicesRepository,

@@ -20,7 +20,7 @@ export type BlogsType = {
 };
 
 export type CommentatorInfoType = {
-  userId: ObjectId;
+  userId: string;
   userLogin: string;
 };
 

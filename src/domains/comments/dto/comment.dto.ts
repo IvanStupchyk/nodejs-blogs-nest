@@ -1,16 +1,10 @@
-import { ObjectId } from 'mongodb';
-import {
-  CommentatorInfoType,
-  CommentLikesInfoType,
-} from '../../../types/general.types';
-
-export class CommentType {
+export class CommentModel {
   constructor(
-    public id: ObjectId,
+    public id: string,
     public content: string,
-    public postId: ObjectId,
-    public commentatorInfo: CommentatorInfoType,
-    public likesInfo: CommentLikesInfoType,
+    public postId: string,
+    public userId: string,
+    public userLogin: string,
     public createdAt: string,
   ) {}
 }

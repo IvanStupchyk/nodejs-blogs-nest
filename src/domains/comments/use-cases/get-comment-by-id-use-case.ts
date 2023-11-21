@@ -1,15 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ObjectId } from 'mongodb';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
-import { likeStatus } from '../../../types/general.types';
 import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { JwtService } from '../../../infrastructure/jwt.service';
+import { isUUID } from '../../../utils/utils';
+import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
 
 export class GetCommentByIdCommand {
   constructor(
     public commentId: string,
-    public accessTokenHeader: string | undefined,
+    public userId: string | undefined,
   ) {}
 }
 
@@ -20,43 +19,17 @@ export class GetCommentByIdUseCase
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
-    private readonly commentsRepository: CommentsRepository,
+    private readonly commentsSqlRepository: CommentsSqlRepository,
   ) {}
 
   async execute(
     command: GetCommentByIdCommand,
   ): Promise<CommentViewModel | null> {
-    const { commentId, accessTokenHeader } = command;
+    if (!isUUID(command.commentId)) return null;
 
-    if (!ObjectId.isValid(commentId)) return null;
-    const commentObjectId = new ObjectId(commentId);
-
-    let userId;
-    if (accessTokenHeader) {
-      const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
-    let finalCommentStatus = likeStatus.None;
-
-    if (userId) {
-      const userCommentsLikes =
-        await this.usersRepository.findUserCommentLikesById(userId);
-
-      if (Array.isArray(userCommentsLikes) && userCommentsLikes.length) {
-        const initialCommentData = userCommentsLikes.find((c) =>
-          new ObjectId(c.commentId).equals(commentObjectId),
-        );
-
-        if (initialCommentData) {
-          finalCommentStatus = initialCommentData.myStatus;
-        }
-      }
-    }
-
-    return await this.commentsRepository.findCommentById(
-      commentObjectId,
-      finalCommentStatus,
+    return await this.commentsSqlRepository.findCommentById(
+      command.commentId,
+      command.userId,
     );
   }
 }
