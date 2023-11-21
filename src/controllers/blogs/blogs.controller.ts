@@ -115,11 +115,15 @@ export class BlogController {
   async getPostsForSpecifiedBlogForAllUsers(
     @Param() params: GetBlogModel,
     @Query() query: GetSortedPostsModel,
-    @CurrentUserId() userId,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const posts = await this.commandBus.execute(
-      new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
+      new GetPostsForSpecifiedBlogCommand(
+        query,
+        params.id,
+        req.headers?.authorization,
+      ),
     );
     !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
   }

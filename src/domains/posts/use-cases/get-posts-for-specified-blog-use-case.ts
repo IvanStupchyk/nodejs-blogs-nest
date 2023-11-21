@@ -5,12 +5,13 @@ import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorte
 import { PostsType } from '../../../types/posts.types';
 import { v4 as uuidv4 } from 'uuid';
 import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
+import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class GetPostsForSpecifiedBlogCommand {
   constructor(
     public query: GetSortedPostsModel,
     public blogId: string,
-    public userId: string,
+    public accessTokenHeader: string | undefined,
   ) {}
 }
 
@@ -21,6 +22,7 @@ export class GetPostsForSpecifiedBlogUseCase
   constructor(
     private readonly postsSqlRepository: PostsSqlRepository,
     private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async execute(
@@ -30,10 +32,10 @@ export class GetPostsForSpecifiedBlogUseCase
 
     if (!isUUID(blogId)) return null;
 
-    let userId = command.userId;
-
-    if (!command.userId || !isUUID(command.userId)) {
-      userId = uuidv4();
+    let userId = uuidv4();
+    if (command.accessTokenHeader) {
+      const accessToken = command.accessTokenHeader.split(' ')[1];
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
     // const foundBlog =
     //   await this.blogsSqlRepository.fetchAllBlogDataById(blogId);
