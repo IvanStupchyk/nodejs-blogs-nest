@@ -44,18 +44,13 @@ export class PostsController {
     private commandBus: CommandBus,
   ) {}
 
-  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}`)
-  async getPosts(
-    @Query() query: GetSortedPostsModel,
-    @CurrentUserId() currentUserId,
-  ) {
+  async getPosts(@Query() query: GetSortedPostsModel, @Req() req: Request) {
     return await this.commandBus.execute(
-      new GetSortedPostsCommand(query, currentUserId),
+      new GetSortedPostsCommand(query, req.headers?.authorization),
     );
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}/:id`)
   async getPost(
     @Param() params: GetPostModel,
