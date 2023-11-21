@@ -134,8 +134,8 @@ export class PostsSqlRepository {
           blogName: p.blogName,
           createdAt: p.createdAt,
           extendedLikesInfo: {
-            likesCount: p.likesCount,
-            dislikesCount: p.dislikesCount,
+            likesCount: Number(p.likesCount),
+            dislikesCount: Number(p.dislikesCount),
             myStatus: p.userStatus ?? likeStatus.None,
             newestLikes: p.newestLikes ?? [],
           },
@@ -294,8 +294,8 @@ export class PostsSqlRepository {
           blogName: p.blogName,
           createdAt: p.createdAt,
           extendedLikesInfo: {
-            likesCount: p.likesCount,
-            dislikesCount: p.dislikesCount,
+            likesCount: Number(p.likesCount),
+            dislikesCount: Number(p.dislikesCount),
             myStatus: p.userStatus ?? likeStatus.None,
             newestLikes: p.newestLikes ?? [],
           },

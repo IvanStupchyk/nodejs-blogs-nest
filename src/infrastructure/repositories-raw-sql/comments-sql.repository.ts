@@ -59,8 +59,8 @@ export class CommentsSqlRepository {
             userLogin: foundComment[0].userLogin,
           },
           likesInfo: {
-            likesCount: foundComment[0].likesCount,
-            dislikesCount: foundComment[0].dislikesCount,
+            likesCount: Number(foundComment[0].likesCount),
+            dislikesCount: Number(foundComment[0].dislikesCount),
             myStatus: foundComment[0].userStatus ?? likeStatus.None,
           },
           createdAt: foundComment[0].createdAt,
@@ -150,8 +150,8 @@ export class CommentsSqlRepository {
             userLogin: c.userLogin,
           },
           likesInfo: {
-            likesCount: c.likesCount,
-            dislikesCount: c.dislikesCount,
+            likesCount: Number(c.likesCount),
+            dislikesCount: Number(c.dislikesCount),
             myStatus: c.userStatus ?? likeStatus.None,
           },
           createdAt: c.createdAt,
