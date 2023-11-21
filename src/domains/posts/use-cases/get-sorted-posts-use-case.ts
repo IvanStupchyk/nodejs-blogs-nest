@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorted-posts.model';
 import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
-import { isUUID } from '../../../utils/utils';
 import { v4 as uuidv4 } from 'uuid';
+import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class GetSortedPostsCommand {
   constructor(
     public params: GetSortedPostsModel,
-    public userId: string | undefined,
+    public accessTokenHeader: string | undefined,
   ) {}
 }
 
@@ -15,13 +15,16 @@ export class GetSortedPostsCommand {
 export class GetSortedPostsUseCase
   implements ICommandHandler<GetSortedPostsCommand>
 {
-  constructor(private readonly postsSqlRepository: PostsSqlRepository) {}
+  constructor(
+    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async execute(command: GetSortedPostsCommand): Promise<any> {
-    let userId = command.userId;
-
-    if (!command.userId || !isUUID(command.userId)) {
-      userId = uuidv4();
+    let userId = uuidv4();
+    if (command.accessTokenHeader) {
+      const accessToken = command.accessTokenHeader.split(' ')[1];
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
     return await this.postsSqlRepository.getSortedPosts(command.params, userId);
