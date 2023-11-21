@@ -92,10 +92,10 @@ export class PostsSqlRepository {
       ) as "dislikesCount",
                           ( select jsonb_agg(json_build_object('addedAt', to_char(
                           agg."addedAt"::timestamp at time zone 'UTC',
-                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."userId",
                                                    'login', agg."login")
                                  order by "addedAt" desc)
-                from ( select "addedAt", "id", "login"
+                from ( select "addedAt", "id", "login", "userId"
                        from public."postLikes" 
                        where "postId" = p.id
                        and "myStatus" = 'Like'
@@ -172,10 +172,10 @@ export class PostsSqlRepository {
       ) as "dislikesCount",
                     ( select jsonb_agg(json_build_object('addedAt', to_char(
                           agg."addedAt"::timestamp at time zone 'UTC',
-                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."userId",
                                                    'login', agg."login")
                                  order by "addedAt" desc)
-                from ( select "addedAt", "id", "login"
+                from ( select "addedAt", "id", "login", "userId"
                        from public."postLikes" 
                        where "postId" = p.id
                        and "myStatus" = 'Like'
@@ -186,7 +186,7 @@ export class PostsSqlRepository {
     `,
       [id, userId],
     );
-    console.log('post[0].newestLikes', post[0].newestLikes);
+
     return post.length
       ? {
           id: post[0].id,
@@ -249,10 +249,10 @@ export class PostsSqlRepository {
       ) as "dislikesCount",
                           ( select jsonb_agg(json_build_object('addedAt', to_char(
                           agg."addedAt"::timestamp at time zone 'UTC',
-                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."id",
+                          'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'userId', agg."userId",
                                                    'login', agg."login")
                                  order by "addedAt" desc)
-                from ( select "addedAt", "id", "login"
+                from ( select "addedAt", "id", "login", "userId"
                        from public."postLikes" 
                        where "postId" = p.id
                        and "myStatus" = 'Like'
