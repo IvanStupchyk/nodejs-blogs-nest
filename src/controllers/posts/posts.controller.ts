@@ -8,10 +8,11 @@ import {
   Post,
   Put,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
@@ -58,11 +59,11 @@ export class PostsController {
   @Get(`${RouterPaths.posts}/:id`)
   async getPost(
     @Param() params: GetPostModel,
+    @Req() req: Request,
     @Res() res: Response,
-    @CurrentUserId() currentUserId,
   ) {
     const foundPost = await this.commandBus.execute(
-      new GetPostByIdCommand(params.id, currentUserId),
+      new GetPostByIdCommand(params.id, req.headers?.authorization),
     );
 
     !foundPost ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundPost);

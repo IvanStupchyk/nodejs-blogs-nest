@@ -186,7 +186,7 @@ export class PostsSqlRepository {
     `,
       [id, userId],
     );
-
+    console.log('post[0].newestLikes', post[0].newestLikes);
     return post.length
       ? {
           id: post[0].id,
@@ -197,8 +197,8 @@ export class PostsSqlRepository {
           blogName: post[0].blogName,
           createdAt: post[0].createdAt,
           extendedLikesInfo: {
-            likesCount: post[0].likesCount,
-            dislikesCount: post[0].dislikesCount,
+            likesCount: Number(post[0].likesCount),
+            dislikesCount: Number(post[0].dislikesCount),
             myStatus: post[0].userStatus ?? likeStatus.None,
             newestLikes: post[0].newestLikes ?? [],
           },
