@@ -4,9 +4,9 @@ import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
-import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
+import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
-import { CommentLikesSqlRepository } from '../../../infrastructure/repositories-raw-sql/comment-likes-sql.repository';
+import { CommentLikesRepository } from '../../../infrastructure/repositories/comment-likes.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { CommentLikeModel } from '../../../controllers/comments/models/Comment-like.model';
 
@@ -23,8 +23,8 @@ export class ChangeCommentLikesCountUseCase
   implements ICommandHandler<ChangeCommentLikesCountCommand>
 {
   constructor(
-    private readonly commentsSqlRepository: CommentsSqlRepository,
-    private readonly commentLikesSqlRepository: CommentLikesSqlRepository,
+    private readonly commentsRepository: CommentsRepository,
+    private readonly commentLikesRepository: CommentLikesRepository,
   ) {}
 
   async execute(command: ChangeCommentLikesCountCommand): Promise<number> {
@@ -39,11 +39,11 @@ export class ChangeCommentLikesCountUseCase
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
     const foundComment: CommentViewModel =
-      await this.commentsSqlRepository.findCommentById(id);
+      await this.commentsRepository.findCommentById(id);
     if (!foundComment) return HttpStatus.NOT_FOUND;
     console.log('foundComment', foundComment);
     const userCommentLike =
-      await this.commentLikesSqlRepository.findCommentLikesByUserIdAndCommentId(
+      await this.commentLikesRepository.findCommentLikesByUserIdAndCommentId(
         userId,
         id,
       );
@@ -57,11 +57,9 @@ export class ChangeCommentLikesCountUseCase
 
     if (userCommentLike) {
       if (myStatus === likeStatus.None) {
-        await this.commentLikesSqlRepository.deleteCommentLike(
-          userCommentLike.id,
-        );
+        await this.commentLikesRepository.deleteCommentLike(userCommentLike.id);
       }
-      await this.commentLikesSqlRepository.updateExistingCommentLike(
+      await this.commentLikesRepository.updateExistingCommentLike(
         userId,
         id,
         myStatus,
@@ -74,7 +72,7 @@ export class ChangeCommentLikesCountUseCase
         myStatus,
         new Date().toISOString(),
       );
-      await this.commentLikesSqlRepository.addCommentLike(newCommentLike);
+      await this.commentLikesRepository.addCommentLike(newCommentLike);
     }
 
     return HttpStatus.NO_CONTENT;

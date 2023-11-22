@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 import { HttpStatus } from '@nestjs/common';
 
 export class DeleteBlogCommand {
@@ -12,7 +12,7 @@ export class DeleteBlogCommand {
 
 @CommandHandler(DeleteBlogCommand)
 export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
-  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: DeleteBlogCommand): Promise<number> {
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
@@ -20,7 +20,7 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
     // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
-    const result = await this.blogsSqlRepository.deleteBlog(command.id);
+    const result = await this.blogsRepository.deleteBlog(command.id);
 
     return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
   }

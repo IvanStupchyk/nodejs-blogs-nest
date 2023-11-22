@@ -1,27 +1,22 @@
 import { APIRequestsCountType } from '../../types/general.types';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import {
-  ApiRequest,
-  ApiRequestDocument,
-} from '../../schemas/api-request.schema';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
-export class ApiRequestRepository {
-  constructor(
-    @InjectModel(ApiRequest.name)
-    private ApiRequestModel: Model<ApiRequestDocument>,
-  ) {}
+export class ApiRequestsRepository {
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async addAPIRequest(newRequest: APIRequestsCountType): Promise<boolean> {
-    const apiRequestsCountInstance = new this.ApiRequestModel();
+    const { id, ip, URL, date, createdAt } = newRequest;
 
-    // apiRequestsCountInstance.ip = newRequest.ip;
-    // apiRequestsCountInstance.URL = newRequest.URL;
-    // apiRequestsCountInstance.date = newRequest.date;
-    //
-    // await apiRequestsCountInstance.save();
+    await this.dataSource.query(
+      `
+    insert into public.apiRequests("id", "ip", "URL", "date", "createdAt")
+    values($1, $2, $3, $4, $5)
+    `,
+      [id, ip, URL, date, createdAt],
+    );
 
     return true;
   }
@@ -29,12 +24,8 @@ export class ApiRequestRepository {
   async getCountApiRequestToOneEndpoint(
     URL: string,
     ip: string,
-    date: Date,
+    date: string,
   ): Promise<number> {
-    return this.ApiRequestModel.countDocuments({
-      URL,
-      ip,
-      date: { $gte: date },
-    });
+    return 0;
   }
 }

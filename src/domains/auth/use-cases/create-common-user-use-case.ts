@@ -3,10 +3,8 @@ import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserModelType } from '../../../schemas/user.schema';
 import { NewUserDto } from '../../../dtos/users/new-user.dto';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { UserType } from '../../../types/rawSqlTypes/user';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
@@ -19,19 +17,16 @@ export class CreateCommonUserCommand {
 export class CreateCommonUserUseCase
   implements ICommandHandler<CreateCommonUserCommand>
 {
-  constructor(
-    @InjectModel(User.name) private UserModel: UserModelType,
-    private readonly usersSqlRepository: UsersSqlRepository,
-  ) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute(command: CreateCommonUserCommand): Promise<boolean> {
     const { login, email, password } = command.userData;
 
     const foundUserByLogin =
-      await this.usersSqlRepository.findUserByLoginOrEmail(login);
+      await this.usersRepository.findUserByLoginOrEmail(login);
 
     const foundUserByEmail =
-      await this.usersSqlRepository.findUserByLoginOrEmail(email);
+      await this.usersRepository.findUserByLoginOrEmail(email);
 
     if (foundUserByLogin && foundUserByEmail) {
       errorMessageGenerator([
@@ -75,6 +70,6 @@ export class CreateCommonUserUseCase
       return false;
     }
 
-    return !!(await this.usersSqlRepository.createUser(newUser));
+    return !!(await this.usersRepository.createUser(newUser));
   }
 }

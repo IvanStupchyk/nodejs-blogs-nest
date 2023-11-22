@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogDto } from '../../../dtos/blogs/blog.dto';
 import { isUUID } from '../../../utils/utils';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 import { HttpStatus } from '@nestjs/common';
 
 export class UpdateBlogCommand {
@@ -14,7 +14,7 @@ export class UpdateBlogCommand {
 
 @CommandHandler(UpdateBlogCommand)
 export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
-  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: UpdateBlogCommand): Promise<number> {
     const { name, websiteUrl, description } = command.body;
@@ -24,7 +24,7 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
     // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
-    const result = await this.blogsSqlRepository.updateBlogById(
+    const result = await this.blogsRepository.updateBlogById(
       command.id,
       name,
       description,

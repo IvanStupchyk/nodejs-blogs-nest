@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsService } from '../posts.service';
 import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
-import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { PostForSpecificBlogDto } from '../../../dtos/posts/post-for-specific-blog.dto';
 import { isUUID } from '../../../utils/utils';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class CreatePostForSpecifiedBlogCommand {
   constructor(
@@ -20,7 +20,7 @@ export class CreatePostForSpecifiedBlogUseCase
 {
   constructor(
     private readonly postsService: PostsService,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly blogsRepository: BlogsRepository,
   ) {}
 
   async execute(
@@ -29,7 +29,7 @@ export class CreatePostForSpecifiedBlogUseCase
     const { title, content, shortDescription } = command.postData;
 
     if (!isUUID(command.blogId)) return null;
-    const foundBlog = await this.blogsSqlRepository.fetchAllBlogDataById(
+    const foundBlog = await this.blogsRepository.fetchAllBlogDataById(
       command.blogId,
     );
 

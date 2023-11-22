@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
 import { UpdatePostDto } from '../../posts/dto/update-post.dto';
 import { HttpStatus } from '@nestjs/common';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class UpdatePostWithCheckingCommand {
   constructor(
@@ -19,8 +19,8 @@ export class UpdatePostWithCheckingUseCase
   implements ICommandHandler<UpdatePostWithCheckingCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsRepository: BlogsRepository,
   ) {}
 
   async execute(command: UpdatePostWithCheckingCommand): Promise<number> {
@@ -29,13 +29,13 @@ export class UpdatePostWithCheckingUseCase
     if (!isUUID(command.blogId)) return HttpStatus.NOT_FOUND;
     if (!isUUID(command.postId)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsSqlRepository.fetchAllBlogDataById(
+    const blog = await this.blogsRepository.fetchAllBlogDataById(
       command.blogId,
     );
     if (!blog) return HttpStatus.NOT_FOUND;
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
-    const result = await this.postsSqlRepository.updatePost(
+    const result = await this.postsRepository.updatePost(
       command.postId,
       title,
       content,

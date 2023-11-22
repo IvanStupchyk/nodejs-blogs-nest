@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { InvalidRefreshTokenType } from '../../types/rawSqlTypes/generalTypes';
 
 @Injectable()
-export class InvalidRefreshTokensSqlRepository {
+export class InvalidRefreshTokensRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async deleteInvalidRefreshTokens() {
     return await this.dataSource.query(`

@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
 import { isUUID } from '../../../utils/utils';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';
 
@@ -15,7 +15,7 @@ export class GetPostByIdCommand {
 @CommandHandler(GetPostByIdCommand)
 export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly postsRepository: PostsRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -28,6 +28,6 @@ export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.postsSqlRepository.getPost(command.id, userId);
+    return await this.postsRepository.getPost(command.id, userId);
   }
 }

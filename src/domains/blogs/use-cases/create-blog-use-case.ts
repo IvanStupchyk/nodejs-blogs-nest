@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogModel } from '../dto/blog.dto';
 import { BlogDto } from '../../../dtos/blogs/blog.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class CreateBlogCommand {
   constructor(
@@ -13,7 +13,7 @@ export class CreateBlogCommand {
 
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
-  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: CreateBlogCommand): Promise<BlogModel> {
     const { name, websiteUrl, description } = command.body;
@@ -31,6 +31,6 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       false,
     );
 
-    return await this.blogsSqlRepository.createBlog(newBlog);
+    return await this.blogsRepository.createBlog(newBlog);
   }
 }

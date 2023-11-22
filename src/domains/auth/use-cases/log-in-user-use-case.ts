@@ -2,9 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
 import { AuthService } from '../../../application/auth.service';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
-import { DevicesSqlRepository } from '../../../infrastructure/repositories-raw-sql/devices-sql.repository';
+import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
 
 export class LogInUserCommand {
   constructor(
@@ -16,9 +16,9 @@ export class LogInUserCommand {
 @CommandHandler(LogInUserCommand)
 export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   constructor(
-    private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
-    private readonly devicesSqlRepository: DevicesSqlRepository,
+    private readonly devicesRepository: DevicesRepository,
     private readonly authService: AuthService,
   ) {}
 
@@ -27,7 +27,7 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { userId, req } = command;
 
-    const user = await this.usersSqlRepository.fetchAllUserDataById(userId);
+    const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user.isConfirmed) return null;
 
     const deviceId = uuidv4();
@@ -43,7 +43,7 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
       userId,
       refreshToken,
     );
-    await this.devicesSqlRepository.setNewDevice(newDevice);
+    await this.devicesRepository.setNewDevice(newDevice);
     return { accessToken, refreshToken };
   }
 }

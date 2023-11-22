@@ -1,37 +1,37 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
 import { RouterPaths } from '../../constants/router.paths';
-import { UsersQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/users-query-sql.repository';
-import { DevicesSqlRepository } from '../../infrastructure/repositories-raw-sql/devices-sql.repository';
-import { InvalidRefreshTokensSqlRepository } from '../../infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
-import { BlogsSqlRepository } from '../../infrastructure/repositories-raw-sql/blogs-sql.repository';
-import { PostsSqlRepository } from '../../infrastructure/repositories-raw-sql/posts-sql.repository';
-import { CommentsSqlRepository } from '../../infrastructure/repositories-raw-sql/comments-sql.repository';
-import { PostLikesSqlRepository } from '../../infrastructure/repositories-raw-sql/post-likes-sql.repository';
-import { CommentLikesSqlRepository } from '../../infrastructure/repositories-raw-sql/comment-likes-sql.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
+import { InvalidRefreshTokensRepository } from '../../infrastructure/repositories/invalid-refresh-tokens.repository';
+import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
+import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
+import { CommentsRepository } from '../../infrastructure/repositories/comments.repository';
+import { PostLikesRepository } from '../../infrastructure/repositories/post-likes.repository';
+import { CommentLikesRepository } from '../../infrastructure/repositories/comment-likes.repository';
 
 @Controller()
 export class ResetDbController {
   constructor(
-    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
-    private readonly devicesSqlRepository: DevicesSqlRepository,
-    private readonly invalidRefreshTokensSqlRepository: InvalidRefreshTokensSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly commentsSqlRepository: CommentsSqlRepository,
-    private readonly postLikesSqlRepository: PostLikesSqlRepository,
-    private readonly commentLikesSqlRepository: CommentLikesSqlRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly devicesRepository: DevicesRepository,
+    private readonly invalidRefreshTokensRepository: InvalidRefreshTokensRepository,
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly commentsRepository: CommentsRepository,
+    private readonly postLikesRepository: PostLikesRepository,
+    private readonly commentLikesRepository: CommentLikesRepository,
   ) {}
 
   @Delete(`${RouterPaths.testing}/all-data`)
   @HttpCode(204)
   async resetDb() {
-    await this.usersQuerySqlRepository.deleteAllUsers();
-    await this.devicesSqlRepository.deleteAllSessions();
-    await this.invalidRefreshTokensSqlRepository.deleteInvalidRefreshTokens();
-    await this.blogsSqlRepository.deleteAllBlogs();
-    await this.postsSqlRepository.deleteAllPosts();
-    await this.commentsSqlRepository.deleteAllComments();
-    await this.postLikesSqlRepository.deleteAllPostLikes();
-    await this.commentLikesSqlRepository.deleteAllCommentLikes();
+    await this.usersQueryRepository.deleteAllUsers();
+    await this.devicesRepository.deleteAllSessions();
+    await this.invalidRefreshTokensRepository.deleteInvalidRefreshTokens();
+    await this.blogsRepository.deleteAllBlogs();
+    await this.postsRepository.deleteAllPosts();
+    await this.commentsRepository.deleteAllComments();
+    await this.postLikesRepository.deleteAllPostLikes();
+    await this.commentLikesRepository.deleteAllCommentLikes();
   }
 }

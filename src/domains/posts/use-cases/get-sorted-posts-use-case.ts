@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorted-posts.model';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';
 
@@ -16,7 +16,7 @@ export class GetSortedPostsUseCase
   implements ICommandHandler<GetSortedPostsCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly postsRepository: PostsRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -27,6 +27,6 @@ export class GetSortedPostsUseCase
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.postsSqlRepository.getSortedPosts(command.params, userId);
+    return await this.postsRepository.getSortedPosts(command.params, userId);
   }
 }

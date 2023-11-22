@@ -1,9 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
-import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { isUUID } from '../../../utils/utils';
-import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
+import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 
 export class GetCommentByIdCommand {
   constructor(
@@ -17,9 +16,8 @@ export class GetCommentByIdUseCase
   implements ICommandHandler<GetCommentByIdCommand>
 {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
-    private readonly commentsSqlRepository: CommentsSqlRepository,
+    private readonly commentsRepository: CommentsRepository,
   ) {}
 
   async execute(
@@ -33,7 +31,7 @@ export class GetCommentByIdUseCase
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.commentsSqlRepository.findCommentById(
+    return await this.commentsRepository.findCommentById(
       command.commentId,
       userId,
     );

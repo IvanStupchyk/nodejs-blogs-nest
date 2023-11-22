@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorted-posts.model';
 import { PostsType } from '../../../types/posts.types';
 import { v4 as uuidv4 } from 'uuid';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class GetPostsForSpecifiedBlogCommand {
@@ -20,8 +20,8 @@ export class GetPostsForSpecifiedBlogUseCase
   implements ICommandHandler<GetPostsForSpecifiedBlogCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsRepository: BlogsRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -44,7 +44,7 @@ export class GetPostsForSpecifiedBlogUseCase
     //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     // }
 
-    return await this.postsSqlRepository.getPostsByIdForSpecificBlog(
+    return await this.postsRepository.getPostsByIdForSpecificBlog(
       query,
       blogId,
       userId,

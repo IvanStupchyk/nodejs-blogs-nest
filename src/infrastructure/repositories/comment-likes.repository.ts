@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { CommentLikeModel } from '../../controllers/comments/models/Comment-like.model';
 
 @Injectable()
-export class CommentLikesSqlRepository {
+export class CommentLikesRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findCommentLikesByUserIdAndCommentId(

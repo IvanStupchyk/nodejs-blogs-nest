@@ -2,9 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsType } from '../../../types/general.types';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { GetSortedCommentsModel } from '../../../controllers/comments/models/get-sorted-comments.model';
-import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
+import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { isUUID } from '../../../utils/utils';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 
 export class GetSortedCommentsCommand {
   constructor(
@@ -19,9 +19,9 @@ export class GetSortedCommentsUseCase
   implements ICommandHandler<GetSortedCommentsCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly postsRepository: PostsRepository,
     private readonly jwtService: JwtService,
-    private readonly commentsSqlRepository: CommentsSqlRepository,
+    private readonly commentsRepository: CommentsRepository,
   ) {}
 
   async execute(
@@ -31,7 +31,7 @@ export class GetSortedCommentsUseCase
 
     if (!isUUID(id)) return false;
 
-    const foundPost = await this.postsSqlRepository.findPostById(id);
+    const foundPost = await this.postsRepository.findPostById(id);
     if (!foundPost) return false;
 
     let userId;
@@ -40,10 +40,6 @@ export class GetSortedCommentsUseCase
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
 
-    return await this.commentsSqlRepository.getSortedComments(
-      query,
-      id,
-      userId,
-    );
+    return await this.commentsRepository.getSortedComments(query, id, userId);
   }
 }

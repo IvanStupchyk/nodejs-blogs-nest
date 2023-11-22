@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { DevicesSqlRepository } from '../../../infrastructure/repositories-raw-sql/devices-sql.repository';
-import { InvalidRefreshTokensSqlRepository } from '../../../infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
+import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
+import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/invalid-refresh-tokens.repository';
 import { InvalidRefreshTokenType } from '../../../types/rawSqlTypes/generalTypes';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -18,9 +18,9 @@ export class RefreshTokenUseCase
   implements ICommandHandler<RefreshTokenCommand>
 {
   constructor(
-    private readonly devicesSqlRepository: DevicesSqlRepository,
+    private readonly devicesRepository: DevicesRepository,
     private readonly jwtService: JwtService,
-    private readonly invalidRefreshTokensSqlRepository: InvalidRefreshTokensSqlRepository,
+    private readonly invalidRefreshTokensRepository: InvalidRefreshTokensRepository,
   ) {}
 
   async execute(
@@ -29,7 +29,7 @@ export class RefreshTokenUseCase
     const { userId, deviceId, oldRefreshToken } = command;
 
     const invalidRefreshTokens =
-      await this.invalidRefreshTokensSqlRepository.getAllInvalidRefreshTokens(
+      await this.invalidRefreshTokensRepository.getAllInvalidRefreshTokens(
         userId,
       );
 
@@ -53,7 +53,7 @@ export class RefreshTokenUseCase
       const lastActiveDate = new Date(result.iat * 1000).toISOString();
       const expirationDate = new Date(result.exp * 1000).toISOString();
 
-      await this.devicesSqlRepository.updateExistingSession(
+      await this.devicesRepository.updateExistingSession(
         deviceId,
         lastActiveDate,
         expirationDate,
@@ -65,7 +65,7 @@ export class RefreshTokenUseCase
         refreshToken: oldRefreshToken,
         createdAt: new Date().toISOString(),
       };
-      await this.invalidRefreshTokensSqlRepository.addInvalidRefreshTokens(
+      await this.invalidRefreshTokensRepository.addInvalidRefreshTokens(
         newInvalidRefreshToken,
       );
     } catch (error) {

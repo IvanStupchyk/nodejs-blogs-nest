@@ -3,31 +3,13 @@ const configModule = ConfigModule.forRoot();
 
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
 import { UsersController } from './controllers/users/users.controller';
-import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
-import { UsersService } from './domains/users/users.service';
-import { UsersRepository } from './infrastructure/repositories/users.repository';
 import { BlogController } from './controllers/blogs/blogs.controller';
-import { BlogsQueryRepository } from './infrastructure/repositories/blogs-query.repository';
-import { Blog, BlogSchema } from './schemas/blog.schema';
-import { BlogsRepository } from './infrastructure/repositories/blogs.repository';
 import { PostsController } from './controllers/posts/posts.controller';
-import { PostsQueryRepository } from './infrastructure/repositories/posts-query.repository';
-import { Post, PostSchema } from './schemas/post.schema';
-import { PostLikes, PostLikesSchema } from './schemas/post-likes.schema';
-import { LikesRepository } from './infrastructure/repositories/likes.repository';
-import { PostsRepository } from './infrastructure/repositories/posts.repository';
 import { PostsService } from './domains/posts/posts.service';
-import { CommentsRepository } from './infrastructure/repositories/comments.repository';
-import { CommentSchema, Comment } from './schemas/comment.schema';
 import { CommentsController } from './controllers/comments/comments.controller';
 import { ResetDbController } from './controllers/testing/reset-db.controller';
-import { ApiRequestRepository } from './infrastructure/repositories/api-requests.repository';
-import { ApiRequest, ApiRequestSchema } from './schemas/api-request.schema';
 import { ApiRequestService } from './application/api-request.service';
-import { DevicesRepository } from './infrastructure/repositories/devices.repository';
-import { Device, DeviceSchema } from './schemas/device.schema';
 import { AuthController } from './controllers/auth/auth.controller';
 import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
@@ -38,7 +20,6 @@ import { RefreshTokenMiddleware } from './infrastructure/refresh-token.middlewar
 import { DevicesController } from './controllers/devices/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
 import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
-import { UpdatePostUseCase } from './domains/posts/use-cases/update-post-use-case';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreatePostForSpecifiedBlogUseCase } from './domains/posts/use-cases/create-post-for-specified-blog-use-case';
 import { ChangePostLikesCountUseCase } from './domains/posts/use-cases/change-post-likes-count-use-case';
@@ -70,25 +51,24 @@ import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-
 import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersQuerySqlRepository } from './infrastructure/repositories-raw-sql/users-query-sql.repository';
-import { UsersSqlRepository } from './infrastructure/repositories-raw-sql/users-sql.repository';
-import { DevicesSqlRepository } from './infrastructure/repositories-raw-sql/devices-sql.repository';
-import { InvalidRefreshTokensSqlRepository } from './infrastructure/repositories-raw-sql/invalid-refresh-tokens-sql.repository';
-import { DevicesQuerySqlRepository } from './infrastructure/repositories-raw-sql/devices-query-sql.repository';
-import { ApiRequestsSqlRepository } from './infrastructure/repositories-raw-sql/api-requests-sql.repository';
-import { BlogsSqlRepository } from './infrastructure/repositories-raw-sql/blogs-sql.repository';
-import { BlogsQuerySqlRepository } from './infrastructure/repositories-raw-sql/blogs-query-sql.repository';
-import { PostsSqlRepository } from './infrastructure/repositories-raw-sql/posts-sql.repository';
+import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
+import { UsersRepository } from './infrastructure/repositories/users.repository';
+import { DevicesRepository } from './infrastructure/repositories/devices.repository';
+import { InvalidRefreshTokensRepository } from './infrastructure/repositories/invalid-refresh-tokens.repository';
+import { DevicesQueryRepository } from './infrastructure/repositories/devices-query.repository';
+import { ApiRequestsRepository } from './infrastructure/repositories/api-requests.repository';
+import { BlogsRepository } from './infrastructure/repositories/blogs.repository';
+import { BlogsQueryRepository } from './infrastructure/repositories/blogs-query.repository';
+import { PostsRepository } from './infrastructure/repositories/posts.repository';
 import { GetPostsForSpecifiedBlogUseCase } from './domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { UpdatePostWithCheckingUseCase } from './domains/blogs/use-cases/update-post-with-checking-use-case';
 import { DeletePostWithCheckingUseCase } from './domains/blogs/use-cases/delete-post-with-checking-use-case';
-import { PostLikesSqlRepository } from './infrastructure/repositories-raw-sql/post-likes-sql.repository';
-import { CommentsSqlRepository } from './infrastructure/repositories-raw-sql/comments-sql.repository';
-import { CommentLikesSqlRepository } from './infrastructure/repositories-raw-sql/comment-likes-sql.repository';
+import { PostLikesRepository } from './infrastructure/repositories/post-likes.repository';
+import { CommentsRepository } from './infrastructure/repositories/comments.repository';
+import { CommentLikesRepository } from './infrastructure/repositories/comment-likes.repository';
 
 const useCases = [
   CreatePostUseCase,
-  UpdatePostUseCase,
   CreatePostForSpecifiedBlogUseCase,
   ChangePostLikesCountUseCase,
   GetSortedPostsUseCase,
@@ -144,17 +124,6 @@ const useCases = [
       ssl: true,
     }),
     MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
-    MongooseModule.forFeature([
-      { name: ApiRequest.name, schema: ApiRequestSchema },
-    ]),
-    MongooseModule.forFeature([
-      { name: PostLikes.name, schema: PostLikesSchema },
-    ]),
   ],
   controllers: [
     UsersController,
@@ -167,30 +136,19 @@ const useCases = [
   ],
   providers: [
     UsersQueryRepository,
-    UsersQuerySqlRepository,
-    UsersSqlRepository,
-    DevicesSqlRepository,
-    InvalidRefreshTokensSqlRepository,
-    DevicesQuerySqlRepository,
-    ApiRequestsSqlRepository,
-    BlogsSqlRepository,
-    BlogsQuerySqlRepository,
-    PostsSqlRepository,
-    PostLikesSqlRepository,
-    CommentsSqlRepository,
-    CommentLikesSqlRepository,
     UsersRepository,
-    UsersService,
-    BlogsQueryRepository,
-    BlogsRepository,
-    PostsQueryRepository,
-    LikesRepository,
-    PostsRepository,
-    PostsService,
-    CommentsRepository,
-    ApiRequestRepository,
-    ApiRequestService,
     DevicesRepository,
+    InvalidRefreshTokensRepository,
+    DevicesQueryRepository,
+    ApiRequestsRepository,
+    BlogsRepository,
+    BlogsQueryRepository,
+    PostsRepository,
+    PostLikesRepository,
+    CommentsRepository,
+    CommentLikesRepository,
+    PostsService,
+    ApiRequestService,
     AuthService,
     JwtService,
     LocalStrategy,

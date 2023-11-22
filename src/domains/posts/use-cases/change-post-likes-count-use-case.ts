@@ -3,15 +3,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { likeStatus } from '../../../types/general.types';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  PostLikeModelType,
-  PostLikes,
-} from '../../../schemas/post-likes.schema';
 import { isUUID } from '../../../utils/utils';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
-import { PostLikesSqlRepository } from '../../../infrastructure/repositories-raw-sql/post-likes-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { PostLikesRepository } from '../../../infrastructure/repositories/post-likes.repository';
 import { PostModel } from '../../../controllers/posts/models/Post.model';
 import { PostLikeModel } from '../../../controllers/posts/models/Post-like.model';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,10 +24,9 @@ export class ChangePostLikesCountUseCase
   implements ICommandHandler<ChangePostLikesCountCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly usersSqlRepository: UsersSqlRepository,
-    private readonly postLikesSqlRepository: PostLikesSqlRepository,
-    @InjectModel(PostLikes.name) private PostLikeModel: PostLikeModelType,
+    private readonly postsRepository: PostsRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly postLikesRepository: PostLikesRepository,
   ) {}
 
   async execute(command: ChangePostLikesCountCommand): Promise<number> {
@@ -46,17 +40,14 @@ export class ChangePostLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundPost: PostModel = await this.postsSqlRepository.findPostById(id);
+    const foundPost: PostModel = await this.postsRepository.findPostById(id);
     if (!foundPost) return HttpStatus.NOT_FOUND;
 
-    const user = await this.usersSqlRepository.fetchAllUserDataById(userId);
+    const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user) return HttpStatus.NOT_FOUND;
 
     const userPostLike =
-      await this.postLikesSqlRepository.findPostLikesByUserIdAndPostId(
-        userId,
-        id,
-      );
+      await this.postLikesRepository.findPostLikesByUserIdAndPostId(userId, id);
 
     if (
       userPostLike?.myStatus === myStatus ||
@@ -67,9 +58,9 @@ export class ChangePostLikesCountUseCase
 
     if (userPostLike) {
       if (myStatus === likeStatus.None) {
-        await this.postLikesSqlRepository.deletePostLike(userPostLike.id);
+        await this.postLikesRepository.deletePostLike(userPostLike.id);
       }
-      await this.postLikesSqlRepository.updateExistingPostLike(
+      await this.postLikesRepository.updateExistingPostLike(
         userId,
         id,
         myStatus,
@@ -85,24 +76,9 @@ export class ChangePostLikesCountUseCase
         new Date().toISOString(),
         new Date().toISOString(),
       );
-      await this.postLikesSqlRepository.addPostLike(newPostLike);
+      await this.postLikesRepository.addPostLike(newPostLike);
     }
 
-    // if (newStatus === likeStatus.Like) {
-    //   const userPostLikeViewInfo: PostLikeUserInfoType = {
-    //     addedAt: new Date().toISOString(),
-    //     userId,
-    //     login: user.login,
-    //   };
-    //   foundPost.setNewUserPostLike(userPostLikeViewInfo);
-    // }
-    //
-    // if (newStatus === likeStatus.None || newStatus === likeStatus.Dislike) {
-    //   await this.postsRepository.deleteUserLikeInfo(postObjectId, userId);
-    // }
-    //
-    // foundPost.changeLikesCount(likesInfo.likesCount, likesInfo.dislikesCount);
-    // await this.postsRepository.save(foundPost);
     return HttpStatus.NO_CONTENT;
   }
 }

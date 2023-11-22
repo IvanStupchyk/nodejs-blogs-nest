@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ApiRequestsSqlRepository } from '../infrastructure/repositories-raw-sql/api-requests-sql.repository';
+import { ApiRequestsRepository } from '../infrastructure/repositories/api-requests.repository';
 import { v4 as uuidv4 } from 'uuid';
 
 class TooManyRequestsException extends HttpException {
@@ -11,16 +11,14 @@ class TooManyRequestsException extends HttpException {
 
 @Injectable()
 export class ApiRequestService {
-  constructor(
-    private readonly apiRequestsSqlRepository: ApiRequestsSqlRepository,
-  ) {}
+  constructor(private readonly apiRequestsRepository: ApiRequestsRepository) {}
 
   async countRequest(req: Request): Promise<boolean> {
     const ip =
       (req.headers['x-forwarded-for'] as string) ||
       (req.socket.remoteAddress ?? '');
 
-    await this.apiRequestsSqlRepository.addAPIRequest({
+    await this.apiRequestsRepository.addAPIRequest({
       id: uuidv4(),
       ip,
       URL: req.originalUrl,
@@ -31,7 +29,7 @@ export class ApiRequestService {
     const timestamp = new Date().getTime() - 10000;
     const filterDate = new Date(timestamp).toISOString();
     const count =
-      await this.apiRequestsSqlRepository.getCountApiRequestToOneEndpoint(
+      await this.apiRequestsRepository.getCountApiRequestToOneEndpoint(
         req.originalUrl,
         ip,
         filterDate,

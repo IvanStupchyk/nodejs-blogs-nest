@@ -4,7 +4,7 @@ import { ViewUserModel } from '../../../controllers/users/models/view-user.model
 import { UserType } from '../../../types/rawSqlTypes/user';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class CreateSuperUserCommand {
   constructor(public userData: NewUserDto) {}
@@ -14,7 +14,7 @@ export class CreateSuperUserCommand {
 export class CreateSuperUserUseCase
   implements ICommandHandler<CreateSuperUserCommand>
 {
-  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute(command: CreateSuperUserCommand): Promise<ViewUserModel> {
     const { login, email, password } = command.userData;
@@ -32,6 +32,6 @@ export class CreateSuperUserUseCase
       createdAt: new Date().toISOString(),
     };
 
-    return this.usersSqlRepository.createUser(newUser);
+    return this.usersRepository.createUser(newUser);
   }
 }
