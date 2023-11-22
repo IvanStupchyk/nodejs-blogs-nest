@@ -6,9 +6,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { UserType } from '../../src/controllers/users/models/user.model';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import mongoose from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
@@ -25,13 +24,13 @@ describe('tests for /auth', () => {
     email: '',
   };
 
-  const validUserData: NewUserDto = {
+  const validUserData: UserInputDto = {
     login: 'Nick',
     password: '123456',
     email: 'nickNick@gmail.com',
   };
 
-  const secondUserData: NewUserDto = {
+  const secondUserData: UserInputDto = {
     login: 'Ivan',
     password: '123456',
     email: 'ivan@gmail.com',
@@ -73,7 +72,7 @@ describe('tests for /auth', () => {
   // });
   //
   // let simpleUser: UserType;
-  // let superAdminUser: ViewUserModel;
+  // let superAdminUser: UserViewType;
   // it('should not register user with incorrect credentials', async () => {
   //   await getRequest()
   //     .post(`${RouterPaths.auth}/registration`)

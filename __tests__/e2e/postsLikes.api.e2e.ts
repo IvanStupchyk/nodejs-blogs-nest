@@ -9,32 +9,32 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { BlogDto } from '../../src/dtos/blogs/blog.dto';
-import { PostType } from '../../src/domains/posts/dto/post.dto';
-import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { PostViewModel } from '../../src/controllers/posts/models/post-view.model';
+import { PostInputDto } from '../../src/dto/posts/post.input.dto';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
+import { BlogModel } from '../../src/models/blogs/Blog.model';
+import { UserViewType } from '../../src/types/user-view.type';
+import { PostViewType } from '../../src/types/post-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
+import { PostModel } from '../../src/models/posts/Post.model';
 
 describe('tests for /posts with likes logic', () => {
-  const blogData: BlogDto = {
+  const blogData: BlogInputDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',
   };
 
-  const validPostData: NewPostDto = {
+  const validPostData: PostInputDto = {
     title: 'title',
     content: 'content',
     blogId: uuidv4(),
     shortDescription: 'shortDescription',
   };
 
-  const userData1: NewUserDto = {
+  const userData1: UserInputDto = {
     login: 'Ivan',
     password: '123456',
     email: 'ivanIvan@gmail.com',
@@ -79,17 +79,17 @@ describe('tests for /posts with likes logic', () => {
   });
 
   let newBlog: BlogModel;
-  let user1: ViewUserModel;
-  let user2: ViewUserModel;
-  let user3: ViewUserModel;
-  let post1: PostViewModel;
-  let post2: PostType;
-  let post3: PostType;
-  let post4: PostType;
+  let user1: UserViewType;
+  let user2: UserViewType;
+  let user3: UserViewType;
+  let post1: PostViewType;
+  let post2: PostModel;
+  let post3: PostModel;
+  let post4: PostModel;
   let accessTokenUser1: string;
   let accessTokenUser2: string;
   let accessTokenUser3: string;
-  const newPosts: Array<PostType> = [];
+  const newPosts: Array<PostModel> = [];
 
   it('should create users with for future tests', async () => {
     const { createdUser } = await usersTestManager.createUser(

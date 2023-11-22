@@ -5,10 +5,10 @@ import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
-import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
+import { CommentViewType } from '../../../types/comment-view.type';
 import { CommentLikesRepository } from '../../../infrastructure/repositories/comment-likes.repository';
 import { v4 as uuidv4 } from 'uuid';
-import { CommentLikeModel } from '../../../controllers/comments/models/Comment-like.model';
+import { CommentLikeModel } from '../../../models/comments/Comment-like.model';
 
 export class ChangeCommentLikesCountCommand {
   constructor(
@@ -38,7 +38,7 @@ export class ChangeCommentLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundComment: CommentViewModel =
+    const foundComment: CommentViewType =
       await this.commentsRepository.findCommentById(id);
     if (!foundComment) return HttpStatus.NOT_FOUND;
     console.log('foundComment', foundComment);

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GetSortedUsersModel } from '../../controllers/users/models/get-sorted-users.model';
+import { UsersQueryDto } from '../../dto/users/users.query.dto';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockUserModel } from '../../constants/blanks';
 import { UsersType } from '../../types/users.types';
@@ -9,7 +9,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async getSortedUsers(params: GetSortedUsersModel): Promise<UsersType> {
+  async getSortedUsers(params: UsersQueryDto): Promise<UsersType> {
     const { searchLoginTerm, searchEmailTerm } = params;
 
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =

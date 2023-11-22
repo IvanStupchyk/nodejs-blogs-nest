@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BlogModel } from '../../domains/blogs/dto/blog.dto';
+import { BlogModel } from '../../models/blogs/Blog.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 

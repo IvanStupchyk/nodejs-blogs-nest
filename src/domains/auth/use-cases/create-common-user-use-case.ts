@@ -3,14 +3,14 @@ import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { NewUserDto } from '../../../dtos/users/new-user.dto';
+import { UserInputDto } from '../../../dto/users/user.input.dto';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
-import { UserType } from '../../../types/rawSqlTypes/user';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
+import { UserModel } from '../../../models/users/User.model';
 
 export class CreateCommonUserCommand {
-  constructor(public userData: NewUserDto) {}
+  constructor(public userData: UserInputDto) {}
 }
 
 @CommandHandler(CreateCommonUserCommand)
@@ -49,19 +49,19 @@ export class CreateCommonUserUseCase
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser: UserType = {
-      id: uuidv4(),
+    const newUser = new UserModel(
+      uuidv4(),
       email,
       login,
       passwordHash,
-      confirmationCode: uuidv4(),
-      expirationDate: add(new Date(), {
+      uuidv4(),
+      add(new Date(), {
         hours: 1,
         minutes: 30,
       }).toISOString(),
-      isConfirmed: false,
-      createdAt: new Date().toISOString(),
-    };
+      false,
+      new Date().toISOString(),
+    );
 
     try {
       await emailTemplatesManager.sendEmailConfirmationMessage(newUser);

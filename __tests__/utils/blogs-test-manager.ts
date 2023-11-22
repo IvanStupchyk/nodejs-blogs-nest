@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { BlogDto } from '../../src/dtos/blogs/blog.dto';
+import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
 
 export const blogsTestManager = {
   async createBlog(
     httpServer: string,
-    data: BlogDto,
+    data: BlogInputDto,
     expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201,
     password = 'qwerty',
   ) {

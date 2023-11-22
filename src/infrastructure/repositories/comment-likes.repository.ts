@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CommentLikeModel } from '../../controllers/comments/models/Comment-like.model';
+import { CommentLikeModel } from '../../models/comments/Comment-like.model';
 
 @Injectable()
 export class CommentLikesRepository {

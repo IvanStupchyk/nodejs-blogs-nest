@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
+import { PostViewType } from '../../../types/post-view.type';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +19,7 @@ export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(command: GetPostByIdCommand): Promise<PostViewModel | null> {
+  async execute(command: GetPostByIdCommand): Promise<PostViewType | null> {
     if (!isUUID(command.id)) return null;
 
     let userId = uuidv4();

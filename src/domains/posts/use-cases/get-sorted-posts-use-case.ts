@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorted-posts.model';
+import { PostsQueryDto } from '../../../dto/posts/posts.query.dto';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class GetSortedPostsCommand {
   constructor(
-    public params: GetSortedPostsModel,
+    public params: PostsQueryDto,
     public accessTokenHeader: string | undefined,
   ) {}
 }

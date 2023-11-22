@@ -3,21 +3,21 @@ const configModule = ConfigModule.forRoot();
 
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersController } from './controllers/users/users.controller';
-import { BlogController } from './controllers/blogs/blogs.controller';
-import { PostsController } from './controllers/posts/posts.controller';
+import { UsersController } from './controllers/users.controller';
+import { BlogController } from './controllers/blogs.controller';
+import { PostsController } from './controllers/posts.controller';
 import { PostsService } from './domains/posts/posts.service';
-import { CommentsController } from './controllers/comments/comments.controller';
-import { ResetDbController } from './controllers/testing/reset-db.controller';
+import { CommentsController } from './controllers/comments.controller';
+import { ResetDbController } from './controllers/reset-db.controller';
 import { ApiRequestService } from './application/api-request.service';
-import { AuthController } from './controllers/auth/auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { JwtService } from './infrastructure/jwt.service';
-import { RefreshTokenMiddleware } from './infrastructure/refresh-token.middleware';
-import { DevicesController } from './controllers/devices/devices.controller';
+import { RefreshTokenMiddleware } from './middlewares/refresh-token.middleware';
+import { DevicesController } from './controllers/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
 import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -25,7 +25,6 @@ import { CreatePostForSpecifiedBlogUseCase } from './domains/posts/use-cases/cre
 import { ChangePostLikesCountUseCase } from './domains/posts/use-cases/change-post-likes-count-use-case';
 import { GetSortedPostsUseCase } from './domains/posts/use-cases/get-sorted-posts-use-case';
 import { GetPostByIdUseCase } from './domains/posts/use-cases/get-post-by-id-use-case';
-import { DeletePostUseCase } from './domains/posts/use-cases/delete-post-use-case';
 import { DeleteDeviceUseCase } from './domains/devices/use-cases/delete-device-use-case';
 import { CreateCommentUseCase } from './domains/comments/use-cases/create-comment-use-case';
 import { UpdateCommentUseCase } from './domains/comments/use-cases/update-comment-use-case';
@@ -73,7 +72,6 @@ const useCases = [
   ChangePostLikesCountUseCase,
   GetSortedPostsUseCase,
   GetPostByIdUseCase,
-  DeletePostUseCase,
   DeleteDeviceUseCase,
   CreateCommentUseCase,
   UpdateCommentUseCase,

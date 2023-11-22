@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
-import { DeviceType } from '../domains/devices/dto/device.dto';
+import { DeviceType } from '../models/devices/Device.model';
 import { JwtService } from '../infrastructure/jwt.service';
 import { v4 as uuidv4 } from 'uuid';
 

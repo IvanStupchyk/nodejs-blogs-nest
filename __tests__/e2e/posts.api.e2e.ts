@@ -9,11 +9,11 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
-import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
-import { BlogDto } from '../../src/dtos/blogs/blog.dto';
-import { PostType } from '../../src/domains/posts/dto/post.dto';
-import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
+import { PostInputDto } from '../../src/dto/posts/post.input.dto';
+import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
+import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { v4 as uuidv4 } from 'uuid';
+import { PostModel } from '../../src/models/posts/Post.model';
 
 describe('tests for /posts', () => {
   const invalidData = {
@@ -23,13 +23,13 @@ describe('tests for /posts', () => {
     shortDescription: '',
   };
 
-  const validBlogData: BlogDto = {
+  const validBlogData: BlogInputDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',
   };
 
-  let validPostData: NewPostDto = {
+  let validPostData: PostInputDto = {
     title: 'title',
     content: 'content',
     blogId: uuidv4(),
@@ -116,8 +116,8 @@ describe('tests for /posts', () => {
       .expect(HTTP_STATUSES.OK_200, mockPosts);
   });
 
-  let newPost: PostType;
-  const newPosts: Array<PostType> = [];
+  let newPost: PostModel;
+  const newPosts: Array<PostModel> = [];
   let newBlog: BlogModel;
   it('should create a post if the user sent valid data with existing blog id', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(

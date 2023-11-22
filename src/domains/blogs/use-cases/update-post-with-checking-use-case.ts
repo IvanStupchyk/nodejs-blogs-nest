@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
-import { UpdatePostDto } from '../../posts/dto/update-post.dto';
+import { UpdatePostInputDto } from '../../../dto/posts/update-post.input.dto';
 import { HttpStatus } from '@nestjs/common';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
@@ -10,7 +10,7 @@ export class UpdatePostWithCheckingCommand {
     public userId: string,
     public blogId: string,
     public postId: string,
-    public body: UpdatePostDto,
+    public body: UpdatePostInputDto,
   ) {}
 }
 

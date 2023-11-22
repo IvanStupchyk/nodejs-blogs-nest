@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { mockBlogs, mockUsers } from '../../src/constants/blanks';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
+import { UserViewType } from '../../src/types/user-view.type';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { AppModule } from '../../src/app.module';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -10,16 +10,16 @@ import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { usersTestManager } from '../utils/users-test-manager';
-import { LoginUserDto } from '../../src/domains/auth/models/login-user.dto';
+import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
 
 describe('tests for /users and /auth', () => {
-  const invalidData: NewUserDto = {
+  const invalidData: UserInputDto = {
     login: '',
     password: '',
     email: '',
   };
 
-  const validData: NewUserDto = {
+  const validData: UserInputDto = {
     login: 'Nick',
     password: '123456',
     email: 'nickNick@gmail.com',
@@ -47,7 +47,7 @@ describe('tests for /users and /auth', () => {
     await app.close();
   });
 
-  const newUsers: Array<ViewUserModel> = [];
+  const newUsers: Array<UserViewType> = [];
 
   it('should return 200 and an empty users array', async () => {
     await request(httpServer)
@@ -101,7 +101,7 @@ describe('tests for /users and /auth', () => {
       .expect(HTTP_STATUSES.OK_200, mockBlogs);
   });
 
-  let newUser: ViewUserModel;
+  let newUser: UserViewType;
   it('should create a user if the user sends the valid data', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,
@@ -229,7 +229,7 @@ describe('tests for /users and /auth', () => {
   });
 
   it('should return 401 status code if credentials are incorrect', async () => {
-    const userWithWrongPassword: LoginUserDto = {
+    const userWithWrongPassword: LoginUserInputDto = {
       loginOrEmail: newUser.login,
       password: '123',
     };
@@ -241,7 +241,7 @@ describe('tests for /users and /auth', () => {
   });
 
   it('should log in a user with correct credentials', async () => {
-    const userWithCorrectData: LoginUserDto = {
+    const userWithCorrectData: LoginUserInputDto = {
       loginOrEmail: newUser.login,
       password: validData.password,
     };

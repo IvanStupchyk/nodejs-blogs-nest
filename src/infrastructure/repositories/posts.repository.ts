@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { likeStatus } from '../../types/general.types';
-import { PostViewModel } from '../../controllers/posts/models/post-view.model';
+import { PostViewType } from '../../types/post-view.type';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostModel } from '../../controllers/posts/models/Post.model';
+import { PostModel } from '../../models/posts/Post.model';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
-import { GetSortedPostsModel } from '../../controllers/posts/models/get-sorted-posts.model';
+import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
 import { mockPostModel } from '../../constants/blanks';
 import { PostsType } from '../../types/posts.types';
 
@@ -13,7 +13,7 @@ import { PostsType } from '../../types/posts.types';
 export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createPost(newPost: PostModel): Promise<PostViewModel> {
+  async createPost(newPost: PostModel): Promise<PostViewType> {
     const {
       id,
       title,
@@ -51,7 +51,7 @@ export class PostsRepository {
   }
 
   async getSortedPosts(
-    params: GetSortedPostsModel,
+    params: PostsQueryDto,
     userId: string,
   ): Promise<PostsType> {
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
@@ -144,7 +144,7 @@ export class PostsRepository {
     };
   }
 
-  async getPost(id: string, userId: string): Promise<PostViewModel | null> {
+  async getPost(id: string, userId: string): Promise<PostViewType | null> {
     const post = await this.dataSource.query(
       `
       select p."id", 
@@ -209,7 +209,7 @@ export class PostsRepository {
   }
 
   async getPostsByIdForSpecificBlog(
-    params: GetSortedPostsModel,
+    params: PostsQueryDto,
     id: string,
     userId: string | undefined,
   ): Promise<PostsType | null> {

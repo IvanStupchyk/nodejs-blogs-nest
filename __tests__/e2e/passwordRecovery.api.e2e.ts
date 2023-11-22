@@ -6,15 +6,14 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { UserType } from '../../src/controllers/users/models/user.model';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { JwtService } from '../../src/infrastructure/jwt.service';
 import { errorsConstants } from '../../src/constants/errors.contants';
 
 describe('tests for /auth password recovery', () => {
-  const userData: NewUserDto = {
+  const userData: UserInputDto = {
     login: 'Nick',
     password: '123456',
     email: 'nickNick@gmail.com',
@@ -46,7 +45,7 @@ describe('tests for /auth password recovery', () => {
     await app.close();
   });
 
-  let superAdminUser: ViewUserModel;
+  let superAdminUser: UserViewType;
 
   it('should create user for future tests', async () => {
     const { createdUser } = await usersTestManager.createUser(

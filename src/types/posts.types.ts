@@ -1,9 +1,9 @@
-import { PostViewModel } from '../controllers/posts/models/post-view.model';
+import { PostViewType } from './post-view.type';
 
 export type PostsType = {
   pagesCount: number;
   page: number;
   pageSize: number;
   totalCount: number;
-  items: Array<PostViewModel>;
+  items: Array<PostViewType>;
 };

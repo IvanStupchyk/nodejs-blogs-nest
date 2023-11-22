@@ -2,7 +2,7 @@ import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
 import { likeStatus } from '../../src/types/general.types';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
+import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 
 export const postsTestManager = {
   async createPost(
@@ -44,7 +44,7 @@ export const postsTestManager = {
 
   async createPostForSpecifiedBlog(
     httpServer: string,
-    data: NewPostDto,
+    data: PostInputDto,
     blogId: any,
     expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201,
     password = 'qwerty',

@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogModel } from '../dto/blog.dto';
-import { BlogDto } from '../../../dtos/blogs/blog.dto';
+import { BlogModel } from '../../../models/blogs/Blog.model';
+import { BlogInputDto } from '../../../dto/blogs/blog.input.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class CreateBlogCommand {
   constructor(
     public userId: string,
-    public body: BlogDto,
+    public body: BlogInputDto,
   ) {}
 }
 

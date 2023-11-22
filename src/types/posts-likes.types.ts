@@ -1,35 +1,8 @@
-import { ObjectId } from 'mongodb';
 import { likeStatus } from './general.types';
-
-// export type PostLikesMethodsType = {
-//   updateExistingPostLike: (myStatus: likeStatus) => void
-// }
-//
-// export type postLikesModelType = mongoose.Model<PostLikesType, {}, PostLikesMethodsType>
-//
-// type PostLikesModelStaticType = mongoose.Model<PostLikesType> & {
-//   makeInstance(
-//     userId: ObjectId,
-//     postId: ObjectId,
-//     newStatus: likeStatus
-//   ): HydratedDocument<PostLikesType, PostLikesMethodsType>
-// }
-//
-// export type postLikesModelFullType = postLikesModelType & PostLikesModelStaticType
-//
-// export type HydratedPostLikesType = HydratedDocument<PostLikesType, PostLikesMethodsType>
-//
-export type PostsLikesInfoType = {
-  id: ObjectId;
-  userId: ObjectId;
-  myStatus: likeStatus;
-  postId: ObjectId;
-  addedAt: string;
-};
 
 export type PostLikeUserInfoType = {
   addedAt: string;
-  userId: ObjectId;
+  userId: string;
   login: string;
 };
 

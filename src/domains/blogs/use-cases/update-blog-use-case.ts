@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogDto } from '../../../dtos/blogs/blog.dto';
+import { BlogInputDto } from '../../../dto/blogs/blog.input.dto';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 import { HttpStatus } from '@nestjs/common';
 
 export class UpdateBlogCommand {
   constructor(
-    public body: BlogDto,
+    public body: BlogInputDto,
     public userId: string,
     public id: string,
   ) {}

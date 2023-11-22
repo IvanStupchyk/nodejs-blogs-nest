@@ -1,12 +1,12 @@
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 
 export const usersTestManager = {
   async createUser(
     httpServer: string,
-    data: NewUserDto,
+    data: UserInputDto,
     expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201,
     password = 'qwerty',
   ) {

@@ -1,17 +1,17 @@
-import { NewPostDto } from '../../../dtos/posts/new-post.dto';
+import { PostInputDto } from '../../../dto/posts/post.input.dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsService } from '../posts.service';
-import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
+import { PostViewType } from '../../../types/post-view.type';
 
 export class CreatePostCommand {
-  constructor(public postData: NewPostDto) {}
+  constructor(public postData: PostInputDto) {}
 }
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
   constructor(private readonly postsService: PostsService) {}
 
-  async execute(command: CreatePostCommand): Promise<PostViewModel> {
+  async execute(command: CreatePostCommand): Promise<PostViewType> {
     return await this.postsService.createPost(command.postData);
   }
 }
