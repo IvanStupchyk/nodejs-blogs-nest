@@ -29,16 +29,14 @@ import { DeleteCommentCommand } from '../../domains/comments/use-cases/delete-co
 export class CommentsController {
   constructor(private commandBus: CommandBus) {}
 
-  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.comments}/:id`)
   async getCurrentComment(
     @Param() params: GetCommentModel,
     @Req() req: Request,
-    @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const foundComment = await this.commandBus.execute(
-      new GetCommentByIdCommand(params.id, userId),
+      new GetCommentByIdCommand(params.id, req.headers?.authorization),
     );
 
     !foundComment

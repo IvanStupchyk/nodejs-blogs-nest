@@ -8,7 +8,7 @@ import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-
 export class GetCommentByIdCommand {
   constructor(
     public commentId: string,
-    public userId: string | undefined,
+    public accessTokenHeader: string | undefined,
   ) {}
 }
 
@@ -27,9 +27,15 @@ export class GetCommentByIdUseCase
   ): Promise<CommentViewModel | null> {
     if (!isUUID(command.commentId)) return null;
 
+    let userId;
+    if (command.accessTokenHeader) {
+      const accessToken = command.accessTokenHeader.split(' ')[1];
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
+    }
+
     return await this.commentsSqlRepository.findCommentById(
       command.commentId,
-      command.userId,
+      userId,
     );
   }
 }

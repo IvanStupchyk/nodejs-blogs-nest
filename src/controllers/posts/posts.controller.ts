@@ -72,16 +72,19 @@ export class PostsController {
     !post ? res.sendStatus(HttpStatus.BAD_REQUEST) : res.send(post);
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Get(`${RouterPaths.posts}/:id/comments`)
   async getComments(
     @Param() params: UriParamsCommentModel,
     @Query() query: GetSortedCommentsModel,
-    @CurrentUserId() userId,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const foundComments = await this.commandBus.execute(
-      new GetSortedCommentsCommand(params.id, query, userId),
+      new GetSortedCommentsCommand(
+        params.id,
+        query,
+        req.headers?.authorization,
+      ),
     );
 
     !foundComments
