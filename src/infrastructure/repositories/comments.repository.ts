@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CommentsType, likeStatus } from '../../types/general.types';
-import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
-import { CommentModel } from '../../domains/comments/dto/comment.dto';
+import { CommentViewType } from '../../types/comment-view.type';
+import { CommentModel } from '../../models/comments/Comment.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockCommentModel } from '../../constants/blanks';
-import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
+import { CommentsQueryDto } from '../../dto/comments/comments.query.dto';
 
 @Injectable()
 export class CommentsRepository {
@@ -16,7 +16,7 @@ export class CommentsRepository {
   async findCommentById(
     id: string,
     userId: string = uuidv4(),
-  ): Promise<CommentViewModel | null> {
+  ): Promise<CommentViewType | null> {
     const foundComment: Array<
       CommentModel & {
         likesCount: number;
@@ -81,7 +81,7 @@ export class CommentsRepository {
   }
 
   async getSortedComments(
-    params: GetSortedCommentsModel,
+    params: CommentsQueryDto,
     postId: string,
     userId: string = uuidv4(),
   ): Promise<CommentsType> {
@@ -160,7 +160,7 @@ export class CommentsRepository {
     };
   }
 
-  async createComment(comment: CommentModel): Promise<CommentViewModel> {
+  async createComment(comment: CommentModel): Promise<CommentViewType> {
     const { id, content, postId, userId, userLogin, createdAt } = comment;
 
     const newComment: CommentModel = await this.dataSource.query(

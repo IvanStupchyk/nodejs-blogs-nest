@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentViewModel } from '../../../controllers/comments/models/comment-view.model';
+import { CommentViewType } from '../../../types/comment-view.type';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { isUUID } from '../../../utils/utils';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
@@ -22,7 +22,7 @@ export class GetCommentByIdUseCase
 
   async execute(
     command: GetCommentByIdCommand,
-  ): Promise<CommentViewModel | null> {
+  ): Promise<CommentViewType | null> {
     if (!isUUID(command.commentId)) return null;
 
     let userId;

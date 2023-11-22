@@ -5,9 +5,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
-import { UserType } from '../../src/controllers/users/models/user.model';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 const { parse } = require('cookie');
 
@@ -15,13 +14,13 @@ const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
 
 describe('tests for /devices and /auth', () => {
-  const validUserData: NewUserDto = {
+  const validUserData: UserInputDto = {
     login: 'Nick',
     password: '123456',
     email: 'nickNick@gmail.com',
   };
 
-  const secondUserData: NewUserDto = {
+  const secondUserData: UserInputDto = {
     login: 'Ivan',
     password: '123456',
     email: 'ivan@gmail.com',
@@ -62,8 +61,8 @@ describe('tests for /devices and /auth', () => {
     await app.close();
   });
 
-  let simpleUser: UserType;
-  let superAdminUser: ViewUserModel;
+  let simpleUser;
+  let superAdminUser: UserViewType;
   it('should create two users for next test cases', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,

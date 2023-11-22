@@ -7,8 +7,8 @@ import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { PostLikesRepository } from '../../../infrastructure/repositories/post-likes.repository';
-import { PostModel } from '../../../controllers/posts/models/Post.model';
-import { PostLikeModel } from '../../../controllers/posts/models/Post-like.model';
+import { PostModel } from '../../../models/posts/Post.model';
+import { PostLikesModel } from '../../../models/posts/Post-likes.model';
 import { v4 as uuidv4 } from 'uuid';
 
 export class ChangePostLikesCountCommand {
@@ -67,7 +67,7 @@ export class ChangePostLikesCountUseCase
         new Date().toISOString(),
       );
     } else {
-      const newPostLike = new PostLikeModel(
+      const newPostLike = new PostLikesModel(
         uuidv4(),
         userId,
         user.login,

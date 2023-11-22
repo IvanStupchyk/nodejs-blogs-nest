@@ -5,11 +5,10 @@ import {
   mockPostModel,
   mockUserModel,
 } from '../constants/blanks';
-import { ObjectId } from 'mongodb';
-import { BlogModel } from '../domains/blogs/dto/blog.dto';
-import { PostType } from '../domains/posts/dto/post.dto';
-import { ViewUserModel } from '../controllers/users/models/view-user.model';
-import { CommentViewModel } from '../controllers/comments/models/comment-view.model';
+import { BlogModel } from '../models/blogs/Blog.model';
+import { UserViewType } from './user-view.type';
+import { CommentViewType } from './comment-view.type';
+import { PostModel } from '../models/posts/Post.model';
 
 export type BlogsType = {
   pagesCount: number;
@@ -30,23 +29,6 @@ export enum likeStatus {
   Dislike = 'Dislike',
 }
 
-export type UserCommentLikesType = {
-  commentId: ObjectId;
-  myStatus: likeStatus;
-  createdAt: string;
-};
-
-export type InvalidRefreshTokensType = {
-  id: ObjectId;
-  refreshToken: string;
-  createdAt: string;
-};
-
-export type CommentLikesInfoType = {
-  likesCount: number;
-  dislikesCount: number;
-};
-
 export type CommentLikesViewType = {
   likesCount: number;
   dislikesCount: number;
@@ -65,7 +47,7 @@ export type CommentsType = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: Array<CommentViewModel>;
+  items: Array<CommentViewType>;
 };
 
 export type APIRequestsCountType = {
@@ -76,27 +58,14 @@ export type APIRequestsCountType = {
   createdAt: string;
 };
 
-export type AccountDataType = {
-  login: string;
-  email: string;
-  passwordHash: string;
-  createdAt: string;
-};
-
-export type EmailConfirmationType = {
-  confirmationCode: string;
-  expirationDate: Date;
-  isConfirmed: boolean;
-};
-
 export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;
   sortBy:
     | keyof BlogModel
-    | keyof PostType
-    | keyof ViewUserModel
-    | keyof CommentViewModel;
+    | keyof PostModel
+    | keyof UserViewType
+    | keyof CommentViewType;
   model:
     | typeof mockBlogModel
     | typeof mockPostModel

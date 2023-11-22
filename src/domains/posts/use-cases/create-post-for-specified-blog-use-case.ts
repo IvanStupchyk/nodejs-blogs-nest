@@ -1,14 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsService } from '../posts.service';
-import { PostViewModel } from '../../../controllers/posts/models/post-view.model';
+import { PostViewType } from '../../../types/post-view.type';
 import { NotFoundException } from '@nestjs/common';
-import { PostForSpecificBlogDto } from '../../../dtos/posts/post-for-specific-blog.dto';
+import { PostForSpecifiedBlogInputDto } from '../../../dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class CreatePostForSpecifiedBlogCommand {
   constructor(
-    public postData: PostForSpecificBlogDto,
+    public postData: PostForSpecifiedBlogInputDto,
     public blogId: string,
     public userId: string,
   ) {}
@@ -25,7 +25,7 @@ export class CreatePostForSpecifiedBlogUseCase
 
   async execute(
     command: CreatePostForSpecifiedBlogCommand,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewType> {
     const { title, content, shortDescription } = command.postData;
 
     if (!isUUID(command.blogId)) return null;

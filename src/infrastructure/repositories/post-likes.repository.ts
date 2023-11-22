@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostLikeModel } from '../../controllers/posts/models/Post-like.model';
+import { PostLikesModel } from '../../models/posts/Post-likes.model';
 
 @Injectable()
 export class PostLikesRepository {
@@ -10,7 +10,7 @@ export class PostLikesRepository {
   async findPostLikesByUserIdAndPostId(
     userId: string,
     postId: string,
-  ): Promise<PostLikeModel | null> {
+  ): Promise<PostLikesModel | null> {
     const likes = await this.dataSource.query(
       `
       select "id", "userId", "login", "myStatus", "postId", "addedAt", "createdAt"
@@ -43,7 +43,7 @@ export class PostLikesRepository {
     return !!response[1];
   }
 
-  async addPostLike(newPostLike: PostLikeModel): Promise<boolean> {
+  async addPostLike(newPostLike: PostLikesModel): Promise<boolean> {
     const { id, userId, login, postId, myStatus, addedAt, createdAt } =
       newPostLike;
 

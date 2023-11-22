@@ -3,11 +3,11 @@ import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { NewPasswordDto } from '../models/new-password.dto';
+import { NewPasswordInputDto } from '../../../dto/auth/new-password.input.dto';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class UpdateUserPasswordCommand {
-  constructor(public body: NewPasswordDto) {}
+  constructor(public body: NewPasswordInputDto) {}
 }
 
 @CommandHandler(UpdateUserPasswordCommand)

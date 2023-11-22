@@ -2,33 +2,32 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { mockBlogs } from '../../src/constants/blanks';
-import { ObjectId } from 'mongodb';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
-import { BlogDto } from '../../src/dtos/blogs/blog.dto';
-import { NewPostDto } from '../../src/dtos/posts/new-post.dto';
+import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
+import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
-import { PostType } from '../../src/domains/posts/dto/post.dto';
+import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { v4 as uuidv4 } from 'uuid';
+import { PostModel } from '../../src/models/posts/Post.model';
 
 describe('tests for /blogs', () => {
-  const invalidData: BlogDto = {
+  const invalidData: BlogInputDto = {
     name: '',
     description: '',
     websiteUrl: '',
   };
 
-  const validData: BlogDto = {
+  const validData: BlogInputDto = {
     name: 'new name',
     description: 'new description',
     websiteUrl: 'https://www.aaaaa.com',
   };
 
-  const validPostData: NewPostDto = {
+  const validPostData: PostInputDto = {
     title: 'title',
     content: 'content',
     blogId: uuidv4(),
@@ -115,8 +114,8 @@ describe('tests for /blogs', () => {
   });
 
   let newBlog: BlogModel;
-  let newPost: PostType;
-  let secondPost: PostType;
+  let newPost: PostModel;
+  let secondPost: PostModel;
   it('should create a blog if the user sends the valid data', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,

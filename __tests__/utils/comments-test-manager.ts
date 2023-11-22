@@ -1,17 +1,16 @@
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
-import { CreateCommentModel } from '../../src/controllers/comments/models/create-comment.model';
-import { ObjectId } from 'mongodb';
 import { RouterPaths } from '../../src/constants/router.paths';
+import { v4 as uuidv4 } from 'uuid';
 
 export const commentsTestManager = {
   async createComment(
     httpServer: string,
-    data: CreateCommentModel,
+    data: { content: string },
     postId: any,
     token: string,
     expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201,
-    userId: ObjectId = new ObjectId(),
+    userId: string = uuidv4(),
     userLogin: string = '',
   ) {
     const response = await request(httpServer)

@@ -8,31 +8,30 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
-import { CreateCommentModel } from '../../src/controllers/comments/models/create-comment.model';
-import { NewUserDto } from '../../src/dtos/users/new-user.dto';
-import { BlogModel } from '../../src/domains/blogs/dto/blog.dto';
-import { CommentViewModel } from '../../src/controllers/comments/models/comment-view.model';
-import { ViewUserModel } from '../../src/controllers/users/models/view-user.model';
+import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { BlogModel } from '../../src/models/blogs/Blog.model';
+import { CommentViewType } from '../../src/types/comment-view.type';
+import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
-import { LoginUserDto } from '../../src/domains/auth/models/login-user.dto';
-import { UpdateCommentDto } from '../../src/dtos/comments/update-comment.dto';
-import { PostType } from '../../src/domains/posts/dto/post.dto';
+import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
+import { CommentInputDto } from '../../src/dto/comments/comment.input.dto';
 import { errorsConstants } from '../../src/constants/errors.contants';
+import { PostModel } from '../../src/models/posts/Post.model';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
 
 describe('tests for /comments and posts/:id/comments', () => {
-  const invalidCommentData: CreateCommentModel = {
+  const invalidCommentData = {
     content: '',
   };
 
-  const validCommentData: CreateCommentModel = {
+  const validCommentData = {
     content: 'new comment for existing comment',
   };
 
-  const userData1: NewUserDto = {
+  const userData1: UserInputDto = {
     login: 'Ivan',
     password: '123456',
     email: 'ivanIvan@gmail.com',
@@ -76,15 +75,15 @@ describe('tests for /comments and posts/:id/comments', () => {
     await app.close();
   });
 
-  let newPost: PostType;
+  let newPost: PostModel;
   let newBlog: BlogModel;
-  let user1: ViewUserModel;
-  let user2: ViewUserModel;
-  let user3: ViewUserModel;
-  let comment1: CommentViewModel;
-  let comment2: CommentViewModel;
-  let comment3: CommentViewModel;
-  const newComments: Array<CommentViewModel> = [];
+  let user1: UserViewType;
+  let user2: UserViewType;
+  let user3: UserViewType;
+  let comment1: CommentViewType;
+  let comment2: CommentViewType;
+  let comment3: CommentViewType;
+  const newComments: Array<CommentViewType> = [];
   let accessTokenUser1: string;
   let accessTokenUser2: string;
   let accessTokenUser3: string;
@@ -330,7 +329,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   it("should return 403 status if user tries to update someone else's comment", async () => {
-    const userWithCorrectData: LoginUserDto = {
+    const userWithCorrectData: LoginUserInputDto = {
       loginOrEmail: userData2.login,
       password: userData2.password,
     };
@@ -530,7 +529,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   }, 10000);
 
   it('should update current comment', async () => {
-    const newCommentContent: UpdateCommentDto = {
+    const newCommentContent: CommentInputDto = {
       content: 'new content for updated comment',
     };
     await getRequest()
@@ -549,7 +548,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   it("shouldn't delete someone else's comment", async () => {
-    const userWithCorrectData: LoginUserDto = {
+    const userWithCorrectData: LoginUserInputDto = {
       loginOrEmail: userData2.login,
       password: userData2.password,
     };
@@ -567,7 +566,7 @@ describe('tests for /comments and posts/:id/comments', () => {
 
   it('should delete certain comment', async () => {
     await sleep(10);
-    const userWithCorrectData: LoginUserDto = {
+    const userWithCorrectData: LoginUserInputDto = {
       loginOrEmail: userData1.login,
       password: userData1.password,
     };

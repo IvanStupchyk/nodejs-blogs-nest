@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
-import { GetSortedPostsModel } from '../../../controllers/posts/models/get-sorted-posts.model';
+import { PostsQueryDto } from '../../../dto/posts/posts.query.dto';
 import { PostsType } from '../../../types/posts.types';
 import { v4 as uuidv4 } from 'uuid';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
@@ -9,7 +9,7 @@ import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class GetPostsForSpecifiedBlogCommand {
   constructor(
-    public query: GetSortedPostsModel,
+    public query: PostsQueryDto,
     public blogId: string,
     public accessTokenHeader: string | undefined,
   ) {}

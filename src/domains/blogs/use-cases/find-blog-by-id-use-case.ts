@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogModel } from '../dto/blog.dto';
+import { BlogModel } from '../../../models/blogs/Blog.model';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 

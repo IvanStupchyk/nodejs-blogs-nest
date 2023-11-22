@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PostViewModel } from '../../controllers/posts/models/post-view.model';
-import { NewPostDto } from '../../dtos/posts/new-post.dto';
+import { PostViewType } from '../../types/post-view.type';
+import { PostInputDto } from '../../dto/posts/post.input.dto';
 import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
-import { PostModel } from '../../controllers/posts/models/Post.model';
+import { PostModel } from '../../models/posts/Post.model';
 import { v4 as uuidv4 } from 'uuid';
 import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
 
@@ -13,7 +13,7 @@ export class PostsService {
     private readonly blogsRepository: BlogsRepository,
   ) {}
 
-  async createPost(postData: NewPostDto): Promise<PostViewModel> {
+  async createPost(postData: PostInputDto): Promise<PostViewType> {
     const { title, content, shortDescription, blogId } = postData;
     const blog = await this.blogsRepository.findBlogById(blogId);
 

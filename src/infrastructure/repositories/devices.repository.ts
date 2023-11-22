@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceType } from '../../domains/devices/dto/device.dto';
+import { DeviceType } from '../../models/devices/Device.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 

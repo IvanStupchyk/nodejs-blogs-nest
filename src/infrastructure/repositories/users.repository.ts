@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ViewUserModel } from '../../controllers/users/models/view-user.model';
+import { UserViewType } from '../../types/user-view.type';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserType } from '../../types/rawSqlTypes/user';
@@ -8,7 +8,7 @@ import { UserType } from '../../types/rawSqlTypes/user';
 export class UsersRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createUser(newUser: UserType): Promise<ViewUserModel> {
+  async createUser(newUser: UserType): Promise<UserViewType> {
     const {
       id,
       login,

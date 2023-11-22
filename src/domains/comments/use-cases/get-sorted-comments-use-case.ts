@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsType } from '../../../types/general.types';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { GetSortedCommentsModel } from '../../../controllers/comments/models/get-sorted-comments.model';
+import { CommentsQueryDto } from '../../../dto/comments/comments.query.dto';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
@@ -9,7 +9,7 @@ import { PostsRepository } from '../../../infrastructure/repositories/posts.repo
 export class GetSortedCommentsCommand {
   constructor(
     public id: string,
-    public query: GetSortedCommentsModel,
+    public query: CommentsQueryDto,
     public accessTokenHeader: string | undefined,
   ) {}
 }
