@@ -1,65 +1,142 @@
-import { ObjectId } from 'mongodb';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, UserModelType } from '../../schemas/user.schema';
 import { ViewUserModel } from '../../controllers/users/models/view-user.model';
-import { UserCommentLikesType } from '../../types/general.types';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { UserType } from '../../types/rawSqlTypes/user';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
-  async save(model: UserDocument) {
-    return await model.save();
-  }
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findUserById(id: ObjectId): Promise<ViewUserModel | null> {
-    const user = await this.UserModel.findOne(
-      { id },
-      { _id: 0, __v: 0 },
-    ).exec();
+  async createUser(newUser: UserType): Promise<ViewUserModel> {
+    const {
+      id,
+      login,
+      email,
+      passwordHash,
+      confirmationCode,
+      expirationDate,
+      isConfirmed,
+      createdAt,
+    } = newUser;
 
-    return user
-      ? {
-          id: user.id,
-          login: user.accountData.login,
-          email: user.accountData.email,
-          createdAt: user.accountData.createdAt,
-        }
-      : null;
-  }
-
-  async findUserByLoginOrEmail(
-    loginOrEmail: string,
-  ): Promise<UserDocument | null> {
-    return this.UserModel.findOne({
-      $or: [
-        { 'accountData.login': loginOrEmail },
-        { 'accountData.email': loginOrEmail },
+    const user = await this.dataSource.query(
+      `
+    INSERT INTO public.users(
+    "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    returning "id", "login", "email", "createdAt";
+    `,
+      [
+        id,
+        login,
+        email,
+        passwordHash,
+        confirmationCode,
+        expirationDate,
+        isConfirmed,
+        createdAt,
       ],
-    });
+    );
+
+    return user[0];
   }
 
-  async findUserByConfirmationCode(code: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({
-      'emailConfirmation.confirmationCode': code,
-    });
+  async fetchAllUserDataById(id: string): Promise<UserType> {
+    const user = await this.dataSource.query(
+      `
+    SELECT "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
+    FROM public.users
+        where ("id" = $1)
+    `,
+      [id],
+    );
+
+    return user[0];
   }
 
-  async findUserCommentLikesById(
-    id: ObjectId,
-  ): Promise<Array<UserCommentLikesType> | null> {
-    const user = await this.UserModel.findOne({ id }).exec();
+  async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
+    const user = await this.dataSource.query(
+      `
+    SELECT "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
+    FROM public.users
+        where ("login" like $1 or "email" like $1)
+    `,
+      [loginOrEmail],
+    );
 
-    return user ? [...user.commentsLikes] : null;
+    return user[0];
   }
 
-  async fetchAllUserDataById(id: ObjectId): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ id });
+  async findUserByConfirmationCode(code: string): Promise<any | null> {
+    const user = await this.dataSource.query(
+      `
+    SELECT "id", "login", "email", "confirmationCode", "expirationDate", "isConfirmed"
+    FROM public.users
+        where ("confirmationCode" like $1)
+    `,
+      [code],
+    );
+
+    return user[0];
   }
 
-  async deleteUser(id: ObjectId): Promise<boolean> {
-    const result = await this.UserModel.deleteOne({ id }).exec();
+  async confirmEmail(id: string): Promise<boolean> {
+    const isConfirmed = await this.dataSource.query(
+      `
+    update public.users
+    set "isConfirmed" = true
+    where id = $1
+    `,
+      [id],
+    );
 
-    return result.deletedCount === 1;
+    return isConfirmed[1] === 1;
+  }
+
+  async updateConfirmationCodeAndExpirationTime(
+    id: string,
+    newExpirationDate: string,
+    newCode: string,
+  ): Promise<boolean> {
+    const isUpdated = await this.dataSource.query(
+      `
+    update public.users
+    set "expirationDate" = $2, "confirmationCode" = $3
+    where id = $1
+    `,
+      [id, newExpirationDate, newCode],
+    );
+
+    return isUpdated[1] === 1;
+  }
+
+  async changeUserPassword(
+    newPasswordHash: string,
+    id: string,
+  ): Promise<boolean> {
+    const isUpdated = await this.dataSource.query(
+      `
+      update public.users
+      set "passwordHash" = $1
+      where "id" = $2
+    `,
+      [newPasswordHash, id],
+    );
+
+    return !!isUpdated[1];
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `
+        DELETE FROM public.users
+        WHERE "id" = $1;
+        `,
+      [id],
+    );
+
+    return !!result[1];
   }
 }

@@ -19,19 +19,19 @@ import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateSuperUserCommand } from '../../domains/users/use-cases/create-super-user-use-case';
 import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
-import { UsersQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/users-query-sql.repository';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 
 @Controller()
 export class UsersController {
   constructor(
-    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(BasicAuthGuard)
   @Get(`${RouterPaths.users}`)
   async getUser(@Query() params: GetSortedUsersModel) {
-    return await this.usersQuerySqlRepository.getSortedUsers(params);
+    return await this.usersQueryRepository.getSortedUsers(params);
   }
 
   @UseGuards(BasicAuthGuard)

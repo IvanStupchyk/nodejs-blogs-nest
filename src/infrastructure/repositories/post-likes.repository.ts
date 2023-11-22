@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { PostLikeModel } from '../../controllers/posts/models/Post-like.model';
 
 @Injectable()
-export class PostLikesSqlRepository {
+export class PostLikesRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findPostLikesByUserIdAndPostId(

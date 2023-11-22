@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
-import { PostsSqlRepository } from '../../../infrastructure/repositories-raw-sql/posts-sql.repository';
-import { BlogsSqlRepository } from '../../../infrastructure/repositories-raw-sql/blogs-sql.repository';
+import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
+import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
 
 export class DeletePostWithCheckingCommand {
   constructor(
@@ -17,21 +17,21 @@ export class DeletePostWithCheckingUseCase
   implements ICommandHandler<DeletePostWithCheckingCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsRepository: BlogsRepository,
   ) {}
 
   async execute(command: DeletePostWithCheckingCommand): Promise<number> {
     if (!isUUID(command.blogId)) return HttpStatus.NOT_FOUND;
     if (!isUUID(command.postId)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsSqlRepository.fetchAllBlogDataById(
+    const blog = await this.blogsRepository.fetchAllBlogDataById(
       command.blogId,
     );
     if (!blog) return HttpStatus.NOT_FOUND;
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
-    const result = await this.postsSqlRepository.deletePost(command.postId);
+    const result = await this.postsRepository.deletePost(command.postId);
 
     return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
   }

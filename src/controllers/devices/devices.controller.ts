@@ -10,17 +10,15 @@ import {
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
 import { RefreshTokenMiddleware } from '../../infrastructure/refresh-token.middleware';
-import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
 import { DeleteDeviceModel } from './models/delete-device.model';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteDeviceCommand } from '../../domains/devices/use-cases/delete-device-use-case';
-import { DevicesQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/devices-query-sql.repository';
+import { DevicesQueryRepository } from '../../infrastructure/repositories/devices-query.repository';
 
 @Controller()
 export class DevicesController {
   constructor(
-    private readonly devicesRepository: DevicesRepository,
-    private readonly devicesQuerySqlRepository: DevicesQuerySqlRepository,
+    private readonly devicesQueryRepository: DevicesQueryRepository,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
     private commandBus: CommandBus,
   ) {}
@@ -31,7 +29,7 @@ export class DevicesController {
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
     return res.send(
-      await this.devicesQuerySqlRepository.getUserSessions(ids.userId),
+      await this.devicesQueryRepository.getUserSessions(ids.userId),
     );
   }
 
@@ -43,7 +41,7 @@ export class DevicesController {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
-    await this.devicesQuerySqlRepository.removeAllSessionsExceptCurrent(
+    await this.devicesQueryRepository.removeAllSessionsExceptCurrent(
       ids.deviceId,
       ids.userId,
     );

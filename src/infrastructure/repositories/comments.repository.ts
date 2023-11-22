@@ -1,58 +1,89 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CommentLikesInfoType,
-  CommentsType,
-  likeStatus,
-  UserCommentLikesType,
-} from '../../types/general.types';
+import { CommentsType, likeStatus } from '../../types/general.types';
 import { CommentViewModel } from '../../controllers/comments/models/comment-view.model';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CommentDocument, Comment } from '../../schemas/comment.schema';
-import { ObjectId } from 'mongodb';
-import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
+import { CommentModel } from '../../domains/comments/dto/comment.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockCommentModel } from '../../constants/blanks';
-import { UsersRepository } from './users.repository';
+import { GetSortedCommentsModel } from '../../controllers/comments/models/get-sorted-comments.model';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(
-    @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
-    private usersRepository: UsersRepository,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findCommentById(
-    id: ObjectId,
-    likedStatus: likeStatus = likeStatus.None,
+    id: string,
+    userId: string = uuidv4(),
   ): Promise<CommentViewModel | null> {
-    const foundComment = await this.CommentModel.findOne(
-      { id },
-      { projection: { _id: 0 } },
-    ).exec();
+    const foundComment: Array<
+      CommentModel & {
+        likesCount: number;
+        dislikesCount: number;
+        userStatus: likeStatus;
+      }
+    > = await this.dataSource.query(
+      `
+      select c."id", c."content", c."postId", c."userId", c."userLogin", c."createdAt" ,
+       ( 
+        select count("myStatus")
+        from public."commentLikes"
+        where "myStatus" = 'Like'
+        and "commentId" = c."id"
+      ) as "likesCount",
+      ( 
+        select "myStatus"
+        from public."commentLikes"
+        where "userId" = $2
+        and "commentId" = c."id"
+      ) as "userStatus",
+      ( 
+        select count("myStatus")
+        from public."commentLikes"
+        where "myStatus" = 'Dislike'
+        and "commentId" = c."id"
+      ) as "dislikesCount"
+      from public."comments" c
+      where "id" = $1
+    `,
+      [id, userId],
+    );
 
-    return foundComment
+    return foundComment.length
       ? {
-          id: foundComment.id,
-          content: foundComment.content,
+          id: foundComment[0].id,
+          content: foundComment[0].content,
           commentatorInfo: {
-            userId: foundComment.commentatorInfo.userId,
-            userLogin: foundComment.commentatorInfo.userLogin,
+            userId: foundComment[0].userId,
+            userLogin: foundComment[0].userLogin,
           },
           likesInfo: {
-            likesCount: foundComment.likesInfo.likesCount,
-            dislikesCount: foundComment.likesInfo.dislikesCount,
-            myStatus: likedStatus,
+            likesCount: Number(foundComment[0].likesCount),
+            dislikesCount: Number(foundComment[0].dislikesCount),
+            myStatus: foundComment[0].userStatus ?? likeStatus.None,
           },
-          createdAt: foundComment.createdAt,
+          createdAt: foundComment[0].createdAt,
         }
       : null;
   }
 
+  async deleteComment(commentId: string): Promise<boolean> {
+    const isDeleted = await this.dataSource.query(
+      `
+      DELETE from public."comments"
+      where "id" = $1
+    `,
+      [commentId],
+    );
+
+    return !!isDeleted[1];
+  }
+
   async getSortedComments(
     params: GetSortedCommentsModel,
-    postId: ObjectId,
-    userId: ObjectId | undefined,
+    postId: string,
+    userId: string = uuidv4(),
   ): Promise<CommentsType> {
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
       createDefaultSortedParams({
@@ -63,44 +94,65 @@ export class CommentsRepository {
         model: mockCommentModel,
       });
 
-    const comments: Array<any> = await this.CommentModel.find(
-      { postId },
-      { _id: 0, __v: 0 },
-    )
-      .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
-      .skip(skipSize)
-      .limit(pageSize)
-      .lean();
+    const comments = await this.dataSource.query(
+      `
+      select c."id", c."content", c."postId", c."userId", c."userLogin", c."createdAt" ,
+       ( 
+        select count("myStatus")
+        from public."commentLikes"
+        where "myStatus" = 'Like'
+        and "commentId" = c."id"
+      ) as "likesCount",
+      ( 
+        select "myStatus"
+        from public."commentLikes"
+        where "userId" = $3
+        and "commentId" = c."id"
+      ) as "userStatus",
+      ( 
+        select count("myStatus")
+        from public."commentLikes"
+        where "myStatus" = 'Dislike'
+        and "commentId" = c."id"
+      ) as "dislikesCount"
+      from public."comments" c
+      where "postId" = $4
+         order by "${sortBy}" ${sortDirection}
+         limit $1 offset $2 
+    `,
+      [pageSize, skipSize, userId, postId],
+    );
 
-    const commentsCount = await this.CommentModel.countDocuments({ postId });
+    const commentsCount = await this.dataSource.query(
+      `
+    select "id", "postId"
+    from public."comments"
+    where ("postId" = $1)`,
+      [postId],
+    );
 
-    const pagesCount = getPagesCount(commentsCount, pageSize);
-    let usersCommentsLikes: any;
-    if (userId) {
-      usersCommentsLikes =
-        await this.usersRepository.findUserCommentLikesById(userId);
-    }
+    if (!commentsCount.length) return null;
+
+    const totalCommentsCount = commentsCount.length;
+    const pagesCount = getPagesCount(totalCommentsCount, pageSize);
 
     return {
       pagesCount,
       page: pageNumber,
       pageSize,
-      totalCount: commentsCount,
+      totalCount: totalCommentsCount,
       items: comments.map((c) => {
         return {
           id: c.id,
           content: c.content,
           commentatorInfo: {
-            userId: c.commentatorInfo.userId,
-            userLogin: c.commentatorInfo.userLogin,
+            userId: c.userId,
+            userLogin: c.userLogin,
           },
           likesInfo: {
-            likesCount: c.likesInfo.likesCount,
-            dislikesCount: c.likesInfo.dislikesCount,
-            myStatus:
-              usersCommentsLikes?.find((uc: UserCommentLikesType) =>
-                new ObjectId(uc.commentId).equals(c.id),
-              )?.myStatus ?? likeStatus.None,
+            likesCount: Number(c.likesCount),
+            dislikesCount: Number(c.dislikesCount),
+            myStatus: c.userStatus ?? likeStatus.None,
           },
           createdAt: c.createdAt,
         };
@@ -108,59 +160,49 @@ export class CommentsRepository {
     };
   }
 
-  async createComment(comment: any): Promise<CommentViewModel | null> {
-    return null;
-    // const commentInstance = new this.CommentModel();
-    //
-    // commentInstance.id = comment.id;
-    // commentInstance.content = comment.content;
-    // commentInstance.postId = comment.postId;
-    // commentInstance.commentatorInfo = comment.commentatorInfo;
-    // commentInstance.likesInfo = comment.likesInfo;
-    // commentInstance.createdAt = comment.createdAt;
-    //
-    // await commentInstance.save();
-    //
-    // return {
-    //   id: commentInstance.id,
-    //   content: commentInstance.content,
-    //   commentatorInfo: {
-    //     userId: commentInstance.commentatorInfo.userId,
-    //     userLogin: commentInstance.commentatorInfo.userLogin,
-    //   },
-    //   likesInfo: {
-    //     likesCount: commentInstance.likesInfo.likesCount,
-    //     dislikesCount: commentInstance.likesInfo.dislikesCount,
-    //     myStatus: likeStatus.None,
-    //   },
-    //   createdAt: commentInstance.createdAt,
-    // };
+  async createComment(comment: CommentModel): Promise<CommentViewModel> {
+    const { id, content, postId, userId, userLogin, createdAt } = comment;
+
+    const newComment: CommentModel = await this.dataSource.query(
+      `
+      insert into public."comments"("id", "content", "postId", "userId", "userLogin", "createdAt")
+      values($1, $2, $3, $4, $5, $6)
+      returning "id", "content", "postId", "userId", "userLogin", "createdAt"  `,
+      [id, content, postId, userId, userLogin, createdAt],
+    );
+
+    return {
+      id: newComment[0].id,
+      content: newComment[0].content,
+      commentatorInfo: {
+        userId: newComment[0].userId,
+        userLogin: newComment[0].userLogin,
+      },
+      createdAt: newComment[0].createdAt,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: likeStatus.None,
+      },
+    };
   }
 
-  async updateComment(content: string, id: ObjectId): Promise<boolean> {
-    const result = await this.CommentModel.updateOne(
-      { id },
-      { $set: { content } },
-    ).exec();
+  async updateComment(content: string, id: string): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `
+      update public."comments"
+      set "content" = $1
+      where "id" = $2 
+    `,
+      [content, id],
+    );
 
-    return result.matchedCount === 1;
+    return !!result[1];
   }
 
-  async changeLikesCount(
-    id: string,
-    likesInfo: CommentLikesInfoType,
-  ): Promise<boolean> {
-    const result = await this.CommentModel.updateOne(
-      { id },
-      { $set: { likesInfo } },
-    ).exec();
-
-    return result.matchedCount === 1;
-  }
-
-  async deleteComment(id: string): Promise<boolean> {
-    const result = await this.CommentModel.deleteOne({ id }).exec();
-
-    return result.deletedCount === 1;
+  async deleteAllComments() {
+    return this.dataSource.query(`
+    Delete from public."comments"
+    `);
   }
 }

@@ -15,7 +15,6 @@ import { LoginUserDto } from '../../domains/auth/models/login-user.dto';
 import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { NewUserDto } from '../../dtos/users/new-user.dto';
 import { ConfirmEmailModel } from '../../domains/auth/models/confirm-email.model';
@@ -38,7 +37,6 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 @Controller()
 export class AuthController {
   constructor(
-    private readonly usersQueryRepository: UsersQueryRepository,
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
     private commandBus: CommandBus,
   ) {}

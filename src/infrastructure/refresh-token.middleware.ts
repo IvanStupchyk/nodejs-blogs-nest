@@ -1,13 +1,13 @@
 import { Request } from 'express';
 import { JwtService } from './jwt.service';
 import { Injectable } from '@nestjs/common';
-import { DevicesSqlRepository } from './repositories-raw-sql/devices-sql.repository';
+import { DevicesRepository } from './repositories/devices.repository';
 
 @Injectable()
 export class RefreshTokenMiddleware {
   constructor(
     protected readonly jwtService: JwtService,
-    protected readonly devicesSqlRepository: DevicesSqlRepository,
+    protected readonly devicesRepository: DevicesRepository,
   ) {}
 
   async checkRefreshToken(
@@ -22,7 +22,7 @@ export class RefreshTokenMiddleware {
     );
 
     if (result?.userId) {
-      const session = await this.devicesSqlRepository.findDeviceById(
+      const session = await this.devicesRepository.findDeviceById(
         result?.deviceId,
       );
       if (!session) {

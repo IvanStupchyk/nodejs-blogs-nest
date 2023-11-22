@@ -29,7 +29,7 @@ import { UpdateBlogCommand } from '../../domains/blogs/use-cases/update-blog-use
 import { DeleteBlogCommand } from '../../domains/blogs/use-cases/delete-blog-use-case';
 import { FindBlogByIdCommand } from '../../domains/blogs/use-cases/find-blog-by-id-use-case';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { BlogsQuerySqlRepository } from '../../infrastructure/repositories-raw-sql/blogs-query-sql.repository';
+import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { UpdatePostModel } from './models/update-post.model';
 import { UpdatePostDto } from '../../domains/posts/dto/update-post.dto';
 import { UpdatePostWithCheckingCommand } from '../../domains/blogs/use-cases/update-post-with-checking-use-case';
@@ -43,7 +43,7 @@ import { CurrentUserId } from '../../auth/current-user-param.decorator';
 @Controller()
 export class BlogController {
   constructor(
-    private readonly blogsQuerySqlRepository: BlogsQuerySqlRepository,
+    private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
@@ -51,7 +51,7 @@ export class BlogController {
   @UseGuards(ThrottlerGuard, BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}`)
   async getBlogsForSa(@Query() params: GetSortedBlogsModel) {
-    return await this.blogsQuerySqlRepository.getSortedBlogs(
+    return await this.blogsQueryRepository.getSortedBlogs(
       params,
       'id from CurrentUserId',
     );
@@ -60,7 +60,7 @@ export class BlogController {
   @UseGuards(ThrottlerGuard)
   @Get(`${RouterPaths.blogs}`)
   async getBlogs(@Query() params: GetSortedBlogsModel) {
-    return await this.blogsQuerySqlRepository.getSortedBlogs(params);
+    return await this.blogsQueryRepository.getSortedBlogs(params);
   }
 
   @UseGuards(BasicAuthGuard)

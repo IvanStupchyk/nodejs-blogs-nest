@@ -3,14 +3,12 @@ import { GetSortedUsersModel } from '../../controllers/users/models/get-sorted-u
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockUserModel } from '../../constants/blanks';
 import { UsersType } from '../../types/users.types';
-import { UserType } from '../../controllers/users/models/user.model';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../../schemas/user.schema';
-import { Model } from 'mongoose';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectModel(User.name) private UserModel: Model<UserDocument>) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async getSortedUsers(params: GetSortedUsersModel): Promise<UsersType> {
     const { searchLoginTerm, searchEmailTerm } = params;
 
@@ -23,59 +21,57 @@ export class UsersQueryRepository {
         model: mockUserModel,
       });
 
-    let findCondition = {};
+    let login = '%';
+    let email = '%';
 
     if (searchLoginTerm && !searchEmailTerm) {
-      findCondition = {
-        'accountData.login': { $regex: searchLoginTerm, $options: 'i' },
-      };
+      login = `%${searchLoginTerm}%`;
+      email = '';
     }
 
     if (searchEmailTerm && !searchLoginTerm) {
-      findCondition = {
-        'accountData.email': { $regex: searchEmailTerm, $options: 'i' },
-      };
+      email = `%${searchEmailTerm}%`;
+      login = '';
     }
 
     if (searchEmailTerm && searchLoginTerm) {
-      findCondition = {
-        $or: [
-          { 'accountData.login': { $regex: searchLoginTerm, $options: 'i' } },
-          { 'accountData.email': { $regex: searchEmailTerm, $options: 'i' } },
-        ],
-      };
+      email = `%${searchEmailTerm}%`;
+      login = `%${searchLoginTerm}%`;
     }
 
-    const sortField = `accountData.${sortBy}`;
+    const users = await this.dataSource.query(
+      `
+    select "id", "login", "email", "createdAt"
+    from public.users
+    where ("login" ilike $3 or "email" ilike $4)
+    order by "${sortBy}" ${sortDirection}
+    limit $1 offset $2`,
+      [pageSize, skipSize, login, email],
+    );
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    const users: Array<UserType> = await this.UserModel.find(findCondition, {
-      _id: 0,
-      __v: 0,
-    })
-      .sort({ [sortField]: sortDirection === 'asc' ? 1 : -1 })
-      .skip(skipSize)
-      .limit(pageSize)
-      .lean();
+    const usersCount = await this.dataSource.query(
+      `
+    select "id", "login", "email", "createdAt"
+    from public.users
+    where ("login" ilike $1 or "email" ilike $2)`,
+      [login, email],
+    );
 
-    const usersCount = await this.UserModel.countDocuments(findCondition);
-
-    const pagesCount = getPagesCount(usersCount, pageSize);
+    const totalUsersCount = usersCount.length;
+    const pagesCount = getPagesCount(totalUsersCount, pageSize);
 
     return {
       pagesCount,
       page: pageNumber,
       pageSize,
-      totalCount: usersCount,
-      items: users.map((u) => {
-        return {
-          id: u.id,
-          email: u.accountData.email,
-          login: u.accountData.login,
-          createdAt: u.accountData.createdAt,
-        };
-      }),
+      totalCount: totalUsersCount,
+      items: users,
     };
+  }
+
+  async deleteAllUsers() {
+    return this.dataSource.query(`
+    Delete from public.users
+    `);
   }
 }

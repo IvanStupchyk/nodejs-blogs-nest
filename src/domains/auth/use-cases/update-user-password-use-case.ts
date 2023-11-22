@@ -4,7 +4,7 @@ import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { NewPasswordDto } from '../models/new-password.dto';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class UpdateUserPasswordCommand {
   constructor(public body: NewPasswordDto) {}
@@ -15,7 +15,7 @@ export class UpdateUserPasswordUseCase
   implements ICommandHandler<UpdateUserPasswordCommand>
 {
   constructor(
-    private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -35,9 +35,7 @@ export class UpdateUserPasswordUseCase
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-    const user = await this.usersSqlRepository.fetchAllUserDataById(
-      result.userId,
-    );
+    const user = await this.usersRepository.fetchAllUserDataById(result.userId);
     if (!user) {
       errorMessageGenerator([
         {
@@ -47,7 +45,7 @@ export class UpdateUserPasswordUseCase
       ]);
     }
 
-    return await this.usersSqlRepository.changeUserPassword(
+    return await this.usersRepository.changeUserPassword(
       newPasswordHash,
       user.id,
     );

@@ -13,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { PostsQueryRepository } from '../../infrastructure/repositories/posts-query.repository';
 import { GetSortedPostsModel } from './models/get-sorted-posts.model';
 import { GetPostModel } from './models/get-post.model';
 import { NewPostDto } from '../../dtos/posts/new-post.dto';
@@ -28,7 +27,6 @@ import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ChangeLikeCountDto } from '../../dtos/likes/change-like-count.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { UpdatePostCommand } from '../../domains/posts/use-cases/update-post-use-case';
 import { CreatePostCommand } from '../../domains/posts/use-cases/create-post-use-case';
 import { ChangePostLikesCountCommand } from '../../domains/posts/use-cases/change-post-likes-count-use-case';
 import { GetSortedPostsCommand } from '../../domains/posts/use-cases/get-sorted-posts-use-case';
@@ -39,10 +37,7 @@ import { GetSortedCommentsCommand } from '../../domains/comments/use-cases/get-s
 
 @Controller()
 export class PostsController {
-  constructor(
-    private readonly postsQueryRepository: PostsQueryRepository,
-    private commandBus: CommandBus,
-  ) {}
+  constructor(private commandBus: CommandBus) {}
 
   @Get(`${RouterPaths.posts}`)
   async getPosts(@Query() query: GetSortedPostsModel, @Req() req: Request) {
@@ -90,18 +85,6 @@ export class PostsController {
     !foundComments
       ? res.sendStatus(HttpStatus.NOT_FOUND)
       : res.send(foundComments);
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @Put(`${RouterPaths.posts}/:id`)
-  async updatePost(
-    @Param() params: UriParamsPostIdModel,
-    @Body() body: NewPostDto,
-    @Res() res: Response,
-  ) {
-    res.sendStatus(
-      await this.commandBus.execute(new UpdatePostCommand(params.id, body)),
-    );
   }
 
   @UseGuards(JwtAuthGuard)

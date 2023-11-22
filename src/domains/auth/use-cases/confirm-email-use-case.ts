@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class ConfirmEmailCommand {
   constructor(public code: string) {}
@@ -11,10 +11,10 @@ export class ConfirmEmailCommand {
 export class ConfirmEmailUseCase
   implements ICommandHandler<ConfirmEmailCommand>
 {
-  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute(command: ConfirmEmailCommand): Promise<boolean> {
-    const user = await this.usersSqlRepository.findUserByConfirmationCode(
+    const user = await this.usersRepository.findUserByConfirmationCode(
       command.code,
     );
 
@@ -35,7 +35,7 @@ export class ConfirmEmailUseCase
         ]);
       }
 
-      return await this.usersSqlRepository.confirmEmail(user.id);
+      return await this.usersRepository.confirmEmail(user.id);
     }
 
     //   user.confirm(command.code);

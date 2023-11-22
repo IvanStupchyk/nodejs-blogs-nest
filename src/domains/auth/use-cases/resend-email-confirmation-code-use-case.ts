@@ -4,7 +4,7 @@ import { errorsConstants } from '../../../constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class ResendEmailConfirmationCodeCommand {
   constructor(public email: string) {}
@@ -14,10 +14,10 @@ export class ResendEmailConfirmationCodeCommand {
 export class ResendEmailConfirmationCodeUseCase
   implements ICommandHandler<ResendEmailConfirmationCodeCommand>
 {
-  constructor(private readonly usersSqlRepository: UsersSqlRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute(command: ResendEmailConfirmationCodeCommand): Promise<boolean> {
-    const user = await this.usersSqlRepository.findUserByLoginOrEmail(
+    const user = await this.usersRepository.findUserByLoginOrEmail(
       command.email,
     );
     if (!user || user.isConfirmed) {
@@ -32,7 +32,7 @@ export class ResendEmailConfirmationCodeUseCase
       minutes: 30,
     }).toISOString();
 
-    await this.usersSqlRepository.updateConfirmationCodeAndExpirationTime(
+    await this.usersRepository.updateConfirmationCodeAndExpirationTime(
       user.id,
       newExpirationDate,
       newCode,

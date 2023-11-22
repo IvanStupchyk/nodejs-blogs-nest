@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { isUUID } from '../../../utils/utils';
-import { CommentsSqlRepository } from '../../../infrastructure/repositories-raw-sql/comments-sql.repository';
-import { CommentLikesSqlRepository } from '../../../infrastructure/repositories-raw-sql/comment-likes-sql.repository';
+import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
+import { CommentLikesRepository } from '../../../infrastructure/repositories/comment-likes.repository';
 
 export class DeleteCommentCommand {
   constructor(
@@ -16,8 +16,8 @@ export class DeleteCommentUseCase
   implements ICommandHandler<DeleteCommentCommand>
 {
   constructor(
-    private readonly commentsSqlRepository: CommentsSqlRepository,
-    private readonly commentLikesSqlRepository: CommentLikesSqlRepository,
+    private readonly commentsRepository: CommentsRepository,
+    private readonly commentLikesRepository: CommentLikesRepository,
   ) {}
 
   async execute(command: DeleteCommentCommand): Promise<number> {
@@ -26,17 +26,17 @@ export class DeleteCommentUseCase
     if (!isUUID(commentId)) return HttpStatus.NOT_FOUND;
 
     const foundComment =
-      await this.commentsSqlRepository.findCommentById(commentId);
+      await this.commentsRepository.findCommentById(commentId);
     if (!foundComment) return HttpStatus.NOT_FOUND;
 
     if (foundComment && foundComment.commentatorInfo.userId !== userId) {
       return HttpStatus.FORBIDDEN;
     }
 
-    const idDeleted = await this.commentsSqlRepository.deleteComment(commentId);
+    const idDeleted = await this.commentsRepository.deleteComment(commentId);
 
     if (idDeleted) {
-      await this.commentLikesSqlRepository.deleteAllCommentLikesAndDislikes(
+      await this.commentLikesRepository.deleteAllCommentLikesAndDislikes(
         commentId,
       );
       return HttpStatus.NO_CONTENT;

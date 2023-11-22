@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { UsersSqlRepository } from '../../../infrastructure/repositories-raw-sql/users-sql.repository';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class SendRecoveryPasswordCodeCommand {
   constructor(public email: string) {}
@@ -12,12 +12,12 @@ export class SendRecoveryPasswordCodeUseCase
   implements ICommandHandler<SendRecoveryPasswordCodeCommand>
 {
   constructor(
-    private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async execute(command: SendRecoveryPasswordCodeCommand): Promise<boolean> {
-    const user = await this.usersSqlRepository.findUserByLoginOrEmail(
+    const user = await this.usersRepository.findUserByLoginOrEmail(
       command.email,
     );
 
