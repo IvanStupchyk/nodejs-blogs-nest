@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommentsType, likeStatus } from '../../types/general.types';
-import { CommentViewType } from '../../types/comment-view.type';
+import { likeStatus } from '../../types/general.types';
 import { CommentModel } from '../../models/comments/Comment.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -8,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockCommentModel } from '../../constants/blanks';
 import { CommentsQueryDto } from '../../dto/comments/comments.query.dto';
+import { CommentsViewType, CommentViewType } from '../../types/comments.types';
 
 @Injectable()
 export class CommentsRepository {
@@ -84,7 +84,7 @@ export class CommentsRepository {
     params: CommentsQueryDto,
     postId: string,
     userId: string = uuidv4(),
-  ): Promise<CommentsType> {
+  ): Promise<CommentsViewType> {
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
       createDefaultSortedParams({
         sortBy: params.sortBy,

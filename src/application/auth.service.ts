@@ -1,8 +1,9 @@
 import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
-import { DeviceType } from '../models/devices/Device.model';
 import { JwtService } from '../infrastructure/jwt.service';
 import { v4 as uuidv4 } from 'uuid';
+import { DeviceModel } from '../models/devices/Device.model';
+import { DeviceType } from '../types/devices.types';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     userId: string,
     refreshToken: string,
   ): Promise<DeviceType> {
-    const newDevice: DeviceType = new DeviceType(
+    const newDevice = new DeviceModel(
       uuidv4(),
       (req.headers['x-forwarded-for'] as string) ||
         (req.socket.remoteAddress ?? ''),

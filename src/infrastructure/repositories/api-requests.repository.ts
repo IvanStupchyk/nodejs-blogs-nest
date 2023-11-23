@@ -1,7 +1,7 @@
-import { APIRequestsCountType } from '../../types/general.types';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { APIRequestsCountType } from '../../types/api-requests.types';
 
 @Injectable()
 export class ApiRequestsRepository {

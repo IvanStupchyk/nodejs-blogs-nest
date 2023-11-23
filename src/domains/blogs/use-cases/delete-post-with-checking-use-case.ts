@@ -3,6 +3,7 @@ import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
+import { PostLikesRepository } from '../../../infrastructure/repositories/post-likes.repository';
 
 export class DeletePostWithCheckingCommand {
   constructor(
@@ -19,6 +20,7 @@ export class DeletePostWithCheckingUseCase
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly blogsRepository: BlogsRepository,
+    private readonly postLikesRepository: PostLikesRepository,
   ) {}
 
   async execute(command: DeletePostWithCheckingCommand): Promise<number> {
@@ -32,7 +34,13 @@ export class DeletePostWithCheckingUseCase
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
     const result = await this.postsRepository.deletePost(command.postId);
-
-    return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+    if (result) {
+      await this.postLikesRepository.deleteAllPostLikesAndDislikes(
+        command.postId,
+      );
+      return HttpStatus.NO_CONTENT;
+    } else {
+      return HttpStatus.NOT_FOUND;
+    }
   }
 }

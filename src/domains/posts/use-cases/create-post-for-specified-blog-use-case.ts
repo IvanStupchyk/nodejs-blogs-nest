@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsService } from '../posts.service';
-import { PostViewType } from '../../../types/post-view.type';
 import { NotFoundException } from '@nestjs/common';
 import { PostForSpecifiedBlogInputDto } from '../../../dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repository';
+import { PostViewType } from '../../../types/posts.types';
 
 export class CreatePostForSpecifiedBlogCommand {
   constructor(

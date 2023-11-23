@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockBlogModel } from '../../constants/blanks';
-import { BlogsType } from '../../types/general.types';
 import { BlogsQueryDto } from '../../dto/blogs/blogs.query.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BlogsViewType } from '../../types/blogs.types';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -12,7 +12,7 @@ export class BlogsQueryRepository {
   async getSortedBlogs(
     params: BlogsQueryDto,
     userId?: string,
-  ): Promise<BlogsType> {
+  ): Promise<BlogsViewType> {
     const { searchNameTerm } = params;
 
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =

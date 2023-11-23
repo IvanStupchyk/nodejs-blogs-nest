@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { UserViewType } from '../../types/user-view.type';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserType } from '../../types/rawSqlTypes/user';
+import { UserType, UserViewType } from '../../types/users.types';
 
 @Injectable()
 export class UsersRepository {

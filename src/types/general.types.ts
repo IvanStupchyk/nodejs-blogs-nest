@@ -5,23 +5,10 @@ import {
   mockPostModel,
   mockUserModel,
 } from '../constants/blanks';
-import { BlogModel } from '../models/blogs/Blog.model';
-import { UserViewType } from './user-view.type';
-import { CommentViewType } from './comment-view.type';
-import { PostModel } from '../models/posts/Post.model';
-
-export type BlogsType = {
-  pagesCount: number;
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  items: Array<BlogModel>;
-};
-
-export type CommentatorInfoType = {
-  userId: string;
-  userLogin: string;
-};
+import { UserViewType } from './users.types';
+import { BlogType } from './blogs.types';
+import { CommentViewType } from './comments.types';
+import { PostType } from './posts.types';
 
 export enum likeStatus {
   None = 'None',
@@ -29,41 +16,12 @@ export enum likeStatus {
   Dislike = 'Dislike',
 }
 
-export type CommentLikesViewType = {
-  likesCount: number;
-  dislikesCount: number;
-  myStatus: likeStatus;
-};
-
-export type DeviceViewType = {
-  ip: string;
-  title: string;
-  lastActiveDate: string;
-  deviceId: string;
-};
-
-export type CommentsType = {
-  pagesCount: number;
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  items: Array<CommentViewType>;
-};
-
-export type APIRequestsCountType = {
-  id: string;
-  ip: string;
-  URL: string;
-  date: string;
-  createdAt: string;
-};
-
 export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;
   sortBy:
-    | keyof BlogModel
-    | keyof PostModel
+    | keyof BlogType
+    | keyof PostType
     | keyof UserViewType
     | keyof CommentViewType;
   model:

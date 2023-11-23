@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { InvalidRefreshTokenType } from '../../types/rawSqlTypes/generalTypes';
+import { InvalidRefreshTokenType } from '../../types/users.types';
 
 @Injectable()
 export class InvalidRefreshTokensRepository {

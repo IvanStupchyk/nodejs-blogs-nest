@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { mockBlogs, mockUsers } from '../../src/constants/blanks';
-import { UserViewType } from '../../src/types/user-view.type';
 import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { AppModule } from '../../src/app.module';
 import { RouterPaths } from '../../src/constants/router.paths';
@@ -11,6 +10,7 @@ import { INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { usersTestManager } from '../utils/users-test-manager';
 import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
+import { UserViewType } from '../../src/types/users.types';
 
 describe('tests for /users and /auth', () => {
   const invalidData: UserInputDto = {

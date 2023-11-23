@@ -1,4 +1,4 @@
-export class DeviceType {
+export class DeviceModel {
   constructor(
     public id: string,
     public ip: string,

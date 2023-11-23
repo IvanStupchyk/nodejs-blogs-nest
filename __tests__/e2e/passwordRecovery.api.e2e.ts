@@ -7,10 +7,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { UserInputDto } from '../../src/dto/users/user.input.dto';
-import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { JwtService } from '../../src/infrastructure/jwt.service';
 import { errorsConstants } from '../../src/constants/errors.contants';
+import { UserViewType } from '../../src/types/users.types';
 
 describe('tests for /auth password recovery', () => {
   const userData: UserInputDto = {

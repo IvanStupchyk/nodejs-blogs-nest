@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostViewType } from '../../../types/post-view.type';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';
+import { PostViewType } from '../../../types/posts.types';
 
 export class GetPostByIdCommand {
   constructor(
