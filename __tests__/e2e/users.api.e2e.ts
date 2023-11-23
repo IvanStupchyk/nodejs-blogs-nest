@@ -1,44 +1,23 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { mockBlogs, mockUsers } from '../../src/constants/blanks';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
-import { AppModule } from '../../src/app.module';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { Test, TestingModule } from '@nestjs/testing';
-import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { usersTestManager } from '../utils/users-test-manager';
 import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
 import { UserViewType } from '../../src/types/users.types';
+import { invalidUserData, userData1 } from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
 
 describe('tests for /users and /auth', () => {
-  const invalidData: UserInputDto = {
-    login: '',
-    password: '',
-    email: '',
-  };
-
-  const validData: UserInputDto = {
-    login: 'Nick',
-    password: '123456',
-    email: 'nickNick@gmail.com',
-  };
-
   let app: INestApplication;
   let httpServer;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -65,7 +44,7 @@ describe('tests for /users and /auth', () => {
   it("shouldn't create a user if the user is not logged in", async () => {
     await usersTestManager.createUser(
       httpServer,
-      invalidData,
+      invalidUserData,
       HTTP_STATUSES.UNAUTHORIZED_401,
       'sssss',
     );
@@ -74,7 +53,7 @@ describe('tests for /users and /auth', () => {
   it("shouldn't create a user if the user sends invalid data", async () => {
     const { response } = await usersTestManager.createUser(
       httpServer,
-      invalidData,
+      invalidUserData,
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -105,7 +84,7 @@ describe('tests for /users and /auth', () => {
   it('should create a user if the user sends the valid data', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,
-      validData,
+      userData1,
     );
 
     newUser = createdUser;
@@ -128,19 +107,19 @@ describe('tests for /users and /auth', () => {
     const pageSize = 2;
 
     const secondUser = await usersTestManager.createUser(httpServer, {
-      ...validData,
+      ...userData1,
       login: 'second',
       email: 'newone@gmail.com',
     });
 
     const thirdUser = await usersTestManager.createUser(httpServer, {
-      ...validData,
+      ...userData1,
       login: 'third',
       email: 'aaaaaa@gmail.com',
     });
 
     const fourthUser = await usersTestManager.createUser(httpServer, {
-      ...validData,
+      ...userData1,
       login: 'fourth',
       email: 'heyee@gmail.com',
     });
@@ -243,7 +222,7 @@ describe('tests for /users and /auth', () => {
   it('should log in a user with correct credentials', async () => {
     const userWithCorrectData: LoginUserInputDto = {
       loginOrEmail: newUser.login,
-      password: validData.password,
+      password: userData1.password,
     };
 
     await request(httpServer)
@@ -256,7 +235,7 @@ describe('tests for /users and /auth', () => {
     await request(httpServer)
       .delete(`${RouterPaths.users}/22`)
       .auth('admin', 'qwerty', { type: 'basic' })
-      .send(validData)
+      .send(userData1)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 

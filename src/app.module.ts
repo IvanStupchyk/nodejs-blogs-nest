@@ -48,7 +48,7 @@ import { LogOutUserUseCase } from './domains/auth/use-cases/log-out-user-use-cas
 import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-user-use-case';
 import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
 import { UsersRepository } from './infrastructure/repositories/users.repository';
 import { DevicesRepository } from './infrastructure/repositories/devices.repository';
@@ -99,27 +99,29 @@ const useCases = [
   DeletePostWithCheckingUseCase,
 ];
 
+export const options: TypeOrmModuleOptions = {
+  type: 'postgres',
+  host: process.env.DATABASE_SQL_HOST,
+  port: 5432,
+  username: process.env.DATABASE_SQL_USERNAME,
+  password: process.env.DATABASE_SQL_PASSWORD,
+  database: process.env.DATABASE_NAME_SQL,
+  autoLoadEntities: false,
+  synchronize: false,
+  ssl: true,
+};
+
 @Module({
   imports: [
     CqrsModule,
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 50000,
+        limit: 5,
       },
     ]),
     configModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_SQL_HOST,
-      port: 5432,
-      username: process.env.DATABASE_SQL_USERNAME,
-      password: process.env.DATABASE_SQL_PASSWORD,
-      database: process.env.DATABASE_NAME_SQL,
-      autoLoadEntities: false,
-      synchronize: false,
-      ssl: true,
-    }),
+    TypeOrmModule.forRoot(options),
   ],
   controllers: [
     UsersController,

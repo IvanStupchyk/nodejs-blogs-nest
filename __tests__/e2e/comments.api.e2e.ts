@@ -5,10 +5,6 @@ import { usersTestManager } from '../utils/users-test-manager';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSettings } from '../../src/app.settings';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
@@ -18,6 +14,8 @@ import { errorsConstants } from '../../src/constants/errors.contants';
 import { PostModel } from '../../src/models/posts/Post.model';
 import { UserViewType } from '../../src/types/users.types';
 import { CommentViewType } from '../../src/types/comments.types';
+import { userData1, userData2, userData3 } from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
@@ -31,24 +29,6 @@ describe('tests for /comments and posts/:id/comments', () => {
     content: 'new comment for existing comment',
   };
 
-  const userData1: UserInputDto = {
-    login: 'Ivan',
-    password: '123456',
-    email: 'ivanIvan@gmail.com',
-  };
-
-  const userData2 = {
-    login: 'Sergey',
-    password: '123456',
-    email: 'ser@gmail.com',
-  };
-
-  const userData3 = {
-    login: 'Andrey',
-    password: '123456',
-    email: 'ser@gmail.com',
-  };
-
   let app: INestApplication;
   let httpServer;
 
@@ -57,16 +37,9 @@ describe('tests for /comments and posts/:id/comments', () => {
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -162,7 +135,7 @@ describe('tests for /comments and posts/:id/comments', () => {
     });
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}/${createdBlog.id}`)
+      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
       .expect(createdBlog);
 
     const validPostData = {
