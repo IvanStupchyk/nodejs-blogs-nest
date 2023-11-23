@@ -2,30 +2,16 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { usersTestManager } from '../utils/users-test-manager';
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSettings } from '../../src/app.settings';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { UserViewType } from '../../src/types/users.types';
+import { userData1, userData2 } from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
 const { parse } = require('cookie');
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
 
 describe('tests for /devices and /auth', () => {
-  const validUserData: UserInputDto = {
-    login: 'Nick',
-    password: '123456',
-    email: 'nickNick@gmail.com',
-  };
-
-  const secondUserData: UserInputDto = {
-    login: 'Ivan',
-    password: '123456',
-    email: 'ivan@gmail.com',
-  };
-
   const deviceMock = {
     ip: expect.any(String),
     title: expect.any(String),
@@ -43,16 +29,9 @@ describe('tests for /devices and /auth', () => {
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -66,14 +45,11 @@ describe('tests for /devices and /auth', () => {
   it('should create two users for next test cases', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,
-      validUserData,
+      userData1,
     );
     superAdminUser = createdUser;
 
-    const secondUser = await usersTestManager.createUser(
-      httpServer,
-      secondUserData,
-    );
+    const secondUser = await usersTestManager.createUser(httpServer, userData2);
     simpleUser = secondUser.createdUser;
 
     await getRequest()
@@ -100,8 +76,8 @@ describe('tests for /devices and /auth', () => {
     const firstLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -115,8 +91,8 @@ describe('tests for /devices and /auth', () => {
     const secondLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -130,8 +106,8 @@ describe('tests for /devices and /auth', () => {
     const thirdLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: validUserData.login,
-        password: validUserData.password,
+        loginOrEmail: userData1.login,
+        password: userData1.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -145,8 +121,8 @@ describe('tests for /devices and /auth', () => {
     const fourthLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: validUserData.login,
-        password: validUserData.password,
+        loginOrEmail: userData1.login,
+        password: userData1.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -160,8 +136,8 @@ describe('tests for /devices and /auth', () => {
     const fifthLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: validUserData.login,
-        password: validUserData.password,
+        loginOrEmail: userData1.login,
+        password: userData1.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -299,8 +275,8 @@ describe('tests for /devices and /auth', () => {
     const loginRequest = await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: validUserData.login,
-        password: validUserData.password,
+        loginOrEmail: userData1.login,
+        password: userData1.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
@@ -328,48 +304,48 @@ describe('tests for /devices and /auth', () => {
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.OK_200);
 
     await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: secondUserData.login,
-        password: secondUserData.password,
+        loginOrEmail: userData2.login,
+        password: userData2.password,
       })
       .expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429);
   }, 20000);

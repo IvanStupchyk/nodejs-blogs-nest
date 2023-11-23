@@ -3,22 +3,14 @@ import { HTTP_STATUSES } from '../../src/utils/utils';
 import { usersTestManager } from '../utils/users-test-manager';
 import { emailTemplatesManager } from '../../src/infrastructure/email-templates-manager';
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSettings } from '../../src/app.settings';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { JwtService } from '../../src/infrastructure/jwt.service';
 import { errorsConstants } from '../../src/constants/errors.contants';
-import { UserViewType } from '../../src/types/users.types';
+import { UserType, UserViewType } from '../../src/types/users.types';
+import { userData1 } from '../mockData/mock-data';
+import { JwtService } from '../../src/infrastructure/jwt.service';
+import { serverStarter } from '../utils/server-starter';
 
 describe('tests for /auth password recovery', () => {
-  const userData: UserInputDto = {
-    login: 'Nick',
-    password: '123456',
-    email: 'nickNick@gmail.com',
-  };
-
   let app: INestApplication;
   let httpServer;
 
@@ -27,16 +19,9 @@ describe('tests for /auth password recovery', () => {
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -50,7 +35,7 @@ describe('tests for /auth password recovery', () => {
   it('should create user for future tests', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,
-      userData,
+      userData1,
     );
 
     superAdminUser = createdUser;
@@ -100,7 +85,7 @@ describe('tests for /auth password recovery', () => {
     await getRequest()
       .post(`${RouterPaths.auth}/password-recovery`)
       .send({
-        email: userData.email,
+        email: userData1.email,
       })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
@@ -141,57 +126,52 @@ describe('tests for /auth password recovery', () => {
       });
   });
 
-  // it('should change user password and log in with new credentials', async () => {
-  //   emailTemplatesManager.sendPasswordRecoveryMessage = jest.fn();
-  //
-  //   const userMock: UserType = {
-  //     id: superAdminUser.id,
-  //     accountData: {
-  //       login: superAdminUser.login,
-  //       passwordHash: '',
-  //       createdAt: superAdminUser.createdAt,
-  //       email: superAdminUser.email,
-  //     },
-  //     emailConfirmation: {
-  //       confirmationCode: 'string',
-  //       expirationDate: new Date(),
-  //       isConfirmed: true,
-  //     },
-  //     commentsLikes: [],
-  //   };
-  //   const jwtService = new JwtService();
-  //   const recoveryCode = await jwtService.createPasswordRecoveryJWT(
-  //     superAdminUser.id,
-  //   );
-  //   const newPassword = '777777';
-  //
-  //   await emailTemplatesManager.sendPasswordRecoveryMessage(
-  //     userMock,
-  //     recoveryCode,
-  //   );
-  //
-  //   await getRequest()
-  //     .post(`${RouterPaths.auth}/new-password`)
-  //     .send({
-  //       newPassword,
-  //       recoveryCode,
-  //     })
-  //     .expect(HTTP_STATUSES.NO_CONTENT_204);
-  //
-  //   await getRequest()
-  //     .post(`${RouterPaths.auth}/login`)
-  //     .send({
-  //       loginOrEmail: userData.login,
-  //       password: userData.password,
-  //     })
-  //     .expect(HTTP_STATUSES.UNAUTHORIZED_401);
-  //
-  //   await getRequest()
-  //     .post(`${RouterPaths.auth}/login`)
-  //     .send({
-  //       loginOrEmail: userData.login,
-  //       password: newPassword,
-  //     })
-  //     .expect(HTTP_STATUSES.OK_200);
-  // });
+  it('should change user password and log in with new credentials', async () => {
+    emailTemplatesManager.sendPasswordRecoveryMessage = jest.fn();
+
+    const userMock: UserType = {
+      id: superAdminUser.id,
+      login: superAdminUser.login,
+      passwordHash: '',
+      createdAt: superAdminUser.createdAt,
+      email: superAdminUser.email,
+      confirmationCode: 'string',
+      expirationDate: new Date().toDateString(),
+      isConfirmed: true,
+    };
+    const jwtService = new JwtService();
+    const recoveryCode = await jwtService.createPasswordRecoveryJWT(
+      superAdminUser.id,
+    );
+    const newPassword = '777777';
+
+    await emailTemplatesManager.sendPasswordRecoveryMessage(
+      userMock,
+      recoveryCode,
+    );
+
+    await getRequest()
+      .post(`${RouterPaths.auth}/new-password`)
+      .send({
+        newPassword,
+        recoveryCode,
+      })
+      .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+    await getRequest()
+      .post(`${RouterPaths.auth}/login`)
+      .send({
+        loginOrEmail: userData1.login,
+        password: userData1.password,
+      })
+      .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+
+    await getRequest()
+      .post(`${RouterPaths.auth}/login`)
+      .send({
+        loginOrEmail: userData1.login,
+        password: newPassword,
+      })
+      .expect(HTTP_STATUSES.OK_200);
+  });
 });

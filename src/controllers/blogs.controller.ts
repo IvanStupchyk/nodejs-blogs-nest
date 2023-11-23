@@ -32,7 +32,6 @@ import { BlogsQueryRepository } from '../infrastructure/repositories/blogs-query
 import { UpdatePostParamsDto } from '../dto/posts/update-post.params.dto';
 import { UpdatePostInputDto } from '../dto/posts/update-post.input.dto';
 import { UpdatePostWithCheckingCommand } from '../domains/blogs/use-cases/update-post-with-checking-use-case';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetPostsForSpecifiedBlogCommand } from '../domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { DeletePostParamsDto } from '../dto/posts/delete-post.params.dto';
 import { DeletePostWithCheckingCommand } from '../domains/blogs/use-cases/delete-post-with-checking-use-case';
@@ -98,17 +97,21 @@ export class BlogController {
     !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
   }
 
-  @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  // @UseGuards(JwtAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Get(`${RouterPaths.saBlogs}/:id/posts`)
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
-    @CurrentUserId() userId,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const posts = await this.commandBus.execute(
-      new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
+      new GetPostsForSpecifiedBlogCommand(
+        query,
+        params.id,
+        req.headers?.authorization,
+      ),
     );
 
     !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);

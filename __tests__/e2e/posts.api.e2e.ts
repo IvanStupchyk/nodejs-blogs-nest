@@ -3,32 +3,16 @@ import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { mockPosts } from '../../src/constants/blanks';
-import { ObjectId } from 'mongodb';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSettings } from '../../src/app.settings';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
-import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { v4 as uuidv4 } from 'uuid';
 import { PostModel } from '../../src/models/posts/Post.model';
+import { invalidPostData, validBlogData } from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
 
 describe('tests for /posts', () => {
-  const invalidData = {
-    title: '',
-    content: '',
-    blogId: '',
-    shortDescription: '',
-  };
-
-  const validBlogData: BlogInputDto = {
-    name: 'new name',
-    description: 'new description',
-    websiteUrl: 'https://www.aaaaa.com',
-  };
-
   let validPostData: PostInputDto = {
     title: 'title',
     content: 'content',
@@ -44,16 +28,9 @@ describe('tests for /posts', () => {
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -77,7 +54,7 @@ describe('tests for /posts', () => {
   it("shouldn't create a post if the user is not logged in", async () => {
     await postsTestManager.createPost(
       httpServer,
-      invalidData,
+      invalidPostData,
       HTTP_STATUSES.UNAUTHORIZED_401,
       'sssss',
     );
@@ -86,7 +63,7 @@ describe('tests for /posts', () => {
   it("shouldn't create a post if the user sends invalid data", async () => {
     const { response } = await postsTestManager.createPost(
       httpServer,
-      invalidData,
+      invalidPostData,
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -126,7 +103,7 @@ describe('tests for /posts', () => {
     );
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}/${createdBlog.id}`)
+      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
       .expect(createdBlog);
 
     validPostData = {
@@ -219,7 +196,7 @@ describe('tests for /posts', () => {
       title: 'updated title',
     };
     await getRequest()
-      .put(`${RouterPaths.posts}/${newPost.id}`)
+      .put(`${RouterPaths.saBlogs}/${newPost.blogId}/posts/${newPost.id}`)
       .auth('admin', 'qwerty', { type: 'basic' })
       .send(updatedValidData)
       .expect(HTTP_STATUSES.NO_CONTENT_204);
@@ -242,7 +219,7 @@ describe('tests for /posts', () => {
 
   it('should delete a post with exiting id', async () => {
     await getRequest()
-      .delete(`${RouterPaths.posts}/${newPost.id}`)
+      .delete(`${RouterPaths.saBlogs}/${newPost.blogId}/posts/${newPost.id}`)
       .auth('admin', 'qwerty', { type: 'basic' })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
@@ -258,6 +235,7 @@ describe('tests for /posts', () => {
 
     await getRequest()
       .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,

@@ -113,8 +113,6 @@ export class PostsRepository {
     from public.posts`,
     );
 
-    if (!postsCount.length) return null;
-
     const totalPostsCount = postsCount.length;
     const pagesCount = getPagesCount(totalPostsCount, pageSize);
 

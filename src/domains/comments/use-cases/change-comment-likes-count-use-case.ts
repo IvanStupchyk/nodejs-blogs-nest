@@ -41,13 +41,13 @@ export class ChangeCommentLikesCountUseCase
     const foundComment: CommentViewType =
       await this.commentsRepository.findCommentById(id);
     if (!foundComment) return HttpStatus.NOT_FOUND;
-    console.log('foundComment', foundComment);
+
     const userCommentLike =
       await this.commentLikesRepository.findCommentLikesByUserIdAndCommentId(
         userId,
         id,
       );
-    console.log('userCommentLike', userCommentLike);
+
     if (
       userCommentLike?.myStatus === myStatus ||
       (!userCommentLike && myStatus === likeStatus.None)

@@ -2,38 +2,19 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { mockBlogs } from '../../src/constants/blanks';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSettings } from '../../src/app.settings';
 import { INestApplication } from '@nestjs/common';
-import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
-import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { v4 as uuidv4 } from 'uuid';
 import { PostModel } from '../../src/models/posts/Post.model';
+import {
+  invalidBlogData,
+  validBlogData,
+  validPostData,
+} from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
 
 describe('tests for /blogs', () => {
-  const invalidData: BlogInputDto = {
-    name: '',
-    description: '',
-    websiteUrl: '',
-  };
-
-  const validData: BlogInputDto = {
-    name: 'new name',
-    description: 'new description',
-    websiteUrl: 'https://www.aaaaa.com',
-  };
-
-  const validPostData: PostInputDto = {
-    title: 'title',
-    content: 'content',
-    blogId: uuidv4(),
-    shortDescription: 'shortDescription',
-  };
-
   let app: INestApplication;
   let httpServer;
 
@@ -42,16 +23,9 @@ describe('tests for /blogs', () => {
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    appSettings(app);
-
-    await app.init();
-    httpServer = app.getHttpServer();
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
   });
@@ -64,20 +38,20 @@ describe('tests for /blogs', () => {
 
   it('should return 200 and an empty blogs array', async () => {
     await getRequest()
-      .get(RouterPaths.saBlogs)
+      .get(RouterPaths.blogs)
       .expect(HTTP_STATUSES.OK_200, mockBlogs);
   });
 
   it('should return 404 for not existing blog', async () => {
     await getRequest()
-      .get(RouterPaths.saBlogs + '/3423')
+      .get(RouterPaths.blogs + '/3423')
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 
   it("shouldn't create a blog if the user is not logged in", async () => {
     await blogsTestManager.createBlog(
       httpServer,
-      invalidData,
+      invalidBlogData,
       HTTP_STATUSES.UNAUTHORIZED_401,
       'sssss',
     );
@@ -86,7 +60,7 @@ describe('tests for /blogs', () => {
   it("shouldn't create a blog if the user sends invalid data", async () => {
     const { response } = await blogsTestManager.createBlog(
       httpServer,
-      invalidData,
+      invalidBlogData,
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -109,7 +83,7 @@ describe('tests for /blogs', () => {
     });
 
     await getRequest()
-      .get(RouterPaths.saBlogs)
+      .get(RouterPaths.blogs)
       .expect(HTTP_STATUSES.OK_200, mockBlogs);
   });
 
@@ -119,14 +93,14 @@ describe('tests for /blogs', () => {
   it('should create a blog if the user sends the valid data', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,
-      validData,
+      validBlogData,
     );
 
     newBlog = createdBlog;
     newBlogs.push(createdBlog);
 
     await getRequest()
-      .get(RouterPaths.saBlogs)
+      .get(RouterPaths.blogs)
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
@@ -136,58 +110,59 @@ describe('tests for /blogs', () => {
       });
   });
 
-  // it('should return all posts for specified blog', async () => {
-  //   validPostData = {
-  //     ...validPostData,
-  //     blogId: newBlog.id,
-  //   };
-  //   const { createdPost } = await postsTestManager.createPost(
-  //     httpServer,
-  //     validPostData,
-  //     HTTP_STATUSES.CREATED_201,
-  //   );
-  //
-  //   newPost = createdPost;
-  //
-  //   await getRequest()
-  //     .get(RouterPaths.posts)
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 1,
-  //       items: [createdPost],
-  //     });
-  //
-  //   await getRequest()
-  //     .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 1,
-  //       items: [createdPost],
-  //     });
-  // });
+  it('should return all posts for specified blog', async () => {
+    const validPostData1 = {
+      ...validPostData,
+      blogId: newBlog.id,
+    };
+    const { createdPost } = await postsTestManager.createPost(
+      httpServer,
+      validPostData1,
+      HTTP_STATUSES.CREATED_201,
+    );
+
+    newPost = createdPost;
+
+    await getRequest()
+      .get(RouterPaths.posts)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [createdPost],
+      });
+
+    await getRequest()
+      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [createdPost],
+      });
+  });
 
   it('should return correctly filtered and sorted blogs', async () => {
     const pageNumber = 2;
     const pageSize = 2;
 
     const secondBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validData,
+      ...validBlogData,
       name: 'second',
       description: 'a',
     });
 
     const thirdBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validData,
+      ...validBlogData,
       name: 'third',
       description: 'b',
     });
 
     const fourthBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validData,
+      ...validBlogData,
       name: 'fourth',
       description: 'c',
     });
@@ -203,16 +178,20 @@ describe('tests for /blogs', () => {
         (pageNumber - 1) * pageSize + pageSize,
       );
 
-    await getRequest().get(RouterPaths.saBlogs).expect(HTTP_STATUSES.OK_200, {
-      pagesCount: 1,
-      page: 1,
-      pageSize: 10,
-      totalCount: 4,
-      items: newBlogs,
-    });
+    await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 4,
+        items: newBlogs,
+      });
 
     await getRequest()
       .get(`${RouterPaths.saBlogs}?searchNameTerm=second`)
+      .auth('admin', 'qwerty', { type: 'basic' })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
@@ -225,6 +204,7 @@ describe('tests for /blogs', () => {
       .get(
         `${RouterPaths.saBlogs}?sortBy=name&sortDirection=asc&pageSize=${pageSize}&pageNumber=${pageNumber}`,
       )
+      .auth('admin', 'qwerty', { type: 'basic' })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 2,
         page: pageNumber,
@@ -234,40 +214,41 @@ describe('tests for /blogs', () => {
       });
   });
 
-  // it('should create a new post for specific blog', async () => {
-  //   validPostData = {
-  //     ...validPostData,
-  //     blogId: newBlog.id,
-  //   };
-  //   const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
-  //     httpServer,
-  //     { ...validPostData, title: 'second' },
-  //     newBlog.id,
-  //     HTTP_STATUSES.CREATED_201,
-  //   );
-  //
-  //   secondPost = createdPost;
-  //
-  //   await getRequest()
-  //     .get(RouterPaths.posts)
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 2,
-  //       items: [createdPost, newPost],
-  //     });
-  //
-  //   await getRequest()
-  //     .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 2,
-  //       items: [createdPost, newPost],
-  //     });
-  // });
+  it('should create a new post for specific blog', async () => {
+    const validPostData1 = {
+      ...validPostData,
+      blogId: newBlog.id,
+    };
+    const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
+      httpServer,
+      { ...validPostData1, title: 'second' },
+      newBlog.id,
+      HTTP_STATUSES.CREATED_201,
+    );
+
+    secondPost = createdPost;
+
+    await getRequest()
+      .get(RouterPaths.posts)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [createdPost, newPost],
+      });
+
+    await getRequest()
+      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [createdPost, newPost],
+      });
+  });
 
   it("shouldn't create a post if blog doesn't exist", async () => {
     await postsTestManager.createPostForSpecifiedBlog(
@@ -292,13 +273,13 @@ describe('tests for /blogs', () => {
     await getRequest()
       .put(`${RouterPaths.saBlogs}/22`)
       .auth('admin', 'qwerty', { type: 'basic' })
-      .send(validData)
+      .send(validBlogData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 
   it('should update a blog with valid data', async () => {
     const updatedValidData = {
-      ...validData,
+      ...validBlogData,
       name: 'updated name',
     };
     await getRequest()
@@ -308,7 +289,7 @@ describe('tests for /blogs', () => {
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}/${newBlog.id}`)
+      .get(`${RouterPaths.blogs}/${newBlog.id}`)
       .expect({
         ...newBlog,
         name: updatedValidData.name,
@@ -319,7 +300,7 @@ describe('tests for /blogs', () => {
     await getRequest()
       .delete(`${RouterPaths.saBlogs}/22`)
       .auth('admin', 'qwerty', { type: 'basic' })
-      .send(validData)
+      .send(validBlogData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 
@@ -331,12 +312,15 @@ describe('tests for /blogs', () => {
 
     const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
 
-    await getRequest().get(RouterPaths.saBlogs).expect(HTTP_STATUSES.OK_200, {
-      pagesCount: 1,
-      page: 1,
-      pageSize: 10,
-      totalCount: filteredBlogs.length,
-      items: filteredBlogs,
-    });
+    await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: filteredBlogs.length,
+        items: filteredBlogs,
+      });
   });
 });
