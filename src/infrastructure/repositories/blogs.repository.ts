@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { BlogModel } from '../../models/blogs/Blog.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BlogType } from '../../types/blogs.types';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async createBlog(newBlog: BlogModel): Promise<BlogModel> {
+  async createBlog(newBlog: BlogModel): Promise<BlogType> {
     const {
       id,
       name,
@@ -46,7 +47,7 @@ export class BlogsRepository {
       [id, name, description, websiteUrl],
     );
 
-    return result[1] === 1;
+    return !!result[1];
   }
 
   async deleteBlog(id: string): Promise<boolean> {
@@ -58,10 +59,10 @@ export class BlogsRepository {
       [id],
     );
 
-    return result[1] === 1;
+    return !!result[1];
   }
 
-  async findBlogById(id: string): Promise<BlogModel | null> {
+  async findBlogById(id: string): Promise<BlogType | null> {
     const blog = await this.dataSource.query(
       `
       select "id", "name", "description", "websiteUrl", "isMembership", "createdAt" 
@@ -73,7 +74,7 @@ export class BlogsRepository {
     return blog[0];
   }
 
-  async fetchAllBlogDataById(id: string): Promise<BlogModel | null> {
+  async fetchAllBlogDataById(id: string): Promise<BlogType | null> {
     const blog = await this.dataSource.query(
       `
       select "id", "name", "description", "userId", "websiteUrl", "isMembership", "createdAt" 

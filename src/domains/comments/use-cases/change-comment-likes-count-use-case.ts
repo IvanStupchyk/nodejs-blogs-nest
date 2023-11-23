@@ -5,10 +5,10 @@ import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
-import { CommentViewType } from '../../../types/comment-view.type';
 import { CommentLikesRepository } from '../../../infrastructure/repositories/comment-likes.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { CommentLikeModel } from '../../../models/comments/Comment-like.model';
+import { CommentViewType } from '../../../types/comments.types';
 
 export class ChangeCommentLikesCountCommand {
   constructor(

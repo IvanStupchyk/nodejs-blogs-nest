@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceType } from '../../models/devices/Device.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { DeviceType } from '../../types/devices.types';
 
 @Injectable()
 export class DevicesRepository {

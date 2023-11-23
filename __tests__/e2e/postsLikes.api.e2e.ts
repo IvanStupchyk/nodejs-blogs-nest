@@ -13,12 +13,12 @@ import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
-import { UserViewType } from '../../src/types/user-view.type';
-import { PostViewType } from '../../src/types/post-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
 import { PostModel } from '../../src/models/posts/Post.model';
+import { UserViewType } from '../../src/types/users.types';
+import { PostViewType } from '../../src/types/posts.types';
 
 describe('tests for /posts with likes logic', () => {
   const blogData: BlogInputDto = {

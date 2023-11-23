@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { CommentModel } from '../../../models/comments/Comment.model';
-import { CommentViewType } from '../../../types/comment-view.type';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
+import { CommentViewType } from '../../../types/comments.types';
 
 export class CreateCommentCommand {
   constructor(

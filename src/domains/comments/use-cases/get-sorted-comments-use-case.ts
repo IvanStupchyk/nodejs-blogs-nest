@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsType } from '../../../types/general.types';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { CommentsQueryDto } from '../../../dto/comments/comments.query.dto';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
+import { CommentsViewType } from '../../../types/comments.types';
 
 export class GetSortedCommentsCommand {
   constructor(
@@ -26,7 +26,7 @@ export class GetSortedCommentsUseCase
 
   async execute(
     command: GetSortedCommentsCommand,
-  ): Promise<CommentsType | boolean> {
+  ): Promise<CommentsViewType | boolean> {
     const { id, accessTokenHeader, query } = command;
 
     if (!isUUID(id)) return false;

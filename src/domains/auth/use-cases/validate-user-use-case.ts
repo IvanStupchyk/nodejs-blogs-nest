@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import bcrypt from 'bcrypt';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
-import { UserType } from '../../../types/rawSqlTypes/user';
+import { UserType } from '../../../types/users.types';
 
 export class ValidateUserCommand {
   constructor(

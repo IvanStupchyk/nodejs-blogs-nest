@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { likeStatus } from '../../types/general.types';
-import { PostViewType } from '../../types/post-view.type';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostModel } from '../../models/posts/Post.model';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
 import { mockPostModel } from '../../constants/blanks';
-import { PostsType } from '../../types/posts.types';
+import { PostsType, PostViewType } from '../../types/posts.types';
 
 @Injectable()
 export class PostsRepository {

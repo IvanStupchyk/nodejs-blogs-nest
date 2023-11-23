@@ -6,8 +6,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { UserInputDto } from '../../src/dto/users/user.input.dto';
-import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
+import { UserViewType } from '../../src/types/users.types';
 const { parse } = require('cookie');
 
 const sleep = (seconds: number) =>

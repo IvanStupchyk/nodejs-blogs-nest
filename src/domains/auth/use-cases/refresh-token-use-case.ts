@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
 import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/invalid-refresh-tokens.repository';
-import { InvalidRefreshTokenType } from '../../../types/rawSqlTypes/generalTypes';
 import { v4 as uuidv4 } from 'uuid';
+import { InvalidRefreshTokenType } from '../../../types/users.types';
 
 export class RefreshTokenCommand {
   constructor(

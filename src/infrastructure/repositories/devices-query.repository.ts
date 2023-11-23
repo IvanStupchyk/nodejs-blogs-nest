@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceViewType } from '../../types/general.types';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { DeviceViewType } from '../../types/devices.types';
 
 @Injectable()
 export class DevicesQueryRepository {
@@ -29,6 +29,6 @@ export class DevicesQueryRepository {
       [userId, deviceId],
     );
 
-    return isDeleted[1] === 1;
+    return !!isDeleted[1];
   }
 }

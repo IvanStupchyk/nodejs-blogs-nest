@@ -2,7 +2,6 @@ import { ConfigModule } from '@nestjs/config';
 const configModule = ConfigModule.forRoot();
 
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersController } from './controllers/users.controller';
 import { BlogController } from './controllers/blogs.controller';
 import { PostsController } from './controllers/posts.controller';
@@ -121,7 +120,6 @@ const useCases = [
       synchronize: false,
       ssl: true,
     }),
-    MongooseModule.forRoot(process.env.DATABASE_MONGOOSE_URI),
   ],
   controllers: [
     UsersController,

@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserInputDto } from '../../../dto/users/user.input.dto';
-import { UserViewType } from '../../../types/user-view.type';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { UserModel } from '../../../models/users/User.model';
+import { UserViewType } from '../../../types/users.types';
 
 export class CreateSuperUserCommand {
   constructor(public userData: UserInputDto) {}

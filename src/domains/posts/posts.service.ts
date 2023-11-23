@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PostViewType } from '../../types/post-view.type';
 import { PostInputDto } from '../../dto/posts/post.input.dto';
 import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
 import { PostModel } from '../../models/posts/Post.model';
 import { v4 as uuidv4 } from 'uuid';
 import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
+import { PostViewType } from '../../types/posts.types';
 
 @Injectable()
 export class PostsService {

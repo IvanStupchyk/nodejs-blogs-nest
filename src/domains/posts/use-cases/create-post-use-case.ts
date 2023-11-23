@@ -1,7 +1,7 @@
 import { PostInputDto } from '../../../dto/posts/post.input.dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsService } from '../posts.service';
-import { PostViewType } from '../../../types/post-view.type';
+import { PostViewType } from '../../../types/posts.types';
 
 export class CreatePostCommand {
   constructor(public postData: PostInputDto) {}

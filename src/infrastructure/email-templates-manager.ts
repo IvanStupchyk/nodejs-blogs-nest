@@ -1,5 +1,5 @@
 import { emailAdapter } from './email.adapter';
-import { UserType } from '../types/rawSqlTypes/user';
+import { UserType } from '../types/users.types';
 
 export const emailTemplatesManager = {
   async sendEmailConfirmationMessage(user: UserType) {

@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentViewType } from '../../../types/comment-view.type';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { isUUID } from '../../../utils/utils';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
+import { CommentViewType } from '../../../types/comments.types';
 
 export class GetCommentByIdCommand {
   constructor(

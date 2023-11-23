@@ -10,14 +10,14 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
-import { CommentViewType } from '../../src/types/comment-view.type';
-import { UserViewType } from '../../src/types/user-view.type';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
 import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
 import { CommentInputDto } from '../../src/dto/comments/comment.input.dto';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { PostModel } from '../../src/models/posts/Post.model';
+import { UserViewType } from '../../src/types/users.types';
+import { CommentViewType } from '../../src/types/comments.types';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
