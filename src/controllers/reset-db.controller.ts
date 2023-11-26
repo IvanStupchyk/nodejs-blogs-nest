@@ -28,10 +28,10 @@ export class ResetDbController {
     await this.usersQueryRepository.deleteAllUsers();
     await this.devicesRepository.deleteAllSessions();
     await this.invalidRefreshTokensRepository.deleteInvalidRefreshTokens();
-    await this.blogsRepository.deleteAllBlogs();
-    await this.postsRepository.deleteAllPosts();
-    await this.commentsRepository.deleteAllComments();
-    await this.postLikesRepository.deleteAllPostLikes();
-    await this.commentLikesRepository.deleteAllCommentLikes();
+    // await this.blogsRepository.deleteAllBlogs();
+    // await this.postsRepository.deleteAllPosts();
+    // await this.commentsRepository.deleteAllComments();
+    // await this.postLikesRepository.deleteAllPostLikes();
+    // await this.commentLikesRepository.deleteAllCommentLikes();
   }
 }

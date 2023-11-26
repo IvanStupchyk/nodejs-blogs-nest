@@ -2,13 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { UsersQueryDto } from '../../dto/users/users.query.dto';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockUserModel } from '../../constants/blanks';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { UsersViewType } from '../../types/users.types';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UsersViewType, UserViewType } from '../../types/users.types';
+import { User } from '../../entities/users/user.entity';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
+
   async getSortedUsers(params: UsersQueryDto): Promise<UsersViewType> {
     const { searchLoginTerm, searchEmailTerm } = params;
 
@@ -21,57 +25,70 @@ export class UsersQueryRepository {
         model: mockUserModel,
       });
 
-    let login = '%';
-    let email = '%';
+    const users = await this.usersRepository
+      .createQueryBuilder('u')
+      .where(
+        `${
+          searchLoginTerm || searchEmailTerm
+            ? `(u.login ilike :login OR u.email ilike :email)`
+            : 'u.login is not null'
+        }`,
+        {
+          login: `%${searchLoginTerm}%`,
+          email: `%${searchEmailTerm}%`,
+        },
+      )
+      .orderBy(`u.${sortBy}`, sortDirection)
+      .skip(skipSize)
+      .take(pageSize)
+      .getMany();
 
-    if (searchLoginTerm && !searchEmailTerm) {
-      login = `%${searchLoginTerm}%`;
-      email = '';
-    }
+    const usersCount = await this.usersRepository
+      .createQueryBuilder('u')
+      .where(
+        `${
+          searchLoginTerm || searchEmailTerm
+            ? `(u.login ilike :login OR u.email ilike :email)`
+            : 'u.login is not null'
+        }`,
+        {
+          login: `%${searchLoginTerm}%`,
+          email: `%${searchEmailTerm}%`,
+        },
+      )
+      .getCount();
 
-    if (searchEmailTerm && !searchLoginTerm) {
-      email = `%${searchEmailTerm}%`;
-      login = '';
-    }
-
-    if (searchEmailTerm && searchLoginTerm) {
-      email = `%${searchEmailTerm}%`;
-      login = `%${searchLoginTerm}%`;
-    }
-
-    const users = await this.dataSource.query(
-      `
-    select "id", "login", "email", "createdAt"
-    from public.users
-    where ("login" ilike $3 or "email" ilike $4)
-    order by "${sortBy}" ${sortDirection}
-    limit $1 offset $2`,
-      [pageSize, skipSize, login, email],
-    );
-
-    const usersCount = await this.dataSource.query(
-      `
-    select "id", "login", "email", "createdAt"
-    from public.users
-    where ("login" ilike $1 or "email" ilike $2)`,
-      [login, email],
-    );
-
-    const totalUsersCount = usersCount.length;
-    const pagesCount = getPagesCount(totalUsersCount, pageSize);
+    const pagesCount = getPagesCount(usersCount, pageSize);
 
     return {
       pagesCount,
       page: pageNumber,
       pageSize,
-      totalCount: totalUsersCount,
-      items: users,
+      totalCount: usersCount,
+      items: this._usersMapper(users),
     };
   }
 
-  async deleteAllUsers() {
-    return this.dataSource.query(`
-    Delete from public.users
-    `);
+  async deleteAllUsers(): Promise<boolean> {
+    const result = await this.usersRepository
+      .createQueryBuilder('u')
+      .delete()
+      .from(User)
+      .execute();
+
+    return !!result.affected;
+  }
+
+  _usersMapper(users: Array<User>): Array<UserViewType> {
+    return users.length
+      ? users.map((u) => {
+          return {
+            id: u.id.toString(),
+            login: u.login,
+            email: u.email,
+            createdAt: u.createdAt,
+          };
+        })
+      : [];
   }
 }

@@ -1,4 +1,3 @@
-import { SortOrder } from '../constants/sort.order';
 import { SortConditionsType } from '../types/general.types';
 
 export const countSkipSizeForDb = (
@@ -15,9 +14,17 @@ export const getPagesCount = (
   return Math.ceil(entityCount / pageSize);
 };
 
+type DefaultSortedParamsType = {
+  pageNumber: number;
+  pageSize: number;
+  skipSize: number;
+  sortBy: string;
+  sortDirection: 'ASC' | 'DESC';
+};
+
 export const createDefaultSortedParams = (
   sortConditions: SortConditionsType,
-) => {
+): DefaultSortedParamsType => {
   const { pageNumber, pageSize, sortDirection, sortBy, model } = sortConditions;
 
   const parsedPageNumber = parseInt(pageNumber);
@@ -30,8 +37,7 @@ export const createDefaultSortedParams = (
 
   const skipSize = countSkipSizeForDb(finalPageNumber, finalPageSize);
   const finalSortBy = model.hasOwnProperty(sortBy) ? sortBy : 'createdAt';
-  const finalSortDirection =
-    sortDirection === 'asc' ? sortDirection : SortOrder.desc;
+  const finalSortDirection = sortDirection === 'asc' ? 'ASC' : 'DESC';
 
   return {
     pageNumber: finalPageNumber,

@@ -64,6 +64,9 @@ import { DeletePostWithCheckingUseCase } from './domains/blogs/use-cases/delete-
 import { PostLikesRepository } from './infrastructure/repositories/post-likes.repository';
 import { CommentsRepository } from './infrastructure/repositories/comments.repository';
 import { CommentLikesRepository } from './infrastructure/repositories/comment-likes.repository';
+import { Device } from './entities/devices/device.entity';
+import { InvalidRefreshToken } from './entities/users/invalid-refresh-tokens.entity';
+import { User } from './entities/users/user.entity';
 
 const useCases = [
   CreatePostUseCase,
@@ -99,17 +102,30 @@ const useCases = [
   DeletePostWithCheckingUseCase,
 ];
 
-export const options: TypeOrmModuleOptions = {
+const globalBdOptions: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.DATABASE_SQL_HOST,
   port: 5432,
   username: process.env.DATABASE_SQL_USERNAME,
   password: process.env.DATABASE_SQL_PASSWORD,
-  database: process.env.DATABASE_NAME_SQL,
-  autoLoadEntities: false,
-  synchronize: false,
+  database: process.env.DATABASE_NAME_SQL_TYPEORM,
+  autoLoadEntities: true,
+  synchronize: true,
   ssl: true,
 };
+
+const localBdOptions: TypeOrmModuleOptions = {
+  type: 'postgres',
+  host: 'localhost',
+  port: 5432,
+  username: process.env.DATABASE_SQL_USERNAME_LOCAL,
+  password: process.env.DATABASE_SQL_PASSWORD_LOCAL,
+  database: 'postgresTypeorm',
+  autoLoadEntities: true,
+  synchronize: true,
+};
+
+const entities = [User, Device, InvalidRefreshToken];
 
 @Module({
   imports: [
@@ -121,7 +137,8 @@ export const options: TypeOrmModuleOptions = {
       },
     ]),
     configModule,
-    TypeOrmModule.forRoot(options),
+    TypeOrmModule.forRoot(globalBdOptions),
+    TypeOrmModule.forFeature([...entities]),
   ],
   controllers: [
     UsersController,

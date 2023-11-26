@@ -136,7 +136,7 @@ describe('tests for /auth password recovery', () => {
       createdAt: superAdminUser.createdAt,
       email: superAdminUser.email,
       confirmationCode: 'string',
-      expirationDate: new Date().toDateString(),
+      expirationDate: new Date(),
       isConfirmed: true,
     };
     const jwtService = new JwtService();

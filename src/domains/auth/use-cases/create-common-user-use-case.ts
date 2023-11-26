@@ -7,7 +7,7 @@ import { UserInputDto } from '../../../dto/users/user.input.dto';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
-import { UserModel } from '../../../models/users/User.model';
+import { User } from '../../../entities/users/user.entity';
 
 export class CreateCommonUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -49,19 +49,16 @@ export class CreateCommonUserUseCase
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = new UserModel(
-      uuidv4(),
-      email,
-      login,
-      passwordHash,
-      uuidv4(),
-      add(new Date(), {
-        hours: 1,
-        minutes: 30,
-      }).toISOString(),
-      false,
-      new Date().toISOString(),
-    );
+    const newUser = new User();
+    newUser.login = login;
+    newUser.email = email;
+    newUser.passwordHash = passwordHash;
+    newUser.isConfirmed = false;
+    newUser.confirmationCode = uuidv4();
+    newUser.expirationDate = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    });
 
     try {
       await emailTemplatesManager.sendEmailConfirmationMessage(newUser);

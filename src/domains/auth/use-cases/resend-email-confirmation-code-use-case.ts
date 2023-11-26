@@ -27,16 +27,13 @@ export class ResendEmailConfirmationCodeUseCase
     }
 
     const newCode = uuidv4();
-    const newExpirationDate = add(new Date(), {
+
+    user.expirationDate = add(new Date(), {
       hours: 1,
       minutes: 30,
-    }).toISOString();
-
-    await this.usersRepository.updateConfirmationCodeAndExpirationTime(
-      user.id,
-      newExpirationDate,
-      newCode,
-    );
+    });
+    user.confirmationCode = newCode;
+    await this.usersRepository.save(user);
 
     try {
       await emailTemplatesManager.resendEmailConfirmationMessage(
