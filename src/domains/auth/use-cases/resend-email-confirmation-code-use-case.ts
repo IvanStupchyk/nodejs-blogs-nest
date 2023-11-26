@@ -37,7 +37,7 @@ export class ResendEmailConfirmationCodeUseCase
 
     try {
       await emailTemplatesManager.resendEmailConfirmationMessage(
-        user.email,
+        command.email,
         newCode,
       );
     } catch (error) {
