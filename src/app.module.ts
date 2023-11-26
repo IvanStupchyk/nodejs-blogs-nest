@@ -8,7 +8,6 @@ import { PostsController } from './controllers/posts.controller';
 import { PostsService } from './domains/posts/posts.service';
 import { CommentsController } from './controllers/comments.controller';
 import { ResetDbController } from './controllers/reset-db.controller';
-import { ApiRequestService } from './application/api-request.service';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
@@ -54,7 +53,6 @@ import { UsersRepository } from './infrastructure/repositories/users.repository'
 import { DevicesRepository } from './infrastructure/repositories/devices.repository';
 import { InvalidRefreshTokensRepository } from './infrastructure/repositories/invalid-refresh-tokens.repository';
 import { DevicesQueryRepository } from './infrastructure/repositories/devices-query.repository';
-import { ApiRequestsRepository } from './infrastructure/repositories/api-requests.repository';
 import { BlogsRepository } from './infrastructure/repositories/blogs.repository';
 import { BlogsQueryRepository } from './infrastructure/repositories/blogs-query.repository';
 import { PostsRepository } from './infrastructure/repositories/posts.repository';
@@ -133,7 +131,7 @@ const entities = [User, Device, InvalidRefreshToken];
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5000,
+        limit: 5,
       },
     ]),
     configModule,
@@ -155,7 +153,6 @@ const entities = [User, Device, InvalidRefreshToken];
     DevicesRepository,
     InvalidRefreshTokensRepository,
     DevicesQueryRepository,
-    ApiRequestsRepository,
     BlogsRepository,
     BlogsQueryRepository,
     PostsRepository,
@@ -163,7 +160,6 @@ const entities = [User, Device, InvalidRefreshToken];
     CommentsRepository,
     CommentLikesRepository,
     PostsService,
-    ApiRequestService,
     AuthService,
     JwtService,
     LocalStrategy,
