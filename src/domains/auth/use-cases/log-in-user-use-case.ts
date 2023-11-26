@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
-import { AuthService } from '../../../application/auth.service';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
+import { Device } from '../../../entities/devices/device.entity';
 
 export class LogInUserCommand {
   constructor(
@@ -19,7 +19,6 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
     private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly devicesRepository: DevicesRepository,
-    private readonly authService: AuthService,
   ) {}
 
   async execute(
@@ -37,22 +36,40 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
       deviceId,
     );
 
-    // const newDevice = await this.authService._createDevice(
-    //   req,
-    //   deviceId,
-    //   userId,
-    //   refreshToken,
-    // );
-
-    const newDevice = await this.authService._createDevice(
+    const newDevice = await this._createDevice(
       req,
       deviceId,
       userId,
       refreshToken,
     );
 
-    // await this.devicesRepository.setNewDevice(newDevice);
     await this.devicesRepository.save(newDevice);
     return { accessToken, refreshToken };
+  }
+
+  private async _createDevice(
+    req: Request,
+    deviceId: string,
+    userId: any,
+    refreshToken: string,
+  ) {
+    const newDevice = new Device();
+    newDevice.deviceId = deviceId;
+    newDevice.title = req.headers['user-agent'] ?? 'unknown';
+    newDevice.ip =
+      (req.headers['x-forwarded-for'] as string) ||
+      (req.socket.remoteAddress ?? '');
+    newDevice.user = userId;
+
+    try {
+      const result: any =
+        await this.jwtService.verifyRefreshToken(refreshToken);
+      newDevice.lastActiveDate = new Date(result.iat * 1000);
+      newDevice.expirationDate = new Date(result.exp * 1000);
+    } catch (error) {
+      console.log(error);
+    }
+
+    return newDevice;
   }
 }

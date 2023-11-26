@@ -9,7 +9,6 @@ import { PostsService } from './domains/posts/posts.service';
 import { CommentsController } from './controllers/comments.controller';
 import { ResetDbController } from './controllers/reset-db.controller';
 import { AuthController } from './controllers/auth.controller';
-import { AuthService } from './application/auth.service';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
@@ -47,7 +46,7 @@ import { LogOutUserUseCase } from './domains/auth/use-cases/log-out-user-use-cas
 import { CreateCommonUserUseCase } from './domains/auth/use-cases/create-common-user-use-case';
 import { ValidateUserUseCase } from './domains/auth/use-cases/validate-user-use-case';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersQueryRepository } from './infrastructure/repositories/users-query.repository';
 import { UsersRepository } from './infrastructure/repositories/users.repository';
 import { DevicesRepository } from './infrastructure/repositories/devices.repository';
@@ -65,6 +64,7 @@ import { CommentLikesRepository } from './infrastructure/repositories/comment-li
 import { Device } from './entities/devices/device.entity';
 import { InvalidRefreshToken } from './entities/users/invalid-refresh-tokens.entity';
 import { User } from './entities/users/user.entity';
+import { globalBdOptions } from './constants/db-options';
 
 const useCases = [
   CreatePostUseCase,
@@ -100,29 +100,6 @@ const useCases = [
   DeletePostWithCheckingUseCase,
 ];
 
-const globalBdOptions: TypeOrmModuleOptions = {
-  type: 'postgres',
-  host: process.env.DATABASE_SQL_HOST,
-  port: 5432,
-  username: process.env.DATABASE_SQL_USERNAME,
-  password: process.env.DATABASE_SQL_PASSWORD,
-  database: process.env.DATABASE_NAME_SQL_TYPEORM,
-  autoLoadEntities: true,
-  synchronize: true,
-  ssl: true,
-};
-
-const localBdOptions: TypeOrmModuleOptions = {
-  type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: process.env.DATABASE_SQL_USERNAME_LOCAL,
-  password: process.env.DATABASE_SQL_PASSWORD_LOCAL,
-  database: 'postgresTypeorm',
-  autoLoadEntities: true,
-  synchronize: true,
-};
-
 const entities = [User, Device, InvalidRefreshToken];
 
 @Module({
@@ -131,7 +108,7 @@ const entities = [User, Device, InvalidRefreshToken];
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5,
+        limit: 5000,
       },
     ]),
     configModule,
@@ -160,7 +137,6 @@ const entities = [User, Device, InvalidRefreshToken];
     CommentsRepository,
     CommentLikesRepository,
     PostsService,
-    AuthService,
     JwtService,
     LocalStrategy,
     JwtStrategy,
