@@ -199,7 +199,7 @@ describe('tests for /auth', () => {
         errorsMessages: [
           {
             field: 'code',
-            message: errorsConstants.confirmCode.invalidCodeFirst,
+            message: 'code must be a UUID',
           },
         ],
       });
@@ -215,7 +215,7 @@ describe('tests for /auth', () => {
         errorsMessages: [
           {
             field: 'code',
-            message: errorsConstants.confirmCode.invalidCodeFirst,
+            message: 'code must be a UUID',
           },
         ],
       });
@@ -235,7 +235,7 @@ describe('tests for /auth', () => {
         errorsMessages: [
           {
             field: 'code',
-            message: errorsConstants.confirmCode.invalidCodeSecond,
+            message: 'code must be a UUID',
           },
         ],
       });

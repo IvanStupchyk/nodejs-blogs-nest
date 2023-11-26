@@ -1,9 +1,7 @@
 import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '../infrastructure/jwt.service';
-import { v4 as uuidv4 } from 'uuid';
-import { DeviceModel } from '../models/devices/Device.model';
-import { DeviceType } from '../types/devices.types';
+import { Device } from '../entities/devices/device.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,26 +10,22 @@ export class AuthService {
   async _createDevice(
     req: Request,
     deviceId: string,
-    userId: string,
+    userId: any,
     refreshToken: string,
-  ): Promise<DeviceType> {
-    const newDevice = new DeviceModel(
-      uuidv4(),
+  ): Promise<any> {
+    const newDevice = new Device();
+    newDevice.deviceId = deviceId;
+    newDevice.title = req.headers['user-agent'] ?? 'unknown';
+    newDevice.ip =
       (req.headers['x-forwarded-for'] as string) ||
-        (req.socket.remoteAddress ?? ''),
-      req.headers['user-agent'] ?? 'unknown',
-      new Date().toISOString(),
-      new Date().toISOString(),
-      deviceId,
-      userId,
-      new Date().toISOString(),
-    );
+      (req.socket.remoteAddress ?? '');
+    newDevice.user = userId;
 
     try {
       const result: any =
         await this.jwtService.verifyRefreshToken(refreshToken);
-      newDevice.lastActiveDate = new Date(result.iat * 1000).toISOString();
-      newDevice.expirationDate = new Date(result.exp * 1000).toISOString();
+      newDevice.lastActiveDate = new Date(result.iat * 1000);
+      newDevice.expirationDate = new Date(result.exp * 1000);
     } catch (error) {
       console.log(error);
     }

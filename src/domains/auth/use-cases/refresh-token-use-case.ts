@@ -2,12 +2,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
 import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/invalid-refresh-tokens.repository';
-import { v4 as uuidv4 } from 'uuid';
-import { InvalidRefreshTokenType } from '../../../types/users.types';
+import { InvalidRefreshToken } from '../../../entities/users/invalid-refresh-tokens.entity';
 
 export class RefreshTokenCommand {
   constructor(
-    public userId: string,
+    public userId: any,
     public deviceId: string,
     public oldRefreshToken: string,
   ) {}
@@ -50,24 +49,17 @@ export class RefreshTokenUseCase
     try {
       const result: any =
         await this.jwtService.verifyRefreshToken(refreshToken);
-      const lastActiveDate = new Date(result.iat * 1000).toISOString();
-      const expirationDate = new Date(result.exp * 1000).toISOString();
+      const device = await this.devicesRepository.findDeviceById(deviceId);
 
-      await this.devicesRepository.updateExistingSession(
-        deviceId,
-        lastActiveDate,
-        expirationDate,
-      );
+      device.lastActiveDate = new Date(result.iat * 1000);
+      device.expirationDate = new Date(result.exp * 1000);
+      await this.devicesRepository.save(device);
 
-      const newInvalidRefreshToken: InvalidRefreshTokenType = {
-        id: uuidv4(),
-        userId,
-        refreshToken: oldRefreshToken,
-        createdAt: new Date().toISOString(),
-      };
-      await this.invalidRefreshTokensRepository.addInvalidRefreshTokens(
-        newInvalidRefreshToken,
-      );
+      const newInvalidRefreshToken = new InvalidRefreshToken();
+      newInvalidRefreshToken.user = userId;
+      newInvalidRefreshToken.refreshToken = oldRefreshToken;
+
+      await this.invalidRefreshTokensRepository.save(newInvalidRefreshToken);
     } catch (error) {
       console.log(error);
     }

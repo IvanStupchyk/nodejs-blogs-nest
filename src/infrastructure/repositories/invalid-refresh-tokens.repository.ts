@@ -1,45 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { InvalidRefreshTokenType } from '../../types/users.types';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InvalidRefreshToken } from '../../entities/users/invalid-refresh-tokens.entity';
 
 @Injectable()
 export class InvalidRefreshTokensRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async deleteInvalidRefreshTokens() {
-    return await this.dataSource.query(`
-    DELETE from
-    public."invalidRefreshTokens"
-    `);
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(InvalidRefreshToken)
+    private readonly invalidRefreshTokensRepository: Repository<InvalidRefreshToken>,
+  ) {}
+  async deleteInvalidRefreshTokens(): Promise<boolean> {
+    const result = await this.invalidRefreshTokensRepository
+      .createQueryBuilder('t')
+      .delete()
+      .from(InvalidRefreshToken)
+      .execute();
+
+    return !!result.affected;
+  }
+
+  async save(invalidRefreshToken: InvalidRefreshToken): Promise<boolean> {
+    return !!(await this.invalidRefreshTokensRepository.save(
+      invalidRefreshToken,
+    ));
   }
 
   async getAllInvalidRefreshTokens(
     userId: string,
-  ): Promise<Array<InvalidRefreshTokenType>> {
-    return await this.dataSource.query(
-      `
-      select "id", "userId", "refreshToken", "createdAt"
-      from public."invalidRefreshTokens"
-      where "userId" = $1
-    `,
-      [userId],
-    );
-  }
-
-  async addInvalidRefreshTokens(
-    newInvalidRefreshToken: InvalidRefreshTokenType,
-  ): Promise<boolean> {
-    const { id, refreshToken, userId, createdAt } = newInvalidRefreshToken;
-
-    await this.dataSource.query(
-      `
-      insert into
-      public."invalidRefreshTokens"("id", "userId", "refreshToken", "createdAt")
-      VALUES ($1, $2, $3, $4)
-    `,
-      [id, userId, refreshToken, createdAt],
-    );
-
-    return true;
+  ): Promise<Array<InvalidRefreshToken>> {
+    return await this.invalidRefreshTokensRepository
+      .createQueryBuilder('t')
+      .where('t.userId = :userId', { userId })
+      .getMany();
   }
 }

@@ -15,10 +15,12 @@ export class GetCurrentUserUseCase
   async execute(command: GetCurrentUserCommand): Promise<ShowOwnUserDataType> {
     const user = await this.usersRepository.fetchAllUserDataById(command.id);
 
-    return {
-      userId: user.id,
-      email: user.email,
-      login: user.login,
-    };
+    return user
+      ? {
+          userId: user.id,
+          email: user.email,
+          login: user.login,
+        }
+      : null;
   }
 }

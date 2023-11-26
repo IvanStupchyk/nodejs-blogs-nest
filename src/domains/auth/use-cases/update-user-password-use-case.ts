@@ -33,8 +33,6 @@ export class UpdateUserPasswordUseCase
       ]);
     }
 
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
-
     const user = await this.usersRepository.fetchAllUserDataById(result.userId);
     if (!user) {
       errorMessageGenerator([
@@ -45,12 +43,8 @@ export class UpdateUserPasswordUseCase
       ]);
     }
 
-    return await this.usersRepository.changeUserPassword(
-      newPasswordHash,
-      user.id,
-    );
-    // user.changeUserPassword(newPasswordHash);
-    //
-    // return !!(await this.usersRepository.save(user));
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+
+    return await this.usersRepository.save(user);
   }
 }

@@ -9,9 +9,9 @@ export type UserType = {
   login: string;
   email: string;
   passwordHash: string;
-  createdAt: string;
+  createdAt: Date;
   confirmationCode: string;
-  expirationDate: string;
+  expirationDate: Date;
   isConfirmed: boolean;
 };
 
@@ -19,7 +19,7 @@ export class UserViewType {
   id: string;
   login: string;
   email: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export type UsersViewType = {

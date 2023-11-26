@@ -35,11 +35,10 @@ export class ConfirmEmailUseCase
         ]);
       }
 
-      return await this.usersRepository.confirmEmail(user.id);
-    }
+      user.isConfirmed = true;
+      return await this.usersRepository.save(user);
 
-    //   user.confirm(command.code);
-    //   return !!(await this.usersRepository.save(user));
-    // }
+      // return await this.usersRepository.confirmEmail(user.id);
+    }
   }
 }

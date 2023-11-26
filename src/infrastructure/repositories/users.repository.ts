@@ -1,141 +1,76 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UserType, UserViewType } from '../../types/users.types';
+import { User } from '../../entities/users/user.entity';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
 
-  async createUser(newUser: UserType): Promise<UserViewType> {
-    const {
-      id,
-      login,
-      email,
-      passwordHash,
-      confirmationCode,
-      expirationDate,
-      isConfirmed,
-      createdAt,
-    } = newUser;
+  async createUser(newUser: any): Promise<UserViewType> {
+    const savedUser = (await this.usersRepository.save(newUser)) as User;
 
-    const user = await this.dataSource.query(
-      `
-    INSERT INTO public.users(
-    "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    returning "id", "login", "email", "createdAt";
-    `,
-      [
-        id,
-        login,
-        email,
-        passwordHash,
-        confirmationCode,
-        expirationDate,
-        isConfirmed,
-        createdAt,
-      ],
-    );
-
-    return user[0];
+    return {
+      id: savedUser.id,
+      login: savedUser.login,
+      email: savedUser.email,
+      createdAt: savedUser.createdAt,
+    };
   }
 
-  async fetchAllUserDataById(id: string): Promise<UserType> {
-    const user = await this.dataSource.query(
-      `
-    SELECT "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
-    FROM public.users
-        where ("id" = $1)
-    `,
-      [id],
-    );
-
-    return user[0];
+  async fetchAllUserDataById(id: string): Promise<UserType | null> {
+    return await this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.id = :id', {
+        id,
+      })
+      .getOne();
   }
 
   async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserType | null> {
-    const user = await this.dataSource.query(
-      `
-    SELECT "id", "login", "email", "passwordHash", "confirmationCode", "expirationDate", "isConfirmed", "createdAt"
-    FROM public.users
-        where ("login" like $1 or "email" like $1)
-    `,
-      [loginOrEmail],
-    );
-
-    return user[0];
+    return await this.usersRepository
+      .createQueryBuilder('u')
+      .where(
+        `${
+          loginOrEmail
+            ? `(u.login like :login OR u.email like :email)`
+            : 'u.login is not null'
+        }`,
+        {
+          login: loginOrEmail,
+          email: loginOrEmail,
+        },
+      )
+      .getOne();
   }
 
   async findUserByConfirmationCode(code: string): Promise<any | null> {
-    const user = await this.dataSource.query(
-      `
-    SELECT "id", "login", "email", "confirmationCode", "expirationDate", "isConfirmed"
-    FROM public.users
-        where ("confirmationCode" like $1)
-    `,
-      [code],
-    );
-
-    return user[0];
+    return await this.usersRepository
+      .createQueryBuilder('u')
+      .where(`u.confirmationCode = :confirmationCode`, {
+        confirmationCode: code,
+      })
+      .getOne();
   }
 
-  async confirmEmail(id: string): Promise<boolean> {
-    const isConfirmed = await this.dataSource.query(
-      `
-    update public.users
-    set "isConfirmed" = true
-    where id = $1
-    `,
-      [id],
-    );
-
-    return isConfirmed[1] === 1;
-  }
-
-  async updateConfirmationCodeAndExpirationTime(
-    id: string,
-    newExpirationDate: string,
-    newCode: string,
-  ): Promise<boolean> {
-    const isUpdated = await this.dataSource.query(
-      `
-    update public.users
-    set "expirationDate" = $2, "confirmationCode" = $3
-    where id = $1
-    `,
-      [id, newExpirationDate, newCode],
-    );
-
-    return isUpdated[1] === 1;
-  }
-
-  async changeUserPassword(
-    newPasswordHash: string,
-    id: string,
-  ): Promise<boolean> {
-    const isUpdated = await this.dataSource.query(
-      `
-      update public.users
-      set "passwordHash" = $1
-      where "id" = $2
-    `,
-      [newPasswordHash, id],
-    );
-
-    return !!isUpdated[1];
+  async save(data: UserType): Promise<boolean> {
+    return !!(await this.usersRepository.save(data));
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    const result = await this.dataSource.query(
-      `
-        DELETE FROM public.users
-        WHERE "id" = $1;
-        `,
-      [id],
-    );
+    const result = await this.usersRepository
+      .createQueryBuilder('u')
+      .delete()
+      .from(User)
+      .where('id = :id', {
+        id,
+      })
+      .execute();
 
-    return !!result[1];
+    return !!result.affected;
   }
 }

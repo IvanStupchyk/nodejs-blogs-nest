@@ -37,13 +37,22 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
       deviceId,
     );
 
+    // const newDevice = await this.authService._createDevice(
+    //   req,
+    //   deviceId,
+    //   userId,
+    //   refreshToken,
+    // );
+
     const newDevice = await this.authService._createDevice(
       req,
       deviceId,
       userId,
       refreshToken,
     );
-    await this.devicesRepository.setNewDevice(newDevice);
+
+    // await this.devicesRepository.setNewDevice(newDevice);
+    await this.devicesRepository.save(newDevice);
     return { accessToken, refreshToken };
   }
 }

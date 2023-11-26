@@ -1,10 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserInputDto } from '../../../dto/users/user.input.dto';
-import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
-import { UserModel } from '../../../models/users/User.model';
 import { UserViewType } from '../../../types/users.types';
+import { User } from '../../../entities/users/user.entity';
 
 export class CreateSuperUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -21,16 +20,11 @@ export class CreateSuperUserUseCase
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = new UserModel(
-      uuidv4(),
-      email,
-      login,
-      passwordHash,
-      uuidv4(),
-      new Date().toISOString(),
-      true,
-      new Date().toISOString(),
-    );
+    const newUser = new User();
+    newUser.login = login;
+    newUser.email = email;
+    newUser.passwordHash = passwordHash;
+    newUser.isConfirmed = true;
 
     return this.usersRepository.createUser(newUser);
   }
