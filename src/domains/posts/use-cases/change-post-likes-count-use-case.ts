@@ -7,7 +7,6 @@ import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { PostLikesRepository } from '../../../infrastructure/repositories/post-likes.repository';
-import { PostModel } from '../../../models/posts/Post.model';
 import { PostLikesModel } from '../../../models/posts/Post-likes.model';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -40,7 +39,7 @@ export class ChangePostLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundPost: PostModel = await this.postsRepository.findPostById(id);
+    const foundPost = await this.postsRepository.findPostById(id);
     if (!foundPost) return HttpStatus.NOT_FOUND;
 
     const user = await this.usersRepository.fetchAllUserDataById(userId);

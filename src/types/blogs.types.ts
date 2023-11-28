@@ -4,7 +4,17 @@ export type BlogType = {
   userId: string;
   description: string;
   websiteUrl: string;
-  createdAt: string;
+  createdAt: Date;
+  isMembership: boolean;
+};
+
+export type BlogViewType = {
+  id: string;
+  name: string;
+  // userId: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: Date;
   isMembership: boolean;
 };
 
@@ -13,5 +23,5 @@ export type BlogsViewType = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: Array<BlogType>;
+  items: Array<BlogViewType>;
 };

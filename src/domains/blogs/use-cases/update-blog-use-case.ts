@@ -21,16 +21,28 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
 
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
-    // const blog = await this.blogsSqlRepository.fetchAllBlogDataById(command.id);
+    // const blog = await this.blogsSqlRepository.findBlogById(command.id);
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
+    const blog = await this.blogsRepository.findBlogById(command.id);
 
-    const result = await this.blogsRepository.updateBlogById(
-      command.id,
-      name,
-      description,
-      websiteUrl,
-    );
+    if (!blog) {
+      return HttpStatus.NOT_FOUND;
+    } else {
+      blog.name = name;
+      blog.websiteUrl = websiteUrl;
+      blog.description = description;
 
-    return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+      await this.blogsRepository.save(blog);
+
+      return HttpStatus.NO_CONTENT;
+    }
+    // const result = await this.blogsRepository.updateBlogById(
+    //   command.id,
+    //   name,
+    //   description,
+    //   websiteUrl,
+    // );
+
+    // return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
   }
 }

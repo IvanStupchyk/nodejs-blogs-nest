@@ -10,7 +10,6 @@ import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
-import { PostModel } from '../../src/models/posts/Post.model';
 import { UserViewType } from '../../src/types/users.types';
 import { PostViewType } from '../../src/types/posts.types';
 import {
@@ -53,13 +52,13 @@ describe('tests for /posts with likes logic', () => {
   let user2: UserViewType;
   let user3: UserViewType;
   let post1: PostViewType;
-  let post2: PostModel;
-  let post3: PostModel;
-  let post4: PostModel;
+  let post2: PostViewType;
+  let post3: PostViewType;
+  let post4: PostViewType;
   let accessTokenUser1: string;
   let accessTokenUser2: string;
   let accessTokenUser3: string;
-  const newPosts: Array<PostModel> = [];
+  const newPosts: Array<PostViewType> = [];
 
   it('should create users with for future tests', async () => {
     const { createdUser } = await usersTestManager.createUser(

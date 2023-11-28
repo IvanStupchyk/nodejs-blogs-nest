@@ -11,11 +11,11 @@ import { commentsTestManager } from '../utils/comments-test-manager';
 import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
 import { CommentInputDto } from '../../src/dto/comments/comment.input.dto';
 import { errorsConstants } from '../../src/constants/errors.contants';
-import { PostModel } from '../../src/models/posts/Post.model';
 import { UserViewType } from '../../src/types/users.types';
 import { CommentViewType } from '../../src/types/comments.types';
 import { userData1, userData2, userData3 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
+import { PostType } from '../../src/types/posts.types';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
@@ -48,7 +48,7 @@ describe('tests for /comments and posts/:id/comments', () => {
     await app.close();
   });
 
-  let newPost: PostModel;
+  let newPost: PostType;
   let newBlog: BlogModel;
   let user1: UserViewType;
   let user2: UserViewType;

@@ -1,94 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { BlogModel } from '../../models/blogs/Blog.model';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { BlogType } from '../../types/blogs.types';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BlogViewType } from '../../types/blogs.types';
+import { Blog } from '../../entities/blogs/Blog.entity';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async createBlog(newBlog: BlogModel): Promise<BlogType> {
-    const {
-      id,
-      name,
-      description,
-      userId,
-      websiteUrl,
-      isMembership,
-      createdAt,
-    } = newBlog;
+  constructor(
+    @InjectRepository(Blog)
+    private readonly blogRepository: Repository<Blog>,
+  ) {}
+  async createBlog(newBlog: Blog): Promise<BlogViewType> {
+    const savedBlog = (await this.blogRepository.save(newBlog)) as Blog;
 
-    const blog = await this.dataSource.query(
-      `
-    insert into public.blogs(
-    "id", "name", "description", "userId", "websiteUrl", "isMembership", "createdAt"
-    )
-    values($1, $2, $3, $4, $5, $6, $7)
-    returning "id", "name", "description", "websiteUrl", "isMembership", "createdAt";
-    `,
-      [id, name, description, userId, websiteUrl, isMembership, createdAt],
-    );
-
-    return blog[0];
+    return {
+      id: savedBlog.id,
+      name: savedBlog.name,
+      // userId: savedBlog.userId,
+      description: savedBlog.description,
+      websiteUrl: savedBlog.websiteUrl,
+      createdAt: savedBlog.createdAt,
+      isMembership: savedBlog.isMembership,
+    };
   }
 
-  async updateBlogById(
-    id: string,
-    name: string,
-    description: string,
-    websiteUrl: string,
-  ): Promise<boolean> {
-    const result = await this.dataSource.query(
-      `
-      update public.blogs
-      set "name" = $2, "description" = $3, "websiteUrl" = $4
-      where "id" = $1
-    `,
-      [id, name, description, websiteUrl],
-    );
-
-    return !!result[1];
+  async save(blog: Blog): Promise<boolean> {
+    return !!(await this.blogRepository.save(blog));
   }
 
   async deleteBlog(id: string): Promise<boolean> {
-    const result = await this.dataSource.query(
-      `
-      DELETE from public.blogs
-      where "id" = $1
-    `,
-      [id],
-    );
+    const result = await this.blogRepository
+      .createQueryBuilder('b')
+      .delete()
+      .from(Blog)
+      .where('id = :id', { id })
+      .execute();
 
-    return !!result[1];
+    return !!result.affected;
   }
 
-  async findBlogById(id: string): Promise<BlogType | null> {
-    const blog = await this.dataSource.query(
-      `
-      select "id", "name", "description", "websiteUrl", "isMembership", "createdAt" 
-      from public.blogs
-      where ("id" = $1)
-    `,
-      [id],
-    );
-    return blog[0];
+  async findBlogById(id: string): Promise<Blog | null> {
+    return await this.blogRepository
+      .createQueryBuilder('b')
+      .where('b.id = :id', {
+        id,
+      })
+      .getOne();
   }
 
-  async fetchAllBlogDataById(id: string): Promise<BlogType | null> {
-    const blog = await this.dataSource.query(
-      `
-      select "id", "name", "description", "userId", "websiteUrl", "isMembership", "createdAt" 
-      from public.blogs
-      where ("id" = $1)
-    `,
-      [id],
-    );
-    return blog[0];
-  }
+  async deleteAllBlogs(): Promise<boolean> {
+    const result = await this.blogRepository
+      .createQueryBuilder('b')
+      .delete()
+      .from(Blog)
+      .execute();
 
-  async deleteAllBlogs() {
-    return this.dataSource.query(`
-    Delete from public.blogs
-    `);
+    return !!result.affected;
   }
 }

@@ -1,8 +1,8 @@
 import { SortOrder } from '../../constants/sort.order';
-import { PostModel } from '../../models/posts/Post.model';
+import { PostType } from '../../types/posts.types';
 
 export class PostsQueryDto {
-  sortBy: keyof PostModel;
+  sortBy: keyof PostType;
   sortDirection: SortOrder.asc | SortOrder.desc;
   pageNumber: string;
   pageSize: string;

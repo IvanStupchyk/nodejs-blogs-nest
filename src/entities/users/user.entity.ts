@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Device } from '../devices/device.entity';
 import { InvalidRefreshToken } from './invalid-refresh-tokens.entity';
+import { PostLike } from '../posts/Post-like.entity';
 
 @Entity('users')
 export class User {
@@ -33,6 +34,15 @@ export class User {
 
   @OneToMany(() => Device, (device) => device.user)
   device: Device[];
+
+  // @OneToMany(() => Blog, (blog) => blog.user)
+  // blog: Blog[];
+
+  // @OneToMany(() => Post, (post) => post.user)
+  // post: Post[];
+
+  @OneToMany(() => PostLike, (postLike) => postLike.user)
+  postLike: PostLike[];
 
   @OneToMany(
     () => InvalidRefreshToken,

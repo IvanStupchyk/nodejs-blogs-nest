@@ -6,13 +6,13 @@ import { INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { PostModel } from '../../src/models/posts/Post.model';
 import {
   invalidBlogData,
   validBlogData,
   validPostData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
+import { PostType } from '../../src/types/posts.types';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
@@ -88,8 +88,8 @@ describe('tests for /blogs', () => {
   });
 
   let newBlog: BlogModel;
-  let newPost: PostModel;
-  let secondPost: PostModel;
+  let newPost: PostType;
+  let secondPost: PostType;
   it('should create a blog if the user sends the valid data', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,

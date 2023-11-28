@@ -38,7 +38,7 @@ export class GetPostsForSpecifiedBlogUseCase
       userId = await this.jwtService.getUserIdByAccessToken(accessToken);
     }
     // const foundBlog =
-    //   await this.blogsSqlRepository.fetchAllBlogDataById(blogId);
+    //   await this.blogsSqlRepository.findBlogById(blogId);
     //
     // if (foundBlog && foundBlog.userId !== command.userId) {
     //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);

@@ -29,9 +29,7 @@ export class CreatePostForSpecifiedBlogUseCase
     const { title, content, shortDescription } = command.postData;
 
     if (!isUUID(command.blogId)) return null;
-    const foundBlog = await this.blogsRepository.fetchAllBlogDataById(
-      command.blogId,
-    );
+    const foundBlog = await this.blogsRepository.findBlogById(command.blogId);
 
     if (!foundBlog) {
       throw new NotFoundException();

@@ -8,9 +8,9 @@ import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { v4 as uuidv4 } from 'uuid';
-import { PostModel } from '../../src/models/posts/Post.model';
 import { invalidPostData, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
+import { PostType } from '../../src/types/posts.types';
 
 describe('tests for /posts', () => {
   let validPostData: PostInputDto = {
@@ -93,8 +93,8 @@ describe('tests for /posts', () => {
       .expect(HTTP_STATUSES.OK_200, mockPosts);
   });
 
-  let newPost: PostModel;
-  const newPosts: Array<PostModel> = [];
+  let newPost: PostType;
+  const newPosts: Array<PostType> = [];
   let newBlog: BlogModel;
   it('should create a post if the user sent valid data with existing blog id', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
