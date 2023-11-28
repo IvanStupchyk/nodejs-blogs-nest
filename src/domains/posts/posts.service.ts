@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PostInputDto } from '../../dto/posts/post.input.dto';
 import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
-import { PostModel } from '../../models/posts/Post.model';
-import { v4 as uuidv4 } from 'uuid';
 import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
 import { PostViewType } from '../../types/posts.types';
+import { Post } from '../../entities/posts/Post.entity';
 
 @Injectable()
 export class PostsService {
@@ -17,16 +16,13 @@ export class PostsService {
     const { title, content, shortDescription, blogId } = postData;
     const blog = await this.blogsRepository.findBlogById(blogId);
 
-    const initialPostModel: PostModel = new PostModel(
-      uuidv4(),
-      title,
-      shortDescription,
-      content,
-      blogId,
-      blog.name,
-      new Date().toISOString(),
-    );
+    const newPost = new Post();
+    newPost.title = title;
+    newPost.content = content;
+    newPost.shortDescription = shortDescription;
+    newPost.blogName = blog.name;
+    newPost.blog = blog.id as any;
 
-    return await this.postsRepository.createPost(initialPostModel);
+    return await this.postsRepository.createPost(newPost);
   }
 }

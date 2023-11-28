@@ -64,9 +64,9 @@ export class BlogController {
 
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.saBlogs}`)
-  async createBlog(@Body() body: BlogInputDto) {
+  async createBlog(@Body() body: BlogInputDto, @Req() req: Request) {
     return await this.commandBus.execute(
-      new CreateBlogCommand('id from CurrentUserId', body),
+      new CreateBlogCommand(req.headers?.authorization, body),
     );
   }
 

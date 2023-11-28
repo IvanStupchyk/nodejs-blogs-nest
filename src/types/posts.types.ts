@@ -1,4 +1,5 @@
 import { likeStatus } from './general.types';
+import { Blog } from '../entities/blogs/Blog.entity';
 
 type PostLikeUserInfoType = {
   addedAt: string;
@@ -18,8 +19,8 @@ export class PostViewType {
   title: string;
   shortDescription: string;
   content: string;
-  createdAt: string;
-  blogId: string;
+  createdAt: Date;
+  blogId: Blog;
   blogName: string;
   extendedLikesInfo: ExtendedLikesInfoViewType;
 }
@@ -31,7 +32,7 @@ export type PostType = {
   content: string;
   blogId: string;
   blogName: string;
-  createdAt: string;
+  createdAt: Date;
 };
 
 export type PostsType = {

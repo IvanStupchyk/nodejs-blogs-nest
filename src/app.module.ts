@@ -64,7 +64,10 @@ import { CommentLikesRepository } from './infrastructure/repositories/comment-li
 import { Device } from './entities/devices/device.entity';
 import { InvalidRefreshToken } from './entities/users/invalid-refresh-tokens.entity';
 import { User } from './entities/users/user.entity';
-import { globalBdOptions } from './constants/db-options';
+import { globalBdOptions, localBdOptions } from './constants/db-options';
+import { Blog } from './entities/blogs/Blog.entity';
+import { Post } from './entities/posts/Post.entity';
+import { PostLike } from './entities/posts/Post-like.entity';
 
 const useCases = [
   CreatePostUseCase,
@@ -100,7 +103,7 @@ const useCases = [
   DeletePostWithCheckingUseCase,
 ];
 
-const entities = [User, Device, InvalidRefreshToken];
+const entities = [User, Device, InvalidRefreshToken, Blog, Post, PostLike];
 
 @Module({
   imports: [

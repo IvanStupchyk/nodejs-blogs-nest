@@ -29,19 +29,21 @@ export class UpdatePostWithCheckingUseCase
     if (!isUUID(command.blogId)) return HttpStatus.NOT_FOUND;
     if (!isUUID(command.postId)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsRepository.fetchAllBlogDataById(
-      command.blogId,
-    );
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) return HttpStatus.NOT_FOUND;
     // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
 
-    const result = await this.postsRepository.updatePost(
-      command.postId,
-      title,
-      content,
-      shortDescription,
-    );
+    const post = await this.postsRepository.findPostById(command.postId);
 
-    return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+    if (post) {
+      post.title = title;
+      post.content = content;
+      post.shortDescription = shortDescription;
+      await this.postsRepository.save(post);
+
+      return HttpStatus.NO_CONTENT;
+    } else {
+      return HttpStatus.NOT_FOUND;
+    }
   }
 }
