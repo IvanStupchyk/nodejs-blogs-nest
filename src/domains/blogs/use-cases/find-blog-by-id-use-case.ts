@@ -17,13 +17,15 @@ export class FindBlogByIdUseCase
     if (!isUUID(command.id)) return null;
     const blog = await this.blogsRepository.findBlogById(command.id);
 
-    return {
-      id: blog.id,
-      name: blog.name,
-      description: blog.description,
-      websiteUrl: blog.websiteUrl,
-      isMembership: blog.isMembership,
-      createdAt: blog.createdAt,
-    };
+    return blog
+      ? {
+          id: blog.id,
+          name: blog.name,
+          description: blog.description,
+          websiteUrl: blog.websiteUrl,
+          isMembership: blog.isMembership,
+          createdAt: blog.createdAt,
+        }
+      : null;
   }
 }
