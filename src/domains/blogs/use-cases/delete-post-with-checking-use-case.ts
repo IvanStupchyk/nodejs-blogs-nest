@@ -31,6 +31,6 @@ export class DeletePostWithCheckingUseCase
 
     const result = await this.postsRepository.deletePost(command.postId);
 
-    return result ? HttpStatus.NO_CONTENT : HttpStatus.NO_CONTENT;
+    return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
   }
 }
