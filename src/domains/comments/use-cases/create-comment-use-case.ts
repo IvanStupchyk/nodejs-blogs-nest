@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
-import { CommentModel } from '../../../models/comments/Comment.model';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
-import { v4 as uuidv4 } from 'uuid';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { CommentViewType } from '../../../types/comments.types';
+import { Comment } from '../../../entities/comments/Comment.entity';
+import { likeStatus } from '../../../types/general.types';
 
 export class CreateCommentCommand {
   constructor(
@@ -38,15 +38,26 @@ export class CreateCommentUseCase
     const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user) return HttpStatus.NOT_FOUND;
 
-    const newComment = new CommentModel(
-      uuidv4(),
-      content,
-      id,
-      user.id,
-      user.login,
-      new Date().toISOString(),
-    );
+    const newComment = new Comment();
+    newComment.content = content;
+    newComment.user = user;
+    newComment.post = foundPost;
 
-    return await this.commentsRepository.createComment(newComment);
+    const savedComment = await this.commentsRepository.save(newComment);
+
+    return {
+      id: savedComment.id,
+      content: savedComment.content,
+      commentatorInfo: {
+        userId: user.id,
+        userLogin: user.login,
+      },
+      createdAt: savedComment.createdAt,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: likeStatus.None,
+      },
+    };
   }
 }

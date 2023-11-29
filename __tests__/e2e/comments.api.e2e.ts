@@ -5,7 +5,6 @@ import { usersTestManager } from '../utils/users-test-manager';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { INestApplication } from '@nestjs/common';
-import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
 import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
@@ -16,6 +15,7 @@ import { CommentViewType } from '../../src/types/comments.types';
 import { userData1, userData2, userData3 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
+import { BlogViewType } from '../../src/types/blogs.types';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
@@ -49,7 +49,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   let newPost: PostType;
-  let newBlog: BlogModel;
+  let newBlog: BlogViewType;
   let user1: UserViewType;
   let user2: UserViewType;
   let user3: UserViewType;
@@ -145,9 +145,10 @@ describe('tests for /comments and posts/:id/comments', () => {
       shortDescription: 'shortDescription',
     };
 
-    const { createdPost } = await postsTestManager.createPost(
+    const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       validPostData,
+      createdBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
 

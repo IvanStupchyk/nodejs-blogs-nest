@@ -6,11 +6,11 @@ import { mockPosts } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
-import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { v4 as uuidv4 } from 'uuid';
 import { invalidPostData, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
+import { BlogViewType } from '../../src/types/blogs.types';
 
 describe('tests for /posts', () => {
   let validPostData: PostInputDto = {
@@ -51,19 +51,33 @@ describe('tests for /posts', () => {
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 
+  let newBlog: BlogViewType;
   it("shouldn't create a post if the user is not logged in", async () => {
-    await postsTestManager.createPost(
+    await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       invalidPostData,
+      'sdf',
       HTTP_STATUSES.UNAUTHORIZED_401,
       'sssss',
     );
+
+    const { createdBlog } = await blogsTestManager.createBlog(
+      httpServer,
+      validBlogData,
+    );
+
+    await getRequest()
+      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
+      .expect(createdBlog);
+
+    newBlog = createdBlog;
   });
 
   it("shouldn't create a post if the user sends invalid data", async () => {
-    const { response } = await postsTestManager.createPost(
+    const { response } = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       invalidPostData,
+      '1d5ab9c1-b16e-4640-80af-67822894e4e4',
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -81,10 +95,6 @@ describe('tests for /posts', () => {
           field: 'content',
           message: 'content should not be an empty string',
         },
-        {
-          field: 'blogId',
-          message: 'such blog should exist',
-        },
       ],
     });
 
@@ -95,29 +105,20 @@ describe('tests for /posts', () => {
 
   let newPost: PostType;
   const newPosts: Array<PostType> = [];
-  let newBlog: BlogModel;
+
   it('should create a post if the user sent valid data with existing blog id', async () => {
-    const { createdBlog } = await blogsTestManager.createBlog(
-      httpServer,
-      validBlogData,
-    );
-
-    await getRequest()
-      .get(`${RouterPaths.blogs}/${createdBlog.id}`)
-      .expect(createdBlog);
-
     validPostData = {
       ...validPostData,
-      blogId: createdBlog.id,
+      blogId: newBlog.id,
     };
-    const { createdPost } = await postsTestManager.createPost(
+    const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       validPostData,
+      newBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
 
     newPost = createdPost;
-    newBlog = createdBlog;
     newPosts.push(newPost);
 
     await getRequest()
@@ -135,20 +136,32 @@ describe('tests for /posts', () => {
     const pageNumber = 2;
     const pageSize = 2;
 
-    const secondPost = await postsTestManager.createPost(httpServer, {
-      ...validPostData,
-      title: 'second',
-    });
+    const secondPost = await postsTestManager.createPostForSpecifiedBlog(
+      httpServer,
+      {
+        ...validPostData,
+        title: 'second',
+      },
+      newBlog.id,
+    );
 
-    const thirdPost = await postsTestManager.createPost(httpServer, {
-      ...validPostData,
-      title: 'third',
-    });
+    const thirdPost = await postsTestManager.createPostForSpecifiedBlog(
+      httpServer,
+      {
+        ...validPostData,
+        title: 'third',
+      },
+      newBlog.id,
+    );
 
-    const fourthPost = await postsTestManager.createPost(httpServer, {
-      ...validPostData,
-      title: 'fourth',
-    });
+    const fourthPost = await postsTestManager.createPostForSpecifiedBlog(
+      httpServer,
+      {
+        ...validPostData,
+        title: 'fourth',
+      },
+      newBlog.id,
+    );
 
     newPosts.unshift(secondPost.createdPost);
     newPosts.unshift(thirdPost.createdPost);

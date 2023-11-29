@@ -22,7 +22,7 @@ import { PostsQueryDto } from '../dto/posts/posts.query.dto';
 import { JwtService } from '../infrastructure/jwt.service';
 import { RouterPaths } from '../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreatePostForSpecifiedBlogCommand } from '../domains/posts/use-cases/create-post-for-specified-blog-use-case';
+import { CreatePostCommand } from '../domains/posts/use-cases/create-post-use-case';
 import { CreateBlogCommand } from '../domains/blogs/use-cases/create-blog-use-case';
 import { UpdateBlogCommand } from '../domains/blogs/use-cases/update-blog-use-case';
 import { DeleteBlogCommand } from '../domains/blogs/use-cases/delete-blog-use-case';
@@ -72,14 +72,14 @@ export class BlogController {
 
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.saBlogs}/:id/posts`)
-  async createPostForSpecifiedBlog(
+  async createPost(
     @Param() params: BlogParamsDto,
     @Body() body: PostForSpecifiedBlogInputDto,
     @CurrentUserId() userId,
     @Res() res: Response,
   ) {
     const post = await this.commandBus.execute(
-      new CreatePostForSpecifiedBlogCommand(body, params.id, userId),
+      new CreatePostCommand(body, params.id, userId),
     );
 
     !post ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(post);

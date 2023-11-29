@@ -16,7 +16,7 @@ export type CommentViewType = {
   content: string;
   commentatorInfo: CommentatorInfoType;
   likesInfo: CommentLikesViewType;
-  createdAt: string;
+  createdAt: Date;
 };
 
 export type CommentsViewType = {

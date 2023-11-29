@@ -14,10 +14,10 @@ export class PostLike {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ name: 'like_status', type: 'varchar' })
   likeStatus: string;
 
-  @Column({ type: 'timestamp with time zone' })
+  @Column({ name: 'added_at', type: 'timestamp with time zone' })
   addedAt: Date;
 
   @ManyToOne(() => User, (user) => user.postLike, {
@@ -26,7 +26,7 @@ export class PostLike {
   @JoinColumn()
   user: User;
 
-  @ManyToOne(() => Post, (post) => post.postLike, {
+  @ManyToOne(() => Post, (post) => post.postLikes, {
     onDelete: 'CASCADE',
   })
   @JoinColumn()

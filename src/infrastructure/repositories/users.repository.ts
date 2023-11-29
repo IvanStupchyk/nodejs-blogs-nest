@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UserType, UserViewType } from '../../types/users.types';
 import { User } from '../../entities/users/user.entity';
 
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
   ) {}
 
@@ -22,7 +21,7 @@ export class UsersRepository {
     };
   }
 
-  async fetchAllUserDataById(id: string): Promise<UserType | null> {
+  async fetchAllUserDataById(id: string): Promise<User | null> {
     return await this.usersRepository
       .createQueryBuilder('u')
       .where('u.id = :id', {

@@ -4,7 +4,6 @@ import { blogsTestManager } from '../utils/blogs-test-manager';
 import { mockBlogs } from '../../src/constants/blanks';
 import { INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { postsTestManager } from '../utils/posts-test-manager';
 import {
   invalidBlogData,
@@ -13,6 +12,7 @@ import {
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
+import { BlogViewType } from '../../src/types/blogs.types';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
@@ -34,7 +34,7 @@ describe('tests for /blogs', () => {
     await app.close();
   });
 
-  const newBlogs: Array<BlogModel> = [];
+  const newBlogs: Array<BlogViewType> = [];
 
   it('should return 200 and an empty blogs array', async () => {
     await getRequest()
@@ -87,7 +87,7 @@ describe('tests for /blogs', () => {
       .expect(HTTP_STATUSES.OK_200, mockBlogs);
   });
 
-  let newBlog: BlogModel;
+  let newBlog: BlogViewType;
   let newPost: PostType;
   let secondPost: PostType;
   it('should create a blog if the user sends the valid data', async () => {
@@ -115,9 +115,10 @@ describe('tests for /blogs', () => {
       ...validPostData,
       blogId: newBlog.id,
     };
-    const { createdPost } = await postsTestManager.createPost(
+    const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       validPostData1,
+      newBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
 

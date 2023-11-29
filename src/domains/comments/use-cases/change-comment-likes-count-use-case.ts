@@ -6,9 +6,8 @@ import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { CommentLikesRepository } from '../../../infrastructure/repositories/comment-likes.repository';
-import { v4 as uuidv4 } from 'uuid';
-import { CommentLikeModel } from '../../../models/comments/Comment-like.model';
-import { CommentViewType } from '../../../types/comments.types';
+import { CommentLike } from '../../../entities/comments/Comment-like.entity';
+import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 
 export class ChangeCommentLikesCountCommand {
   constructor(
@@ -25,6 +24,7 @@ export class ChangeCommentLikesCountUseCase
   constructor(
     private readonly commentsRepository: CommentsRepository,
     private readonly commentLikesRepository: CommentLikesRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async execute(command: ChangeCommentLikesCountCommand): Promise<number> {
@@ -38,8 +38,11 @@ export class ChangeCommentLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundComment: CommentViewType =
-      await this.commentsRepository.findCommentById(id);
+    const user = await this.usersRepository.fetchAllUserDataById(userId);
+    if (!user) return HttpStatus.NOT_FOUND;
+
+    const foundComment =
+      await this.commentsRepository.fetchAllCommentDataById(id);
     if (!foundComment) return HttpStatus.NOT_FOUND;
 
     const userCommentLike =
@@ -49,7 +52,7 @@ export class ChangeCommentLikesCountUseCase
       );
 
     if (
-      userCommentLike?.myStatus === myStatus ||
+      userCommentLike?.likeStatus === myStatus ||
       (!userCommentLike && myStatus === likeStatus.None)
     ) {
       return HttpStatus.NO_CONTENT;
@@ -58,21 +61,16 @@ export class ChangeCommentLikesCountUseCase
     if (userCommentLike) {
       if (myStatus === likeStatus.None) {
         await this.commentLikesRepository.deleteCommentLike(userCommentLike.id);
+        return HttpStatus.NO_CONTENT;
       }
-      await this.commentLikesRepository.updateExistingCommentLike(
-        userId,
-        id,
-        myStatus,
-      );
+      userCommentLike.likeStatus = myStatus;
+      await this.commentLikesRepository.save(userCommentLike);
     } else {
-      const newCommentLike = new CommentLikeModel(
-        uuidv4(),
-        userId,
-        id,
-        myStatus,
-        new Date().toISOString(),
-      );
-      await this.commentLikesRepository.addCommentLike(newCommentLike);
+      const commentLike = new CommentLike();
+      commentLike.user = user;
+      commentLike.comment = foundComment;
+      commentLike.likeStatus = myStatus;
+      await this.commentLikesRepository.save(commentLike);
     }
 
     return HttpStatus.NO_CONTENT;

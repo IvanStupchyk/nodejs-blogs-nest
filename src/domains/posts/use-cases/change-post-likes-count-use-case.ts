@@ -7,8 +7,7 @@ import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { PostLikesRepository } from '../../../infrastructure/repositories/post-likes.repository';
-import { PostLikesModel } from '../../../models/posts/Post-likes.model';
-import { v4 as uuidv4 } from 'uuid';
+import { PostLike } from '../../../entities/posts/Post-like.entity';
 
 export class ChangePostLikesCountCommand {
   constructor(
@@ -49,7 +48,7 @@ export class ChangePostLikesCountUseCase
       await this.postLikesRepository.findPostLikesByUserIdAndPostId(userId, id);
 
     if (
-      userPostLike?.myStatus === myStatus ||
+      userPostLike?.likeStatus === myStatus ||
       (!userPostLike && myStatus === likeStatus.None)
     ) {
       return HttpStatus.NO_CONTENT;
@@ -58,24 +57,20 @@ export class ChangePostLikesCountUseCase
     if (userPostLike) {
       if (myStatus === likeStatus.None) {
         await this.postLikesRepository.deletePostLike(userPostLike.id);
+        return HttpStatus.NO_CONTENT;
       }
-      await this.postLikesRepository.updateExistingPostLike(
-        userId,
-        id,
-        myStatus,
-        new Date().toISOString(),
-      );
+
+      userPostLike.likeStatus = myStatus;
+      userPostLike.addedAt = new Date();
+      await this.postLikesRepository.save(userPostLike);
     } else {
-      const newPostLike = new PostLikesModel(
-        uuidv4(),
-        userId,
-        user.login,
-        myStatus,
-        id,
-        new Date().toISOString(),
-        new Date().toISOString(),
-      );
-      await this.postLikesRepository.addPostLike(newPostLike);
+      const postLike = new PostLike();
+      postLike.likeStatus = myStatus;
+      postLike.post = foundPost;
+      postLike.user = user;
+      postLike.addedAt = new Date();
+
+      await this.postLikesRepository.save(postLike);
     }
 
     return HttpStatus.NO_CONTENT;
