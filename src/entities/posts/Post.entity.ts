@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Blog } from '../blogs/Blog.entity';
 import { PostLike } from './Post-like.entity';
+import { Comment } from '../comments/Comment.entity';
 
 @Entity('posts')
 export class Post {
@@ -40,7 +41,10 @@ export class Post {
   blogName: string;
 
   @OneToMany(() => PostLike, (postLike) => postLike.post)
-  postLike: PostLike[];
+  postLikes: PostLike[];
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comment: Comment[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

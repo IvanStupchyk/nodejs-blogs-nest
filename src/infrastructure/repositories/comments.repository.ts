@@ -1,83 +1,99 @@
 import { Injectable } from '@nestjs/common';
 import { likeStatus } from '../../types/general.types';
-import { CommentModel } from '../../models/comments/Comment.model';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { createDefaultSortedParams, getPagesCount } from '../../utils/utils';
 import { mockCommentModel } from '../../constants/blanks';
 import { CommentsQueryDto } from '../../dto/comments/comments.query.dto';
 import { CommentsViewType, CommentViewType } from '../../types/comments.types';
+import { Comment } from '../../entities/comments/Comment.entity';
+import { CommentLike } from '../../entities/comments/Comment-like.entity';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Comment)
+    private readonly commentsRepository: Repository<Comment>,
+  ) {}
+
+  async save(comment: Comment): Promise<Comment> {
+    return await this.commentsRepository.save(comment);
+  }
 
   async findCommentById(
     id: string,
     userId: string = uuidv4(),
   ): Promise<CommentViewType | null> {
-    const foundComment: Array<
-      CommentModel & {
-        likesCount: number;
-        dislikesCount: number;
-        userStatus: likeStatus;
-      }
-    > = await this.dataSource.query(
-      `
-      select c."id", c."content", c."postId", c."userId", c."userLogin", c."createdAt" ,
-       ( 
-        select count("myStatus")
-        from public."commentLikes"
-        where "myStatus" = 'Like'
-        and "commentId" = c."id"
-      ) as "likesCount",
-      ( 
-        select "myStatus"
-        from public."commentLikes"
-        where "userId" = $2
-        and "commentId" = c."id"
-      ) as "userStatus",
-      ( 
-        select count("myStatus")
-        from public."commentLikes"
-        where "myStatus" = 'Dislike'
-        and "commentId" = c."id"
-      ) as "dislikesCount"
-      from public."comments" c
-      where "id" = $1
-    `,
-      [id, userId],
-    );
+    const comment = await this.commentsRepository
+      .createQueryBuilder('c')
+      .addSelect(
+        (lk) =>
+          lk
+            .select('count(*)')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere("cl.likeStatus = 'Like'"),
+        'likes_count',
+      )
+      .addSelect(
+        (lk) =>
+          lk
+            .select('count(*)')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere("cl.likeStatus = 'Dislike'"),
+        'dislikes_count',
+      )
+      .addSelect(
+        (lk) =>
+          lk
+            .select('like_status')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere('cl.userId = :userId', { userId }),
+        'my_status',
+      )
+      .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('c.post', 'p')
+      .where('c.id = :id', { id })
+      .getRawOne();
 
-    return foundComment.length
+    return comment
       ? {
-          id: foundComment[0].id,
-          content: foundComment[0].content,
+          id: comment.c_id,
+          content: comment.c_content,
           commentatorInfo: {
-            userId: foundComment[0].userId,
-            userLogin: foundComment[0].userLogin,
+            userId: comment.u_id,
+            userLogin: comment.u_login,
           },
           likesInfo: {
-            likesCount: Number(foundComment[0].likesCount),
-            dislikesCount: Number(foundComment[0].dislikesCount),
-            myStatus: foundComment[0].userStatus ?? likeStatus.None,
+            likesCount: Number(comment.likes_count),
+            dislikesCount: Number(comment.dislikes_count),
+            myStatus: comment.my_status ?? likeStatus.None,
           },
-          createdAt: foundComment[0].createdAt,
+          createdAt: comment.c_createdAt,
         }
       : null;
   }
 
-  async deleteComment(commentId: string): Promise<boolean> {
-    const isDeleted = await this.dataSource.query(
-      `
-      DELETE from public."comments"
-      where "id" = $1
-    `,
-      [commentId],
-    );
+  async fetchAllCommentDataById(id: string): Promise<Comment | null> {
+    return await this.commentsRepository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.user', 'u')
+      .where('c.id = :id', { id })
+      .getOne();
+  }
 
-    return !!isDeleted[1];
+  async deleteComment(commentId: string): Promise<boolean> {
+    const isDeleted = await this.commentsRepository
+      .createQueryBuilder('c')
+      .delete()
+      .from(Comment)
+      .where('id = :id', { id: commentId })
+      .execute();
+
+    return !!isDeleted.affected;
   }
 
   async getSortedComments(
@@ -94,115 +110,84 @@ export class CommentsRepository {
         model: mockCommentModel,
       });
 
-    const comments = await this.dataSource.query(
-      `
-      select c."id", c."content", c."postId", c."userId", c."userLogin", c."createdAt" ,
-       ( 
-        select count("myStatus")
-        from public."commentLikes"
-        where "myStatus" = 'Like'
-        and "commentId" = c."id"
-      ) as "likesCount",
-      ( 
-        select "myStatus"
-        from public."commentLikes"
-        where "userId" = $3
-        and "commentId" = c."id"
-      ) as "userStatus",
-      ( 
-        select count("myStatus")
-        from public."commentLikes"
-        where "myStatus" = 'Dislike'
-        and "commentId" = c."id"
-      ) as "dislikesCount"
-      from public."comments" c
-      where "postId" = $4
-         order by "${sortBy}" ${sortDirection}
-         limit $1 offset $2 
-    `,
-      [pageSize, skipSize, userId, postId],
-    );
+    const comments = await this.commentsRepository
+      .createQueryBuilder('c')
+      .addSelect(
+        (lk) =>
+          lk
+            .select('count(*)')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere("cl.likeStatus = 'Like'"),
+        'likes_count',
+      )
+      .addSelect(
+        (lk) =>
+          lk
+            .select('count(*)')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere("cl.likeStatus = 'Dislike'"),
+        'dislikes_count',
+      )
+      .addSelect(
+        (lk) =>
+          lk
+            .select('like_status')
+            .from(CommentLike, 'cl')
+            .where('c.id = cl.commentId')
+            .andWhere('cl.userId = :userId', { userId }),
+        'my_status',
+      )
+      .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('c.post', 'p')
+      .where('p.id = :postId', { postId })
+      .orderBy(`c.${sortBy}`, sortDirection)
+      .limit(pageSize)
+      .offset(skipSize)
+      .getRawMany();
 
-    const commentsCount = await this.dataSource.query(
-      `
-    select "id", "postId"
-    from public."comments"
-    where ("postId" = $1)`,
-      [postId],
-    );
+    const commentsCount = await this.commentsRepository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.post', 'p')
+      .where('p.id = :postId', { postId })
+      .getCount();
 
-    if (!commentsCount.length) return null;
+    if (!commentsCount) return null;
 
-    const totalCommentsCount = commentsCount.length;
-    const pagesCount = getPagesCount(totalCommentsCount, pageSize);
+    const pagesCount = getPagesCount(commentsCount, pageSize);
 
     return {
       pagesCount,
       page: pageNumber,
       pageSize,
-      totalCount: totalCommentsCount,
+      totalCount: commentsCount,
       items: comments.map((c) => {
         return {
-          id: c.id,
-          content: c.content,
+          id: c.c_id,
+          content: c.c_content,
           commentatorInfo: {
-            userId: c.userId,
-            userLogin: c.userLogin,
+            userId: c.u_id,
+            userLogin: c.u_login,
           },
           likesInfo: {
-            likesCount: Number(c.likesCount),
-            dislikesCount: Number(c.dislikesCount),
-            myStatus: c.userStatus ?? likeStatus.None,
+            likesCount: Number(c.likes_count),
+            dislikesCount: Number(c.dislikes_count),
+            myStatus: c.my_status ?? likeStatus.None,
           },
-          createdAt: c.createdAt,
+          createdAt: c.c_createdAt,
         };
       }),
     };
   }
 
-  async createComment(comment: CommentModel): Promise<CommentViewType> {
-    const { id, content, postId, userId, userLogin, createdAt } = comment;
+  async deleteAllComments(): Promise<boolean> {
+    const result = await this.commentsRepository
+      .createQueryBuilder('c')
+      .delete()
+      .from(Comment)
+      .execute();
 
-    const newComment: CommentModel = await this.dataSource.query(
-      `
-      insert into public."comments"("id", "content", "postId", "userId", "userLogin", "createdAt")
-      values($1, $2, $3, $4, $5, $6)
-      returning "id", "content", "postId", "userId", "userLogin", "createdAt"  `,
-      [id, content, postId, userId, userLogin, createdAt],
-    );
-
-    return {
-      id: newComment[0].id,
-      content: newComment[0].content,
-      commentatorInfo: {
-        userId: newComment[0].userId,
-        userLogin: newComment[0].userLogin,
-      },
-      createdAt: newComment[0].createdAt,
-      likesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-      },
-    };
-  }
-
-  async updateComment(content: string, id: string): Promise<boolean> {
-    const result = await this.dataSource.query(
-      `
-      update public."comments"
-      set "content" = $1
-      where "id" = $2 
-    `,
-      [content, id],
-    );
-
-    return !!result[1];
-  }
-
-  async deleteAllComments() {
-    return this.dataSource.query(`
-    Delete from public."comments"
-    `);
+    return !!result.affected;
   }
 }

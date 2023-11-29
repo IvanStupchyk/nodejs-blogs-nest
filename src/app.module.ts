@@ -5,7 +5,6 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './controllers/users.controller';
 import { BlogController } from './controllers/blogs.controller';
 import { PostsController } from './controllers/posts.controller';
-import { PostsService } from './domains/posts/posts.service';
 import { CommentsController } from './controllers/comments.controller';
 import { ResetDbController } from './controllers/reset-db.controller';
 import { AuthController } from './controllers/auth.controller';
@@ -16,9 +15,8 @@ import { JwtService } from './infrastructure/jwt.service';
 import { RefreshTokenMiddleware } from './middlewares/refresh-token.middleware';
 import { DevicesController } from './controllers/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
-import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
 import { CqrsModule } from '@nestjs/cqrs';
-import { CreatePostForSpecifiedBlogUseCase } from './domains/posts/use-cases/create-post-for-specified-blog-use-case';
+import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
 import { ChangePostLikesCountUseCase } from './domains/posts/use-cases/change-post-likes-count-use-case';
 import { GetSortedPostsUseCase } from './domains/posts/use-cases/get-sorted-posts-use-case';
 import { GetPostByIdUseCase } from './domains/posts/use-cases/get-post-by-id-use-case';
@@ -68,10 +66,11 @@ import { globalBdOptions, localBdOptions } from './constants/db-options';
 import { Blog } from './entities/blogs/Blog.entity';
 import { Post } from './entities/posts/Post.entity';
 import { PostLike } from './entities/posts/Post-like.entity';
+import { Comment } from './entities/comments/Comment.entity';
+import { CommentLike } from './entities/comments/Comment-like.entity';
 
 const useCases = [
   CreatePostUseCase,
-  CreatePostForSpecifiedBlogUseCase,
   ChangePostLikesCountUseCase,
   GetSortedPostsUseCase,
   GetPostByIdUseCase,
@@ -103,7 +102,16 @@ const useCases = [
   DeletePostWithCheckingUseCase,
 ];
 
-const entities = [User, Device, InvalidRefreshToken, Blog, Post, PostLike];
+const entities = [
+  User,
+  Device,
+  InvalidRefreshToken,
+  Blog,
+  Post,
+  PostLike,
+  Comment,
+  CommentLike,
+];
 
 @Module({
   imports: [
@@ -139,7 +147,6 @@ const entities = [User, Device, InvalidRefreshToken, Blog, Post, PostLike];
     PostLikesRepository,
     CommentsRepository,
     CommentLikesRepository,
-    PostsService,
     JwtService,
     LocalStrategy,
     JwtStrategy,

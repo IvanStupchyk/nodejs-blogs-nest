@@ -21,17 +21,15 @@ export class UpdateCommentUseCase
     const { id, userId, content } = command;
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundComment = await this.commentsRepository.findCommentById(id);
-    if (!foundComment) return HttpStatus.NOT_FOUND;
+    const comment = await this.commentsRepository.fetchAllCommentDataById(id);
+    if (!comment) return HttpStatus.NOT_FOUND;
 
-    if (foundComment && foundComment.commentatorInfo.userId !== userId) {
+    if (comment && comment.user.id !== userId) {
       return HttpStatus.FORBIDDEN;
     }
 
-    const isCommentUpdated = await this.commentsRepository.updateComment(
-      content,
-      id,
-    );
+    comment.content = content;
+    const isCommentUpdated = await this.commentsRepository.save(comment);
 
     if (isCommentUpdated) return HttpStatus.NO_CONTENT;
 

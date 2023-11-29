@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { InvalidRefreshToken } from '../../entities/users/invalid-refresh-tokens.entity';
 
 @Injectable()
 export class InvalidRefreshTokensRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(InvalidRefreshToken)
     private readonly invalidRefreshTokensRepository: Repository<InvalidRefreshToken>,
   ) {}

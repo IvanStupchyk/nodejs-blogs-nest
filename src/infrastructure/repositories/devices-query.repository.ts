@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { DeviceViewType } from '../../types/devices.types';
 import { Device } from '../../entities/devices/device.entity';
 
 @Injectable()
 export class DevicesQueryRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(Device)
     private readonly devicesRepository: Repository<Device>,
   ) {}

@@ -8,6 +8,8 @@ import {
 import { Device } from '../devices/device.entity';
 import { InvalidRefreshToken } from './invalid-refresh-tokens.entity';
 import { PostLike } from '../posts/Post-like.entity';
+import { Comment } from '../comments/Comment.entity';
+import { CommentLike } from '../comments/Comment-like.entity';
 
 @Entity('users')
 export class User {
@@ -40,6 +42,12 @@ export class User {
 
   // @OneToMany(() => Post, (post) => post.user)
   // post: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comment: Comment[];
+
+  @OneToMany(() => CommentLike, (commentLike) => commentLike.user)
+  commentLikes: CommentLike[];
 
   @OneToMany(() => PostLike, (postLike) => postLike.user)
   postLike: PostLike[];

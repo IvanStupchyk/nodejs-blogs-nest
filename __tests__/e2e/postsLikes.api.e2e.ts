@@ -6,7 +6,6 @@ import { usersTestManager } from '../utils/users-test-manager';
 import { likeStatus } from '../../src/types/general.types';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
-import { BlogModel } from '../../src/models/blogs/Blog.model';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +18,7 @@ import {
   validBlogData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
+import { BlogViewType } from '../../src/types/blogs.types';
 
 describe('tests for /posts with likes logic', () => {
   let validPostData: PostInputDto = {
@@ -47,7 +47,7 @@ describe('tests for /posts with likes logic', () => {
     await app.close();
   });
 
-  let newBlog: BlogModel;
+  let newBlog: BlogViewType;
   let user1: UserViewType;
   let user2: UserViewType;
   let user3: UserViewType;
@@ -109,12 +109,13 @@ describe('tests for /posts with likes logic', () => {
       blogId: createdBlog.id,
     };
 
-    const { createdPost } = await postsTestManager.createPost(
+    const { createdPost } = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       validPostData,
+      createdBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
-    const createdPost2 = await postsTestManager.createPost(
+    const createdPost2 = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       {
         title: 'a',
@@ -122,9 +123,10 @@ describe('tests for /posts with likes logic', () => {
         blogId: createdBlog.id,
         shortDescription: 'shortDescription',
       },
+      createdBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
-    const createdPost3 = await postsTestManager.createPost(
+    const createdPost3 = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       {
         title: 'b',
@@ -132,9 +134,10 @@ describe('tests for /posts with likes logic', () => {
         blogId: createdBlog.id,
         shortDescription: 'shortDescription',
       },
+      createdBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
-    const createdPost4 = await postsTestManager.createPost(
+    const createdPost4 = await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
       {
         title: 'c',
@@ -142,6 +145,7 @@ describe('tests for /posts with likes logic', () => {
         blogId: createdBlog.id,
         shortDescription: 'shortDescription',
       },
+      createdBlog.id,
       HTTP_STATUSES.CREATED_201,
     );
 

@@ -6,7 +6,7 @@ import {
   mockUserModel,
 } from '../constants/blanks';
 import { UserViewType } from './users.types';
-import { BlogType } from './blogs.types';
+import { BlogViewType } from './blogs.types';
 import { CommentViewType } from './comments.types';
 import { PostType } from './posts.types';
 
@@ -20,7 +20,7 @@ export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;
   sortBy:
-    | keyof BlogType
+    | keyof BlogViewType
     | keyof PostType
     | keyof UserViewType
     | keyof CommentViewType;
