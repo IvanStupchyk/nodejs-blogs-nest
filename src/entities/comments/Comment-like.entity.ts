@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Comment } from './Comment.entity';
-import { User } from '../users/user.entity';
+import { User } from '../users/User.entity';
 
 @Entity('commentLikes')
 export class CommentLike {

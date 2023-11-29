@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
 import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/invalid-refresh-tokens.repository';
-import { InvalidRefreshToken } from '../../../entities/users/invalid-refresh-tokens.entity';
+import { InvalidRefreshToken } from '../../../entities/users/Invalid-refresh-tokens.entity';
 
 export class RefreshTokenCommand {
   constructor(

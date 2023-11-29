@@ -8,12 +8,12 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { RouterPaths } from '../constants/router.paths';
-import { RefreshTokenMiddleware } from '../middlewares/refresh-token.middleware';
-import { DeleteDeviceParamsDto } from '../dto/devices/delete-device.params.dto';
+import { RouterPaths } from '../../constants/router.paths';
+import { RefreshTokenMiddleware } from '../../middlewares/refresh-token.middleware';
+import { DeleteDeviceParamsDto } from '../../dto/devices/delete-device.params.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { DeleteDeviceCommand } from '../domains/devices/use-cases/delete-device-use-case';
-import { DevicesQueryRepository } from '../infrastructure/repositories/devices-query.repository';
+import { DeleteDeviceCommand } from '../../domains/devices/use-cases/delete-device-use-case';
+import { DevicesQueryRepository } from '../../infrastructure/repositories/devices-query.repository';
 
 @Controller()
 export class DevicesController {

@@ -5,8 +5,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Device } from '../devices/device.entity';
-import { InvalidRefreshToken } from './invalid-refresh-tokens.entity';
+import { Device } from '../devices/Device.entity';
+import { InvalidRefreshToken } from './Invalid-refresh-tokens.entity';
 import { PostLike } from '../posts/Post-like.entity';
 import { Comment } from '../comments/Comment.entity';
 import { CommentLike } from '../comments/Comment-like.entity';

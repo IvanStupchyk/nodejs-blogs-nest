@@ -7,7 +7,7 @@ import { UserInputDto } from '../../../dto/users/user.input.dto';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
-import { User } from '../../../entities/users/user.entity';
+import { User } from '../../../entities/users/User.entity';
 
 export class CreateCommonUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -67,6 +67,6 @@ export class CreateCommonUserUseCase
       return false;
     }
 
-    return !!(await this.usersRepository.createUser(newUser));
+    return !!(await this.usersRepository.save(newUser));
   }
 }

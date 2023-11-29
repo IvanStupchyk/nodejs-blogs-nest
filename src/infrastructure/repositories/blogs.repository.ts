@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BlogViewType } from '../../types/blogs.types';
 import { Blog } from '../../entities/blogs/Blog.entity';
 
 @Injectable()
@@ -10,22 +9,9 @@ export class BlogsRepository {
     @InjectRepository(Blog)
     private readonly blogRepository: Repository<Blog>,
   ) {}
-  async createBlog(newBlog: Blog): Promise<BlogViewType> {
-    const savedBlog = (await this.blogRepository.save(newBlog)) as Blog;
 
-    return {
-      id: savedBlog.id,
-      name: savedBlog.name,
-      // userId: savedBlog.userId,
-      description: savedBlog.description,
-      websiteUrl: savedBlog.websiteUrl,
-      createdAt: savedBlog.createdAt,
-      isMembership: savedBlog.isMembership,
-    };
-  }
-
-  async save(blog: Blog): Promise<boolean> {
-    return !!(await this.blogRepository.save(blog));
+  async save(blog: Blog): Promise<Blog> {
+    return await this.blogRepository.save(blog);
   }
 
   async deleteBlog(id: string): Promise<boolean> {

@@ -2,18 +2,18 @@ import { ConfigModule } from '@nestjs/config';
 const configModule = ConfigModule.forRoot();
 
 import { Module } from '@nestjs/common';
-import { UsersController } from './controllers/users.controller';
-import { BlogController } from './controllers/blogs.controller';
-import { PostsController } from './controllers/posts.controller';
-import { CommentsController } from './controllers/comments.controller';
-import { ResetDbController } from './controllers/reset-db.controller';
-import { AuthController } from './controllers/auth.controller';
+import { UsersSaController } from './controllers/super-admin/users.sa.controller';
+import { BlogController } from './controllers/public/blogs.controller';
+import { PostsController } from './controllers/public/posts.controller';
+import { CommentsController } from './controllers/public/comments.controller';
+import { ResetDbController } from './controllers/public/reset-db.controller';
+import { AuthController } from './controllers/public/auth.controller';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { JwtService } from './infrastructure/jwt.service';
 import { RefreshTokenMiddleware } from './middlewares/refresh-token.middleware';
-import { DevicesController } from './controllers/devices.controller';
+import { DevicesController } from './controllers/public/devices.controller';
 import { IsBlogExistConstraint } from './utils/decorators/existing-blog.decorator';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreatePostUseCase } from './domains/posts/use-cases/create-post-use-case';
@@ -59,15 +59,16 @@ import { DeletePostWithCheckingUseCase } from './domains/blogs/use-cases/delete-
 import { PostLikesRepository } from './infrastructure/repositories/post-likes.repository';
 import { CommentsRepository } from './infrastructure/repositories/comments.repository';
 import { CommentLikesRepository } from './infrastructure/repositories/comment-likes.repository';
-import { Device } from './entities/devices/device.entity';
-import { InvalidRefreshToken } from './entities/users/invalid-refresh-tokens.entity';
-import { User } from './entities/users/user.entity';
+import { Device } from './entities/devices/Device.entity';
+import { InvalidRefreshToken } from './entities/users/Invalid-refresh-tokens.entity';
+import { User } from './entities/users/User.entity';
 import { globalBdOptions, localBdOptions } from './constants/db-options';
 import { Blog } from './entities/blogs/Blog.entity';
 import { Post } from './entities/posts/Post.entity';
 import { PostLike } from './entities/posts/Post-like.entity';
 import { Comment } from './entities/comments/Comment.entity';
 import { CommentLike } from './entities/comments/Comment-like.entity';
+import { BlogSaController } from './controllers/super-admin/blogs.sa.controller';
 
 const useCases = [
   CreatePostUseCase,
@@ -127,7 +128,8 @@ const entities = [
     TypeOrmModule.forFeature([...entities]),
   ],
   controllers: [
-    UsersController,
+    UsersSaController,
+    BlogSaController,
     BlogController,
     PostsController,
     CommentsController,

@@ -36,6 +36,16 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
     newBlog.websiteUrl = websiteUrl;
     newBlog.websiteUrl = websiteUrl;
 
-    return await this.blogsRepository.createBlog(newBlog);
+    const savedBlog = await this.blogsRepository.save(newBlog);
+
+    return {
+      id: savedBlog.id,
+      name: savedBlog.name,
+      // userId: savedBlog.userId,
+      description: savedBlog.description,
+      websiteUrl: savedBlog.websiteUrl,
+      createdAt: savedBlog.createdAt,
+      isMembership: savedBlog.isMembership,
+    };
   }
 }

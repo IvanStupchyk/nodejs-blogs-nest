@@ -45,6 +45,6 @@ export class UpdateUserPasswordUseCase
 
     user.passwordHash = await bcrypt.hash(newPassword, 10);
 
-    return await this.usersRepository.save(user);
+    return !!(await this.usersRepository.save(user));
   }
 }

@@ -6,6 +6,7 @@ import { BlogsRepository } from '../../../infrastructure/repositories/blogs.repo
 import { PostViewType } from '../../../types/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
+import { likeStatus } from '../../../types/general.types';
 
 export class CreatePostCommand {
   constructor(
@@ -42,6 +43,22 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
     newPost.blogName = foundBlog.name;
     newPost.blog = foundBlog;
 
-    return await this.postsRepository.createPost(newPost);
+    const savedPost = await this.postsRepository.save(newPost);
+
+    return {
+      id: savedPost.id,
+      title: savedPost.title,
+      content: savedPost.content,
+      blogId: savedPost.blog.id,
+      blogName: savedPost.blogName,
+      createdAt: savedPost.createdAt,
+      shortDescription: savedPost.shortDescription,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: likeStatus.None,
+        newestLikes: [],
+      },
+    };
   }
 }
