@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../posts/Post.entity';
-import { User } from '../users/user.entity';
+import { User } from '../users/User.entity';
 import { CommentLike } from './Comment-like.entity';
 
 @Entity('comments')

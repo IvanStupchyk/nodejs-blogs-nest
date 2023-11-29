@@ -3,7 +3,7 @@ import { UserInputDto } from '../../../dto/users/user.input.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { UserViewType } from '../../../types/users.types';
-import { User } from '../../../entities/users/user.entity';
+import { User } from '../../../entities/users/User.entity';
 
 export class CreateSuperUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -26,6 +26,13 @@ export class CreateSuperUserUseCase
     newUser.passwordHash = passwordHash;
     newUser.isConfirmed = true;
 
-    return this.usersRepository.createUser(newUser);
+    const savedUser = await this.usersRepository.save(newUser);
+
+    return {
+      id: savedUser.id,
+      login: savedUser.login,
+      email: savedUser.email,
+      createdAt: savedUser.createdAt,
+    };
   }
 }

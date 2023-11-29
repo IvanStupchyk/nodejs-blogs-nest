@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
-import { Device } from '../../../entities/devices/device.entity';
+import { Device } from '../../../entities/devices/Device.entity';
 
 export class LogInUserCommand {
   constructor(

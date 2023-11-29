@@ -12,21 +12,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { PostsQueryDto } from '../dto/posts/posts.query.dto';
-import { PostParamsDto } from '../dto/posts/post.params.dto';
-import { CommentParamsDto } from '../dto/comments/comment.params.dto';
-import { CommentsQueryDto } from '../dto/comments/comments.query.dto';
-import { RouterPaths } from '../constants/router.paths';
-import { CommentInputDto } from '../dto/comments/comment.input.dto';
-import { CurrentUserId } from '../auth/current-user-param.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ChangeLikeCountDto } from '../dto/likes/change-like-count.dto';
+import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
+import { PostParamsDto } from '../../dto/posts/post.params.dto';
+import { CommentParamsDto } from '../../dto/comments/comment.params.dto';
+import { CommentsQueryDto } from '../../dto/comments/comments.query.dto';
+import { RouterPaths } from '../../constants/router.paths';
+import { CommentInputDto } from '../../dto/comments/comment.input.dto';
+import { CurrentUserId } from '../../auth/current-user-param.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { ChangeLikeCountDto } from '../../dto/likes/change-like-count.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { ChangePostLikesCountCommand } from '../domains/posts/use-cases/change-post-likes-count-use-case';
-import { GetSortedPostsCommand } from '../domains/posts/use-cases/get-sorted-posts-use-case';
-import { GetPostByIdCommand } from '../domains/posts/use-cases/get-post-by-id-use-case';
-import { CreateCommentCommand } from '../domains/comments/use-cases/create-comment-use-case';
-import { GetSortedCommentsCommand } from '../domains/comments/use-cases/get-sorted-comments-use-case';
+import { ChangePostLikesCountCommand } from '../../domains/posts/use-cases/change-post-likes-count-use-case';
+import { GetSortedPostsCommand } from '../../domains/posts/use-cases/get-sorted-posts-use-case';
+import { GetPostByIdCommand } from '../../domains/posts/use-cases/get-post-by-id-use-case';
+import { CreateCommentCommand } from '../../domains/comments/use-cases/create-comment-use-case';
+import { GetSortedCommentsCommand } from '../../domains/comments/use-cases/get-sorted-comments-use-case';
 
 @Controller()
 export class PostsController {

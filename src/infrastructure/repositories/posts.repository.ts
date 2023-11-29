@@ -17,28 +17,8 @@ export class PostsRepository {
     private readonly postsRepository: Repository<Post>,
   ) {}
 
-  async createPost(newPost: Post): Promise<PostViewType> {
-    const savedPost = await this.postsRepository.save(newPost);
-
-    return {
-      id: savedPost.id,
-      title: savedPost.title,
-      content: savedPost.content,
-      blogId: savedPost.blog.id,
-      blogName: savedPost.blogName,
-      createdAt: savedPost.createdAt,
-      shortDescription: savedPost.shortDescription,
-      extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-        newestLikes: [],
-      },
-    };
-  }
-
-  async save(post: Post): Promise<boolean> {
-    return !!(await this.postsRepository.save(post));
+  async save(post: Post): Promise<Post> {
+    return await this.postsRepository.save(post);
   }
 
   async getSortedPosts(
@@ -122,23 +102,7 @@ export class PostsRepository {
       page: pageNumber,
       pageSize,
       totalCount: postsCount,
-      items: posts.map((p) => {
-        return {
-          id: p.p_id,
-          title: p.p_title,
-          shortDescription: p.p_shortDescription,
-          content: p.p_content,
-          blogId: p.b_id,
-          blogName: p.b_name,
-          createdAt: p.p_createdAt,
-          extendedLikesInfo: {
-            likesCount: Number(p.likes_count),
-            dislikesCount: Number(p.dislikes_count),
-            myStatus: p.my_status ?? likeStatus.None,
-            newestLikes: p.newest_likes ?? [],
-          },
-        };
-      }),
+      items: this._postsMapper(posts),
     };
   }
 
@@ -198,25 +162,14 @@ export class PostsRepository {
       .where('p.id = :id', {
         id,
       })
-      .getRawOne();
+      .getRawMany();
 
-    return post
-      ? {
-          id: post.p_id,
-          title: post.p_title,
-          shortDescription: post.p_shortDescription,
-          content: post.p_content,
-          blogId: post.b_id,
-          blogName: post.b_name,
-          createdAt: post.p_createdAt,
-          extendedLikesInfo: {
-            likesCount: Number(post.likes_count),
-            dislikesCount: Number(post.dislikes_count),
-            myStatus: post.my_status ?? likeStatus.None,
-            newestLikes: post.newest_likes ?? [],
-          },
-        }
-      : null;
+    if (!post.length) {
+      return null;
+    } else {
+      const mappedPost = this._postsMapper(post);
+      return mappedPost[0];
+    }
   }
 
   async getPostsByIdForSpecificBlog(
@@ -310,23 +263,7 @@ export class PostsRepository {
       page: pageNumber,
       pageSize,
       totalCount: postsCount,
-      items: posts.map((p) => {
-        return {
-          id: p.p_id,
-          title: p.p_title,
-          shortDescription: p.p_shortDescription,
-          content: p.p_content,
-          blogId: p.b_id,
-          blogName: p.b_name,
-          createdAt: p.p_createdAt,
-          extendedLikesInfo: {
-            likesCount: Number(p.likes_count),
-            dislikesCount: Number(p.dislikes_count),
-            myStatus: p.my_status ?? likeStatus.None,
-            newestLikes: p.newest_likes ?? [],
-          },
-        };
-      }),
+      items: this._postsMapper(posts),
     };
   }
 
@@ -356,5 +293,27 @@ export class PostsRepository {
       .execute();
 
     return !!result.affected;
+  }
+
+  private _postsMapper(posts: Array<any>): Array<PostViewType> {
+    return posts.length
+      ? posts.map((p) => {
+          return {
+            id: p.p_id.toString(),
+            title: p.p_title,
+            shortDescription: p.p_shortDescription,
+            content: p.p_content,
+            blogId: p.b_id,
+            blogName: p.b_name,
+            createdAt: p.p_createdAt,
+            extendedLikesInfo: {
+              likesCount: Number(p.likes_count),
+              dislikesCount: Number(p.dislikes_count),
+              myStatus: p.my_status ?? likeStatus.None,
+              newestLikes: p.newest_likes ?? [],
+            },
+          };
+        })
+      : [];
   }
 }

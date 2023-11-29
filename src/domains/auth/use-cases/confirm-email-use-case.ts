@@ -36,9 +36,7 @@ export class ConfirmEmailUseCase
       }
 
       user.isConfirmed = true;
-      return await this.usersRepository.save(user);
-
-      // return await this.usersRepository.confirmEmail(user.id);
+      return !!(await this.usersRepository.save(user));
     }
   }
 }

@@ -1,13 +1,13 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
-import { RouterPaths } from '../constants/router.paths';
-import { UsersQueryRepository } from '../infrastructure/repositories/users-query.repository';
-import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
-import { InvalidRefreshTokensRepository } from '../infrastructure/repositories/invalid-refresh-tokens.repository';
-import { BlogsRepository } from '../infrastructure/repositories/blogs.repository';
-import { PostsRepository } from '../infrastructure/repositories/posts.repository';
-import { CommentsRepository } from '../infrastructure/repositories/comments.repository';
-import { PostLikesRepository } from '../infrastructure/repositories/post-likes.repository';
-import { CommentLikesRepository } from '../infrastructure/repositories/comment-likes.repository';
+import { RouterPaths } from '../../constants/router.paths';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { DevicesRepository } from '../../infrastructure/repositories/devices.repository';
+import { InvalidRefreshTokensRepository } from '../../infrastructure/repositories/invalid-refresh-tokens.repository';
+import { BlogsRepository } from '../../infrastructure/repositories/blogs.repository';
+import { PostsRepository } from '../../infrastructure/repositories/posts.repository';
+import { CommentsRepository } from '../../infrastructure/repositories/comments.repository';
+import { PostLikesRepository } from '../../infrastructure/repositories/post-likes.repository';
+import { CommentLikesRepository } from '../../infrastructure/repositories/comment-likes.repository';
 
 @Controller()
 export class ResetDbController {

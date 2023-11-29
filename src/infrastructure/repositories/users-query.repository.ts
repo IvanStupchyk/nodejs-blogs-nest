@@ -5,7 +5,7 @@ import { mockUserModel } from '../../constants/blanks';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersViewType, UserViewType } from '../../types/users.types';
-import { User } from '../../entities/users/user.entity';
+import { User } from '../../entities/users/User.entity';
 
 @Injectable()
 export class UsersQueryRepository {

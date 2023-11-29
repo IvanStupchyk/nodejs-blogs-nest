@@ -10,19 +10,19 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { UsersQueryDto } from '../dto/users/users.query.dto';
-import { UserInputDto } from '../dto/users/user.input.dto';
-import { DeleteUserParamsDto } from '../dto/users/delete-user.params.dto';
+import { UsersQueryDto } from '../../dto/users/users.query.dto';
+import { UserInputDto } from '../../dto/users/user.input.dto';
+import { DeleteUserParamsDto } from '../../dto/users/delete-user.params.dto';
 import { Response } from 'express';
-import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
-import { RouterPaths } from '../constants/router.paths';
+import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
+import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateSuperUserCommand } from '../domains/users/use-cases/create-super-user-use-case';
-import { DeleteUserCommand } from '../domains/users/use-cases/delete-user-use-case';
-import { UsersQueryRepository } from '../infrastructure/repositories/users-query.repository';
+import { CreateSuperUserCommand } from '../../domains/users/use-cases/create-super-user-use-case';
+import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
 
 @Controller()
-export class UsersController {
+export class UsersSaController {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
