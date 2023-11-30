@@ -1,6 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
-import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
 import { UserInputDto } from '../../../dto/users/user.input.dto';
@@ -21,31 +19,6 @@ export class CreateCommonUserUseCase
 
   async execute(command: CreateCommonUserCommand): Promise<boolean> {
     const { login, email, password } = command.userData;
-
-    const foundUserByLogin =
-      await this.usersRepository.findUserByLoginOrEmail(login);
-
-    const foundUserByEmail =
-      await this.usersRepository.findUserByLoginOrEmail(email);
-
-    if (foundUserByLogin && foundUserByEmail) {
-      errorMessageGenerator([
-        { field: 'email', message: errorsConstants.email.uniqueEmail },
-        { field: 'login', message: errorsConstants.user.uniqueLogin },
-      ]);
-    }
-
-    if (foundUserByLogin) {
-      errorMessageGenerator([
-        { field: 'login', message: errorsConstants.user.uniqueLogin },
-      ]);
-    }
-
-    if (foundUserByEmail) {
-      errorMessageGenerator([
-        { field: 'email', message: errorsConstants.email.uniqueEmail },
-      ]);
-    }
 
     const passwordHash = await bcrypt.hash(password, 10);
 

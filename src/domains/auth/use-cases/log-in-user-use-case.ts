@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { Request } from 'express';
 import { UsersRepository } from '../../../infrastructure/repositories/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { DevicesRepository } from '../../../infrastructure/repositories/devices.repository';
@@ -8,8 +7,9 @@ import { Device } from '../../../entities/devices/Device.entity';
 
 export class LogInUserCommand {
   constructor(
-    public req: Request,
+    public userAgent: string,
     public userId: string,
+    public ip: string,
   ) {}
 }
 
@@ -24,7 +24,7 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   async execute(
     command: LogInUserCommand,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const { userId, req } = command;
+    const { userId, userAgent, ip } = command;
 
     const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user.isConfirmed) return null;
@@ -37,10 +37,11 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
     );
 
     const newDevice = await this._createDevice(
-      req,
+      userAgent,
       deviceId,
       userId,
       refreshToken,
+      ip,
     );
 
     await this.devicesRepository.save(newDevice);
@@ -48,27 +49,21 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   }
 
   private async _createDevice(
-    req: Request,
+    userAgent: string,
     deviceId: string,
     userId: any,
     refreshToken: string,
+    ip: string,
   ) {
+    const result: any = await this.jwtService.verifyRefreshToken(refreshToken);
+
     const newDevice = new Device();
     newDevice.deviceId = deviceId;
-    newDevice.title = req.headers['user-agent'] ?? 'unknown';
-    newDevice.ip =
-      (req.headers['x-forwarded-for'] as string) ||
-      (req.socket.remoteAddress ?? '');
+    newDevice.title = userAgent;
+    newDevice.ip = ip;
     newDevice.user = userId;
-
-    try {
-      const result: any =
-        await this.jwtService.verifyRefreshToken(refreshToken);
-      newDevice.lastActiveDate = new Date(result.iat * 1000);
-      newDevice.expirationDate = new Date(result.exp * 1000);
-    } catch (error) {
-      console.log(error);
-    }
+    newDevice.lastActiveDate = new Date(result.iat * 1000);
+    newDevice.expirationDate = new Date(result.exp * 1000);
 
     return newDevice;
   }

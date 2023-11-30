@@ -2,16 +2,16 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Param,
   Post,
   Put,
   Query,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
 import { PostParamsDto } from '../../dto/posts/post.params.dto';
 import { CommentParamsDto } from '../../dto/comments/comment.params.dto';
@@ -27,49 +27,47 @@ import { GetSortedPostsCommand } from '../../domains/posts/use-cases/get-sorted-
 import { GetPostByIdCommand } from '../../domains/posts/use-cases/get-post-by-id-use-case';
 import { CreateCommentCommand } from '../../domains/comments/use-cases/create-comment-use-case';
 import { GetSortedCommentsCommand } from '../../domains/comments/use-cases/get-sorted-comments-use-case';
+import { exceptionHandler } from '../../exception.handler';
 
 @Controller()
 export class PostsController {
   constructor(private commandBus: CommandBus) {}
 
   @Get(`${RouterPaths.posts}`)
-  async getPosts(@Query() query: PostsQueryDto, @Req() req: Request) {
+  async getPosts(@Query() query: PostsQueryDto, @Headers() headers: any) {
     return await this.commandBus.execute(
-      new GetSortedPostsCommand(query, req.headers?.authorization),
+      new GetSortedPostsCommand(query, headers?.authorization),
     );
   }
 
   @Get(`${RouterPaths.posts}/:id`)
-  async getPost(
-    @Param() params: PostParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  async getPost(@Param() params: PostParamsDto, @Headers() headers: any) {
     const foundPost = await this.commandBus.execute(
-      new GetPostByIdCommand(params.id, req.headers?.authorization),
+      new GetPostByIdCommand(params.id, headers?.authorization),
     );
 
-    !foundPost ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundPost);
+    if (!foundPost) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return foundPost;
   }
 
   @Get(`${RouterPaths.posts}/:id/comments`)
   async getComments(
     @Param() params: CommentParamsDto,
     @Query() query: CommentsQueryDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers() headers: any,
   ) {
     const foundComments = await this.commandBus.execute(
-      new GetSortedCommentsCommand(
-        params.id,
-        query,
-        req.headers?.authorization,
-      ),
+      new GetSortedCommentsCommand(params.id, query, headers?.authorization),
     );
 
-    !foundComments
-      ? res.sendStatus(HttpStatus.NOT_FOUND)
-      : res.send(foundComments);
+    if (!foundComments) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return foundComments;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -78,17 +76,16 @@ export class PostsController {
     @Param() params: CommentParamsDto,
     @Body() body: CommentInputDto,
     @CurrentUserId() currentUserId,
-    @Res() res: Response,
   ) {
     const newComment = await this.commandBus.execute(
       new CreateCommentCommand(body.content, params.id, currentUserId),
     );
 
-    if (typeof newComment === 'object') {
-      res.status(HttpStatus.CREATED).send(newComment);
-    } else {
-      res.sendStatus(newComment);
+    if (!newComment) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
     }
+
+    return newComment;
   }
 
   @UseGuards(JwtAuthGuard)

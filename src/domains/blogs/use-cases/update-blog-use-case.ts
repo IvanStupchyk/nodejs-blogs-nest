@@ -36,13 +36,5 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
 
       return HttpStatus.NO_CONTENT;
     }
-    // const result = await this.blogsRepository.updateBlogById(
-    //   command.id,
-    //   name,
-    //   description,
-    //   websiteUrl,
-    // );
-
-    // return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
   }
 }

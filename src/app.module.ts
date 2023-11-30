@@ -69,6 +69,8 @@ import { PostLike } from './entities/posts/Post-like.entity';
 import { Comment } from './entities/comments/Comment.entity';
 import { CommentLike } from './entities/comments/Comment-like.entity';
 import { BlogSaController } from './controllers/super-admin/blogs.sa.controller';
+import { IsEmailExistConstraint } from './utils/decorators/unique-email.decorator';
+import { IsLoginExistConstraint } from './utils/decorators/unique-login.decorator';
 
 const useCases = [
   CreatePostUseCase,
@@ -155,6 +157,8 @@ const entities = [
     BasicStrategy,
     RefreshTokenMiddleware,
     IsBlogExistConstraint,
+    IsEmailExistConstraint,
+    IsLoginExistConstraint,
     ...useCases,
   ],
 })

@@ -3,14 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpStatus,
   Param,
   Put,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { GetCommentParamsDto } from '../../dto/comments/get-comment.params.dto';
 import { CommentInputDto } from '../../dto/comments/comment.input.dto';
 import { CommentParamsDto } from '../../dto/comments/comment.params.dto';
@@ -24,6 +24,7 @@ import { UpdateCommentCommand } from '../../domains/comments/use-cases/update-co
 import { GetCommentByIdCommand } from '../../domains/comments/use-cases/get-comment-by-id-use-case';
 import { ChangeCommentLikesCountCommand } from '../../domains/comments/use-cases/change-comment-likes-count-use-case';
 import { DeleteCommentCommand } from '../../domains/comments/use-cases/delete-comment-use-case';
+import { exceptionHandler } from '../../exception.handler';
 
 @Controller()
 export class CommentsController {
@@ -32,16 +33,17 @@ export class CommentsController {
   @Get(`${RouterPaths.comments}/:id`)
   async getCurrentComment(
     @Param() params: GetCommentParamsDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers() headers: any,
   ) {
     const foundComment = await this.commandBus.execute(
-      new GetCommentByIdCommand(params.id, req.headers?.authorization),
+      new GetCommentByIdCommand(params.id, headers?.authorization),
     );
 
-    !foundComment
-      ? res.sendStatus(HttpStatus.NOT_FOUND)
-      : res.send(foundComment);
+    if (!foundComment) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return foundComment;
   }
 
   @UseGuards(JwtAuthGuard)

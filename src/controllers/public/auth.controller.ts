@@ -4,10 +4,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Ip,
   Post,
   Req,
   Res,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
@@ -45,12 +47,15 @@ export class AuthController {
   @Post(`${RouterPaths.auth}/login`)
   async login(
     @Body() body: LoginUserInputDto,
-    @Req() req: Request,
+    @Ip() ip: string,
+    @Headers() headers: any,
     @CurrentUserId() currentUserId,
     @Res() res: Response,
   ) {
+    const userAgent = headers['user-agent'] || 'unknown';
+
     const result = await this.commandBus.execute(
-      new LogInUserCommand(req, currentUserId),
+      new LogInUserCommand(userAgent, currentUserId, ip),
     );
 
     if (result) {

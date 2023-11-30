@@ -1,15 +1,13 @@
 import {
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Param,
   Query,
-  Res,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { BlogsQueryDto } from '../../dto/blogs/blogs.query.dto';
-import { Response, Request } from 'express';
 import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
@@ -19,6 +17,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs-query.repository';
 import { GetPostsForSpecifiedBlogCommand } from '../../domains/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { GetBlogParamsDto } from '../../dto/blogs/get-blog.params.dto';
+import { exceptionHandler } from '../../exception.handler';
 
 @Controller()
 export class BlogController {
@@ -35,31 +34,36 @@ export class BlogController {
   }
 
   @Get(`${RouterPaths.blogs}/:id`)
-  async getCurrentBlog(
-    @Param() params: GetBlogParamsDto,
-    @Res() res: Response,
-  ) {
+  async getCurrentBlog(@Param() params: GetBlogParamsDto) {
     const foundBlog = await this.commandBus.execute(
       new FindBlogByIdCommand(params.id),
     );
 
-    !foundBlog ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(foundBlog);
+    if (!foundBlog) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return foundBlog;
   }
 
   @Get(`${RouterPaths.blogs}/:id/posts`)
   async getPostsForSpecifiedBlogForAllUsers(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
-    @Req() req: Request,
-    @Res() res: Response,
+    @Headers() headers: any,
   ) {
     const posts = await this.commandBus.execute(
       new GetPostsForSpecifiedBlogCommand(
         query,
         params.id,
-        req.headers?.authorization,
+        headers?.authorization,
       ),
     );
-    !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
+
+    if (!posts) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return posts;
   }
 }

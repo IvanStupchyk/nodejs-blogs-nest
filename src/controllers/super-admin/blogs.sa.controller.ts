@@ -37,6 +37,7 @@ import { UpdatePostInputDto } from '../../dto/posts/update-post.input.dto';
 import { RouterPaths } from '../../constants/router.paths';
 import { UpdatePostWithCheckingCommand } from '../../domains/blogs/use-cases/update-post-with-checking-use-case';
 import { JwtService } from '../../infrastructure/jwt.service';
+import { exceptionHandler } from '../../exception.handler';
 
 @Controller()
 export class BlogSaController {
@@ -69,13 +70,16 @@ export class BlogSaController {
     @Param() params: BlogParamsDto,
     @Body() body: PostForSpecifiedBlogInputDto,
     @CurrentUserId() userId,
-    @Res() res: Response,
   ) {
     const post = await this.commandBus.execute(
       new CreatePostCommand(body, params.id, userId),
     );
 
-    !post ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(post);
+    if (!post) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return post;
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -85,7 +89,6 @@ export class BlogSaController {
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const posts = await this.commandBus.execute(
       new GetPostsForSpecifiedBlogCommand(
@@ -95,7 +98,11 @@ export class BlogSaController {
       ),
     );
 
-    !posts ? res.sendStatus(HttpStatus.NOT_FOUND) : res.send(posts);
+    if (!posts) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    return posts;
   }
 
   @UseGuards(BasicAuthGuard)
