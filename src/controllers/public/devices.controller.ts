@@ -59,7 +59,7 @@ export class DevicesController {
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
 
     const status = await this.commandBus.execute(
-      new DeleteDeviceCommand(req, req.params.id),
+      new DeleteDeviceCommand(req, params.id),
     );
 
     res.sendStatus(status);

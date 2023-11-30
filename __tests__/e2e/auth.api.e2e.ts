@@ -95,12 +95,12 @@ describe('tests for /auth', () => {
       .expect(HTTP_STATUSES.BAD_REQUEST_400, {
         errorsMessages: [
           {
-            field: 'email',
-            message: errorsConstants.email.uniqueEmail,
-          },
-          {
             field: 'login',
             message: errorsConstants.user.uniqueLogin,
+          },
+          {
+            field: 'email',
+            message: errorsConstants.email.uniqueEmail,
           },
         ],
       });

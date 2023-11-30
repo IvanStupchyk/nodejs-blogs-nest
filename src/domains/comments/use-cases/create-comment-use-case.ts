@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments.repository';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts.repository';
@@ -28,15 +27,15 @@ export class CreateCommentUseCase
 
   async execute(
     command: CreateCommentCommand,
-  ): Promise<CommentViewType | number> {
+  ): Promise<CommentViewType | null> {
     const { id, userId, content } = command;
-    if (!isUUID(id)) return HttpStatus.NOT_FOUND;
+    if (!isUUID(id)) return null;
 
     const foundPost = await this.postsRepository.findPostById(id);
-    if (!foundPost) return HttpStatus.NOT_FOUND;
+    if (!foundPost) return null;
 
     const user = await this.usersRepository.fetchAllUserDataById(userId);
-    if (!user) return HttpStatus.NOT_FOUND;
+    if (!user) return null;
 
     const newComment = new Comment();
     newComment.content = content;

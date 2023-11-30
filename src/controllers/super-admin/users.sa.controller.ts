@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersQueryDto } from '../../dto/users/users.query.dto';
-import { UserInputDto } from '../../dto/users/user.input.dto';
 import { DeleteUserParamsDto } from '../../dto/users/delete-user.params.dto';
 import { Response } from 'express';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
@@ -20,6 +19,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreateSuperUserCommand } from '../../domains/users/use-cases/create-super-user-use-case';
 import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { SAUserInputDto } from '../../dto/users/sa-user.input.dto';
 
 @Controller()
 export class UsersSaController {
@@ -36,7 +36,7 @@ export class UsersSaController {
 
   @UseGuards(BasicAuthGuard)
   @Post(`${RouterPaths.users}`)
-  async createUser(@Body() body: UserInputDto) {
+  async createUser(@Body() body: SAUserInputDto) {
     return await this.commandBus.execute(new CreateSuperUserCommand(body));
   }
 
