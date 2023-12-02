@@ -25,15 +25,15 @@ import { RefreshTokenMiddleware } from '../../middlewares/refresh-token.middlewa
 import { RecoveryEmailInputDto } from '../../dto/auth/recovery-email.input.dto';
 import { NewPasswordInputDto } from '../../dto/auth/new-password.input.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { UpdateUserPasswordCommand } from '../../domains/auth/use-cases/update-user-password-use-case';
-import { RefreshTokenCommand } from '../../domains/auth/use-cases/refresh-token-use-case';
-import { ConfirmEmailCommand } from '../../domains/auth/use-cases/confirm-email-use-case';
-import { ResendEmailConfirmationCodeCommand } from '../../domains/auth/use-cases/resend-email-confirmation-code-use-case';
-import { SendRecoveryPasswordCodeCommand } from '../../domains/auth/use-cases/send-recovery-password-code-use-case';
-import { GetCurrentUserCommand } from '../../domains/auth/use-cases/get-current-user-use-case';
-import { LogInUserCommand } from '../../domains/auth/use-cases/log-in-user-use-case';
-import { LogOutUserCommand } from '../../domains/auth/use-cases/log-out-user-use-case';
-import { CreateCommonUserCommand } from '../../domains/auth/use-cases/create-common-user-use-case';
+import { UpdateUserPasswordCommand } from '../../domain/auth/use-cases/update-user-password-use-case';
+import { RefreshTokenCommand } from '../../domain/auth/use-cases/refresh-token-use-case';
+import { ConfirmEmailCommand } from '../../domain/auth/use-cases/confirm-email-use-case';
+import { ResendEmailConfirmationCodeCommand } from '../../domain/auth/use-cases/resend-email-confirmation-code-use-case';
+import { SendRecoveryPasswordCodeCommand } from '../../domain/auth/use-cases/send-recovery-password-code-use-case';
+import { GetCurrentUserCommand } from '../../domain/auth/use-cases/get-current-user-use-case';
+import { LogInUserCommand } from '../../domain/auth/use-cases/log-in-user-use-case';
+import { LogOutUserCommand } from '../../domain/auth/use-cases/log-out-user-use-case';
+import { CreateCommonUserCommand } from '../../domain/auth/use-cases/create-common-user-use-case';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller()

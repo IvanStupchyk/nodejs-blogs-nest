@@ -8,7 +8,7 @@ import { AppModule } from '../../src/app.module';
 import { appSettings } from '../../src/app.settings';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
-import { UsersRepository } from '../../src/infrastructure/repositories/users.repository';
+import { UsersRepository } from '../../src/infrastructure/repositories/users/users.repository';
 import { UserType, UserViewType } from '../../src/types/users.types';
 import { invalidUserData, userData2, userData1 } from '../mockData/mock-data';
 const { parse } = require('cookie');

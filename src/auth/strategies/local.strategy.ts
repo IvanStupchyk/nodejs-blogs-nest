@@ -5,7 +5,7 @@ import { errorMessageGenerator } from '../../utils/error-message-generator';
 import { ObjectId } from 'mongodb';
 import { errorsConstants } from '../../constants/errors.contants';
 import { CommandBus } from '@nestjs/cqrs';
-import { ValidateUserCommand } from '../../domains/auth/use-cases/validate-user-use-case';
+import { ValidateUserCommand } from '../../domain/auth/use-cases/validate-user-use-case';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
