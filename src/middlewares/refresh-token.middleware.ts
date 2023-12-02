@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { JwtService } from '../infrastructure/jwt.service';
 import { Injectable } from '@nestjs/common';
-import { DevicesRepository } from '../infrastructure/repositories/devices.repository';
+import { DevicesRepository } from '../infrastructure/repositories/devices/devices.repository';
 
 @Injectable()
 export class RefreshTokenMiddleware {

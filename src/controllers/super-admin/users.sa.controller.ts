@@ -16,9 +16,9 @@ import { Response } from 'express';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateSuperUserCommand } from '../../domains/users/use-cases/create-super-user-use-case';
-import { DeleteUserCommand } from '../../domains/users/use-cases/delete-user-use-case';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users-query.repository';
+import { CreateSuperUserCommand } from '../../domain/users/use-cases/create-super-user-use-case';
+import { DeleteUserCommand } from '../../domain/users/use-cases/delete-user-use-case';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
 import { SAUserInputDto } from '../../dto/users/sa-user.input.dto';
 
 @Controller()

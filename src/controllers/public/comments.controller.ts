@@ -20,10 +20,10 @@ import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { ChangeLikeCountDto } from '../../dto/likes/change-like-count.dto';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { UpdateCommentCommand } from '../../domains/comments/use-cases/update-comment-use-case';
-import { GetCommentByIdCommand } from '../../domains/comments/use-cases/get-comment-by-id-use-case';
-import { ChangeCommentLikesCountCommand } from '../../domains/comments/use-cases/change-comment-likes-count-use-case';
-import { DeleteCommentCommand } from '../../domains/comments/use-cases/delete-comment-use-case';
+import { UpdateCommentCommand } from '../../domain/comments/use-cases/update-comment-use-case';
+import { GetCommentByIdCommand } from '../../domain/comments/use-cases/get-comment-by-id-use-case';
+import { ChangeCommentLikesCountCommand } from '../../domain/comments/use-cases/change-comment-likes-count-use-case';
+import { DeleteCommentCommand } from '../../domain/comments/use-cases/delete-comment-use-case';
 import { exceptionHandler } from '../../exception.handler';
 
 @Controller()
