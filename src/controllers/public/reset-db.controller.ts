@@ -18,5 +18,7 @@ export class ResetDbController {
     await this.dataSource.query('DELETE from "postLikes"');
     await this.dataSource.query('DELETE from "invalidRefreshTokens"');
     await this.dataSource.query('DELETE from "users"');
+    await this.dataSource.query('DELETE from "questions"');
+    await this.dataSource.query('DELETE from "answers"');
   }
 }

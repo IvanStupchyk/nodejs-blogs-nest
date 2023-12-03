@@ -44,6 +44,7 @@ describe('tests for /posts with likes logic', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
-import { mockBlogs, mockUsers } from '../../src/constants/blanks';
+import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
@@ -23,6 +23,7 @@ describe('tests for /users and /auth', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
@@ -32,7 +33,7 @@ describe('tests for /users and /auth', () => {
     await request(httpServer)
       .get(RouterPaths.users)
       .auth('admin', 'qwerty', { type: 'basic' })
-      .expect(HTTP_STATUSES.OK_200, mockUsers);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   it('should return 404 for not existing user', async () => {
@@ -77,7 +78,7 @@ describe('tests for /users and /auth', () => {
     await request(httpServer)
       .get(RouterPaths.users)
       .auth('admin', 'qwerty', { type: 'basic' })
-      .expect(HTTP_STATUSES.OK_200, mockBlogs);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   let newUser: UserViewType;

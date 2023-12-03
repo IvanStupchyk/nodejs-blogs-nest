@@ -27,6 +27,7 @@ describe('tests for /auth password recovery', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 

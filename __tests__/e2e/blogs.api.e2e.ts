@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
-import { mockBlogs } from '../../src/constants/blanks';
+import { mockGetItems } from '../../src/constants/blanks';
 import { INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { postsTestManager } from '../utils/posts-test-manager';
@@ -31,6 +31,7 @@ describe('tests for /blogs', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
@@ -39,7 +40,7 @@ describe('tests for /blogs', () => {
   it('should return 200 and an empty blogs array', async () => {
     await getRequest()
       .get(RouterPaths.blogs)
-      .expect(HTTP_STATUSES.OK_200, mockBlogs);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   it('should return 404 for not existing blog', async () => {
@@ -84,7 +85,7 @@ describe('tests for /blogs', () => {
 
     await getRequest()
       .get(RouterPaths.blogs)
-      .expect(HTTP_STATUSES.OK_200, mockBlogs);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   let newBlog: BlogViewType;

@@ -37,6 +37,7 @@ describe('tests for /devices and /auth', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 

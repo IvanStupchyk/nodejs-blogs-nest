@@ -73,6 +73,15 @@ import { IsEmailExistConstraint } from './utils/decorators/unique-email.decorato
 import { IsLoginExistConstraint } from './utils/decorators/unique-login.decorator';
 import { TransactionsRepository } from './infrastructure/repositories/transactions/transactions.repository';
 import { DataSourceRepository } from './infrastructure/repositories/transactions/data-source.repository';
+import { Question } from './entities/game/Question.entity';
+import { Answer } from './entities/game/Answer.entity';
+import { CreateQuestionUseCase } from './domain/questions/use-cases/create-question-use-case';
+import { QuestionsSaController } from './controllers/super-admin/questions.sa.controller';
+import { QuestionsRepository } from './infrastructure/repositories/questions/questions.repository';
+import { QuestionsQueryRepository } from './infrastructure/repositories/questions/questions-query.repository';
+import { UpdateQuestionUseCase } from './domain/questions/use-cases/update-question-use-case';
+import { PublishQuestionUseCase } from './domain/questions/use-cases/publish-question-use-case';
+import { DeleteQuestionUseCase } from './domain/questions/use-cases/delete-question-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -105,6 +114,10 @@ const useCases = [
   GetPostsForSpecifiedBlogUseCase,
   UpdatePostWithCheckingUseCase,
   DeletePostWithCheckingUseCase,
+  CreateQuestionUseCase,
+  UpdateQuestionUseCase,
+  PublishQuestionUseCase,
+  DeleteQuestionUseCase,
 ];
 
 const entities = [
@@ -116,6 +129,8 @@ const entities = [
   PostLike,
   Comment,
   CommentLike,
+  Question,
+  Answer,
 ];
 
 @Module({
@@ -140,6 +155,7 @@ const entities = [
     ResetDbController,
     AuthController,
     DevicesController,
+    QuestionsSaController,
   ],
   providers: [
     UsersQueryRepository,
@@ -155,6 +171,8 @@ const entities = [
     CommentLikesRepository,
     TransactionsRepository,
     DataSourceRepository,
+    QuestionsRepository,
+    QuestionsQueryRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

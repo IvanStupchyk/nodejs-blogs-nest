@@ -2,7 +2,7 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { mockPosts } from '../../src/constants/blanks';
+import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
@@ -36,13 +36,14 @@ describe('tests for /posts', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
   it('should return 200 and an empty posts array', async () => {
     await getRequest()
       .get(RouterPaths.posts)
-      .expect(HTTP_STATUSES.OK_200, mockPosts);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   it('should return 404 for not existing post', async () => {
@@ -100,7 +101,7 @@ describe('tests for /posts', () => {
 
     await getRequest()
       .get(RouterPaths.posts)
-      .expect(HTTP_STATUSES.OK_200, mockPosts);
+      .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
   let newPost: PostType;
