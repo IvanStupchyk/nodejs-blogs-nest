@@ -16,11 +16,9 @@ export class CreateQuestionUseCase
 
   async execute(command: CreateQuestionCommand): Promise<QuestionViewType> {
     const newQuestion = new Question();
-    const date = new Date();
+
     newQuestion.body = command.questionData.body;
     newQuestion.correctAnswers = command.questionData.correctAnswers;
-    newQuestion.updatedAt = date;
-    newQuestion.createdAt = date;
 
     const savedQuestion = await this.dataSourceRepository.save(newQuestion);
 

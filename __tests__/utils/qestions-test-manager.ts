@@ -27,7 +27,7 @@ export const questionsTestManager = {
         body: data.body,
         correctAnswers: data.correctAnswers,
         published: false,
-        updatedAt: expect.any(String),
+        updatedAt: null,
         createdAt: expect.any(String),
       });
     }
