@@ -6,6 +6,8 @@ import { InvalidRefreshToken } from '../entities/users/Invalid-refresh-tokens.en
 import { PostLike } from '../entities/posts/Post-like.entity';
 import { CommentLike } from '../entities/comments/Comment-like.entity';
 import { Device } from '../entities/devices/Device.entity';
+import { Question } from '../entities/game/Question.entity';
+import { Answer } from '../entities/game/Answer.entity';
 
 export type EntitiesType =
   | User
@@ -15,4 +17,6 @@ export type EntitiesType =
   | InvalidRefreshToken
   | PostLike
   | CommentLike
-  | Device;
+  | Device
+  | Question
+  | Answer;

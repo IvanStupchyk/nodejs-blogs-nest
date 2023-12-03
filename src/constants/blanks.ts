@@ -34,23 +34,16 @@ export const mockCommentModel = {
   createdAt: '',
 };
 
-export const mockBlogs = {
-  pagesCount: 0,
-  page: 1,
-  pageSize: 10,
-  totalCount: 0,
-  items: [],
+export const mockQuestionModel = {
+  id: '',
+  body: '',
+  correctAnswers: [],
+  published: false,
+  updatedAt: '',
+  createdAt: '',
 };
 
-export const mockPosts = {
-  pagesCount: 0,
-  page: 1,
-  pageSize: 10,
-  totalCount: 0,
-  items: [],
-};
-
-export const mockUsers = {
+export const mockGetItems = {
   pagesCount: 0,
   page: 1,
   pageSize: 10,

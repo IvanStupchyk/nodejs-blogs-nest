@@ -45,6 +45,7 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 

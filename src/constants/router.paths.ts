@@ -3,6 +3,7 @@ export const RouterPaths = {
   blogs: '/blogs',
   posts: '/posts',
   users: '/sa/users',
+  questions: '/sa/quiz/questions',
   auth: '/auth',
   comments: '/comments',
   security: '/security',
