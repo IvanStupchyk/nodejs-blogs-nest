@@ -3,7 +3,7 @@ export type QuestionViewType = {
   body: string;
   correctAnswers: Array<string>;
   published: boolean;
-  updatedAt: Date;
+  updatedAt: Date | null;
   createdAt: Date;
 };
 

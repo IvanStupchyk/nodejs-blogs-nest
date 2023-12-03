@@ -24,7 +24,7 @@ export class Question {
   @Column({ type: 'boolean', default: false })
   published: boolean;
 
-  @Column({ type: 'timestamp with time zone' })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   updatedAt: Date;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
