@@ -23,6 +23,12 @@ export enum AnswerStatus {
   Incorrect = 'Incorrect',
 }
 
+export enum GameStatus {
+  PendingSecondPlayer = 'PendingSecondPlayer',
+  Active = 'Active',
+  Finished = 'Finished',
+}
+
 export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;

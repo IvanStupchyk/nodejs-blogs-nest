@@ -21,7 +21,7 @@ import { DeleteUserCommand } from '../../domain/users/use-cases/delete-user-use-
 import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
 import { SAUserInputDto } from '../../dto/users/sa-user.input.dto';
 
-@Controller()
+@Controller(RouterPaths.users)
 export class UsersSaController {
   constructor(
     private readonly usersQueryRepository: UsersQueryRepository,
@@ -29,19 +29,19 @@ export class UsersSaController {
   ) {}
 
   @UseGuards(BasicAuthGuard)
-  @Get(`${RouterPaths.users}`)
+  @Get()
   async getUser(@Query() params: UsersQueryDto) {
     return await this.usersQueryRepository.getSortedUsers(params);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post(`${RouterPaths.users}`)
+  @Post()
   async createUser(@Body() body: SAUserInputDto) {
     return await this.commandBus.execute(new CreateSuperUserCommand(body));
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(`${RouterPaths.users}/:id`)
+  @Delete(':id')
   async deleteUser(@Param() params: DeleteUserParamsDto, @Res() res: Response) {
     const isUserDeleted = await this.commandBus.execute(
       new DeleteUserCommand(params.id),

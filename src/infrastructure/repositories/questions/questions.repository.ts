@@ -19,6 +19,15 @@ export class QuestionsRepository {
       .getOne();
   }
 
+  async takeBunchRandomQuestions(amount: number): Promise<Question[]> {
+    return await this.questionsRepository
+      .createQueryBuilder('q')
+      .where('q.published = true')
+      .orderBy('RANDOM()')
+      .limit(amount)
+      .getMany();
+  }
+
   async deleteQuestion(id: string): Promise<boolean> {
     const result = await this.questionsRepository
       .createQueryBuilder('q')

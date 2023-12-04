@@ -8,6 +8,8 @@ import { CommentLike } from '../entities/comments/Comment-like.entity';
 import { Device } from '../entities/devices/Device.entity';
 import { Question } from '../entities/game/Question.entity';
 import { Answer } from '../entities/game/Answer.entity';
+import { Player } from '../entities/game/Player.entity';
+import { Game } from '../entities/game/Game.entity';
 
 export type EntitiesType =
   | User
@@ -19,4 +21,6 @@ export type EntitiesType =
   | CommentLike
   | Device
   | Question
-  | Answer;
+  | Answer
+  | Player
+  | Game;

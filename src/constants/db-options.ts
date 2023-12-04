@@ -18,7 +18,7 @@ export const localBdOptions: TypeOrmModuleOptions = {
   port: 5432,
   username: process.env.DATABASE_SQL_USERNAME_LOCAL,
   password: process.env.DATABASE_SQL_PASSWORD_LOCAL,
-  database: 'postgresTypeorm',
+  database: 'postgres_typeorm',
   autoLoadEntities: true,
   synchronize: true,
 };

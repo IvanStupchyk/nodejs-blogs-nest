@@ -36,7 +36,7 @@ import { LogOutUserCommand } from '../../domain/auth/use-cases/log-out-user-use-
 import { CreateCommonUserCommand } from '../../domain/auth/use-cases/create-common-user-use-case';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
-@Controller()
+@Controller(RouterPaths.auth)
 export class AuthController {
   constructor(
     private readonly refreshTokenMiddleware: RefreshTokenMiddleware,
@@ -44,7 +44,7 @@ export class AuthController {
   ) {}
 
   @UseGuards(ThrottlerGuard, LocalAuthGuard)
-  @Post(`${RouterPaths.auth}/login`)
+  @Post('login')
   async login(
     @Body() body: LoginUserInputDto,
     @Ip() ip: string,
@@ -72,7 +72,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(`${RouterPaths.auth}/me`)
+  @Get('me')
   async getOwnData(@CurrentUserId() currentUserId) {
     return await this.commandBus.execute(
       new GetCurrentUserCommand(currentUserId),
@@ -80,21 +80,21 @@ export class AuthController {
   }
 
   @UseGuards(ThrottlerGuard)
-  @Post(`${RouterPaths.auth}/registration`)
+  @Post('registration')
   @HttpCode(204)
   async registration(@Body() body: UserInputDto) {
     return await this.commandBus.execute(new CreateCommonUserCommand(body));
   }
 
   @UseGuards(ThrottlerGuard)
-  @Post(`${RouterPaths.auth}/registration-confirmation`)
+  @Post('registration-confirmation')
   @HttpCode(204)
   async registrationConfirmation(@Body() body: ConfirmEmailInputDto) {
     return await this.commandBus.execute(new ConfirmEmailCommand(body.code));
   }
 
   @UseGuards(ThrottlerGuard)
-  @Post(`${RouterPaths.auth}/registration-email-resending`)
+  @Post('registration-email-resending')
   @HttpCode(204)
   async resendEmail(@Body() body: NewCodeToEmailInputDto) {
     return await this.commandBus.execute(
@@ -102,7 +102,7 @@ export class AuthController {
     );
   }
 
-  @Post(`${RouterPaths.auth}/logout`)
+  @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const isLogout = await this.commandBus.execute(new LogOutUserCommand(req));
 
@@ -111,7 +111,7 @@ export class AuthController {
       : res.sendStatus(HttpStatus.UNAUTHORIZED);
   }
 
-  @Post(`${RouterPaths.auth}/refresh-token`)
+  @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
@@ -136,14 +136,14 @@ export class AuthController {
   }
 
   @UseGuards(ThrottlerGuard)
-  @Post(`${RouterPaths.auth}/new-password`)
+  @Post('new-password')
   @HttpCode(204)
   async newPassword(@Body() body: NewPasswordInputDto) {
     return await this.commandBus.execute(new UpdateUserPasswordCommand(body));
   }
 
   @UseGuards(ThrottlerGuard)
-  @Post(`${RouterPaths.auth}/password-recovery`)
+  @Post('password-recovery')
   @HttpCode(204)
   async passwordRecovery(@Body() body: RecoveryEmailInputDto) {
     return await this.commandBus.execute(

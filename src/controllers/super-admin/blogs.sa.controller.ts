@@ -39,7 +39,7 @@ import { UpdatePostWithCheckingCommand } from '../../domain/blogs/use-cases/upda
 import { JwtService } from '../../infrastructure/jwt.service';
 import { exceptionHandler } from '../../exception.handler';
 
-@Controller()
+@Controller(RouterPaths.saBlogs)
 export class BlogSaController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
@@ -48,7 +48,7 @@ export class BlogSaController {
   ) {}
 
   @UseGuards(ThrottlerGuard, BasicAuthGuard)
-  @Get(`${RouterPaths.saBlogs}`)
+  @Get()
   async getBlogsForSa(@Query() params: BlogsQueryDto) {
     return await this.blogsQueryRepository.getSortedBlogs(
       params,
@@ -57,7 +57,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post(`${RouterPaths.saBlogs}`)
+  @Post()
   async createBlog(@Body() body: BlogInputDto, @Req() req: Request) {
     return await this.commandBus.execute(
       new CreateBlogCommand(req.headers?.authorization, body),
@@ -65,7 +65,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post(`${RouterPaths.saBlogs}/:id/posts`)
+  @Post(':id/posts')
   async createPost(
     @Param() params: BlogParamsDto,
     @Body() body: PostForSpecifiedBlogInputDto,
@@ -84,7 +84,7 @@ export class BlogSaController {
 
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
-  @Get(`${RouterPaths.saBlogs}/:id/posts`)
+  @Get(':id/posts')
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
@@ -106,7 +106,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(`${RouterPaths.saBlogs}/:blogId/posts/:postId`)
+  @Put(':blogId/posts/:postId')
   async updateSpecifiedPost(
     @Param() params: UpdatePostParamsDto,
     @Body() body: UpdatePostInputDto,
@@ -127,7 +127,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(`${RouterPaths.saBlogs}/:blogId/posts/:postId`)
+  @Delete(':blogId/posts/:postId')
   async deleteSpecifiedPost(
     @Param() params: DeletePostParamsDto,
     @CurrentUserId() userId,
@@ -142,7 +142,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(`${RouterPaths.saBlogs}/:id`)
+  @Put(':id')
   async updateBlog(
     @Param() params: BlogParamsDto,
     @Body() body: BlogInputDto,
@@ -157,7 +157,7 @@ export class BlogSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(`${RouterPaths.saBlogs}/:id`)
+  @Delete(':id')
   async deleteBlog(
     @Param() params: DeleteBlogParamsDto,
     @Res() res: Response,
