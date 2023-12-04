@@ -354,6 +354,14 @@ describe('tests for /sa/quiz/questions', () => {
         startGameDate: null,
         finishGameDate: null,
       });
+
+      await request(httpServer)
+        .get(`${RouterPaths.game}/${gameId}`)
+        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser3}`,
+        })
+        .expect(403);
     });
 
     it('should not connect user to the new game if the user is already participating in an active pair', async () => {
@@ -571,7 +579,7 @@ describe('tests for /sa/quiz/questions', () => {
         .get(`${RouterPaths.game}/2323`)
         .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set(headers)
-        .expect(404);
+        .expect(400);
     });
 
     it('should return a specified game', async () => {
