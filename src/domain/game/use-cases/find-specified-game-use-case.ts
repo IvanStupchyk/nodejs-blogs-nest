@@ -24,7 +24,7 @@ export class FindSpecifiedGameUseCase
   ): Promise<GameViewType | null> {
     const { userId, gameId } = command;
     if (!isUUID(gameId)) {
-      exceptionHandler(HttpStatus.NOT_FOUND);
+      exceptionHandler(HttpStatus.BAD_REQUEST);
     }
 
     const game = await this.gamesRepository.findCurrentGame(gameId);
@@ -35,7 +35,7 @@ export class FindSpecifiedGameUseCase
 
     if (
       game.firstPlayer.user.id !== userId &&
-      game.secondPlayer.user.id !== userId
+      game.secondPlayer?.user?.id !== userId
     ) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
