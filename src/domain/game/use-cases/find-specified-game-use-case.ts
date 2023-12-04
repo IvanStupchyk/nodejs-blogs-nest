@@ -29,15 +29,15 @@ export class FindSpecifiedGameUseCase
 
     const game = await this.gamesRepository.findCurrentGame(gameId);
 
+    if (!game) {
+      exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
     if (
       game.firstPlayer.user.id !== userId &&
       game.secondPlayer.user.id !== userId
     ) {
       exceptionHandler(HttpStatus.FORBIDDEN);
-    }
-
-    if (!game) {
-      exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
     return {
