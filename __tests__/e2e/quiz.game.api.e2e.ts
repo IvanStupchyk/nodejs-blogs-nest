@@ -285,7 +285,7 @@ describe('tests for /sa/quiz/questions', () => {
         .post(`${RouterPaths.game}/connection`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set(headers)
-        .expect(201);
+        .expect(200);
 
       expect(result.body).toEqual({
         id: expect.any(String),
@@ -385,7 +385,7 @@ describe('tests for /sa/quiz/questions', () => {
         .post(`${RouterPaths.game}/connection`)
         .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
-        .expect(201);
+        .expect(200);
 
       expect(response.body).toEqual({
         id: expect.any(String),

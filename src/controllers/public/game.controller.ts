@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Post,
@@ -50,6 +51,7 @@ export class GameController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
   @Post('connection')
   async connectToTheGame(@CurrentUserId() currentUserId) {
     return await this.commandBus.execute(
