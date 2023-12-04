@@ -2,10 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Answer } from './Answer.entity';
+import { Game } from './Game.entity';
 
 @Entity('questions')
 export class Question {
@@ -23,6 +26,10 @@ export class Question {
 
   @Column({ type: 'boolean', default: false })
   published: boolean;
+
+  @ManyToMany(() => Game, (game) => game.questions)
+  @JoinTable()
+  games: Game[];
 
   @Column({ type: 'timestamp with time zone', nullable: true })
   updatedAt: Date;

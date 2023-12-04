@@ -15,7 +15,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { DeleteDeviceCommand } from '../../domain/devices/use-cases/delete-device-use-case';
 import { DevicesQueryRepository } from '../../infrastructure/repositories/devices/devices-query.repository';
 
-@Controller()
+@Controller(RouterPaths.security)
 export class DevicesController {
   constructor(
     private readonly devicesQueryRepository: DevicesQueryRepository,
@@ -23,7 +23,7 @@ export class DevicesController {
     private commandBus: CommandBus,
   ) {}
 
-  @Get(`${RouterPaths.security}/devices`)
+  @Get('devices')
   async getSessions(@Req() req: Request, @Res() res: Response) {
     const ids = await this.refreshTokenMiddleware.checkRefreshToken(req);
     if (!ids) return res.sendStatus(HttpStatus.UNAUTHORIZED);
@@ -33,7 +33,7 @@ export class DevicesController {
     );
   }
 
-  @Delete(`${RouterPaths.security}/devices`)
+  @Delete('devices')
   async deleteAllSessionsExceptCurrent(
     @Req() req: Request,
     @Res() res: Response,
@@ -49,7 +49,7 @@ export class DevicesController {
     res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
-  @Delete(`${RouterPaths.security}/devices/:id`)
+  @Delete('devices/:id')
   async deleteSpecifiedSession(
     @Param() params: DeleteDeviceParamsDto,
     @Req() req: Request,

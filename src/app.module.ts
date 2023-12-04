@@ -82,6 +82,13 @@ import { QuestionsQueryRepository } from './infrastructure/repositories/question
 import { UpdateQuestionUseCase } from './domain/questions/use-cases/update-question-use-case';
 import { PublishQuestionUseCase } from './domain/questions/use-cases/publish-question-use-case';
 import { DeleteQuestionUseCase } from './domain/questions/use-cases/delete-question-use-case';
+import { Player } from './entities/game/Player.entity';
+import { Game } from './entities/game/Game.entity';
+import { GameController } from './controllers/public/game.controller';
+import { GamesQueryRepository } from './infrastructure/repositories/game/games-query.repository';
+import { ConnectUserToGameUseCase } from './domain/game/use-cases/connect-user-to-game-use-case';
+import { GamesRepository } from './infrastructure/repositories/game/games.repository';
+import { FindSpecifiedGameUseCase } from './domain/game/use-cases/find-specified-game-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -118,6 +125,8 @@ const useCases = [
   UpdateQuestionUseCase,
   PublishQuestionUseCase,
   DeleteQuestionUseCase,
+  ConnectUserToGameUseCase,
+  FindSpecifiedGameUseCase,
 ];
 
 const entities = [
@@ -131,6 +140,8 @@ const entities = [
   CommentLike,
   Question,
   Answer,
+  Player,
+  Game,
 ];
 
 @Module({
@@ -156,6 +167,7 @@ const entities = [
     AuthController,
     DevicesController,
     QuestionsSaController,
+    GameController,
   ],
   providers: [
     UsersQueryRepository,
@@ -173,6 +185,8 @@ const entities = [
     DataSourceRepository,
     QuestionsRepository,
     QuestionsQueryRepository,
+    GamesQueryRepository,
+    GamesRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

@@ -26,11 +26,11 @@ import { ChangeCommentLikesCountCommand } from '../../domain/comments/use-cases/
 import { DeleteCommentCommand } from '../../domain/comments/use-cases/delete-comment-use-case';
 import { exceptionHandler } from '../../exception.handler';
 
-@Controller()
+@Controller(RouterPaths.comments)
 export class CommentsController {
   constructor(private commandBus: CommandBus) {}
 
-  @Get(`${RouterPaths.comments}/:id`)
+  @Get(':id')
   async getCurrentComment(
     @Param() params: GetCommentParamsDto,
     @Headers() headers: any,
@@ -47,7 +47,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(`${RouterPaths.comments}/:id`)
+  @Put(':id')
   async updateComment(
     @Param() params: CommentParamsDto,
     @Body() body: CommentInputDto,
@@ -62,7 +62,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(`${RouterPaths.comments}/:id/like-status`)
+  @Put(':id/like-status')
   async likeComment(
     @Param() params: CommentParamsDto,
     @Body() body: ChangeLikeCountDto,
@@ -81,7 +81,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(`${RouterPaths.comments}/:id`)
+  @Delete(':id')
   async deleteComment(
     @Param() params: DeleteCommentParamsDto,
     @Res() res: Response,

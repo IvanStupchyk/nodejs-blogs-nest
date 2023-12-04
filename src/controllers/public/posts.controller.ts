@@ -29,18 +29,18 @@ import { CreateCommentCommand } from '../../domain/comments/use-cases/create-com
 import { GetSortedCommentsCommand } from '../../domain/comments/use-cases/get-sorted-comments-use-case';
 import { exceptionHandler } from '../../exception.handler';
 
-@Controller()
+@Controller(RouterPaths.posts)
 export class PostsController {
   constructor(private commandBus: CommandBus) {}
 
-  @Get(`${RouterPaths.posts}`)
+  @Get()
   async getPosts(@Query() query: PostsQueryDto, @Headers() headers: any) {
     return await this.commandBus.execute(
       new GetSortedPostsCommand(query, headers?.authorization),
     );
   }
 
-  @Get(`${RouterPaths.posts}/:id`)
+  @Get(':id')
   async getPost(@Param() params: PostParamsDto, @Headers() headers: any) {
     const foundPost = await this.commandBus.execute(
       new GetPostByIdCommand(params.id, headers?.authorization),
@@ -53,7 +53,7 @@ export class PostsController {
     return foundPost;
   }
 
-  @Get(`${RouterPaths.posts}/:id/comments`)
+  @Get(':id/comments')
   async getComments(
     @Param() params: CommentParamsDto,
     @Query() query: CommentsQueryDto,
@@ -71,7 +71,7 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(`${RouterPaths.posts}/:id/comments`)
+  @Post(':id/comments')
   async createComment(
     @Param() params: CommentParamsDto,
     @Body() body: CommentInputDto,
@@ -89,7 +89,7 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(`${RouterPaths.posts}/:id/like-status`)
+  @Put(':id/like-status')
   async changeLikeCount(
     @Param() params: PostParamsDto,
     @Body() body: ChangeLikeCountDto,

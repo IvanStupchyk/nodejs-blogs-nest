@@ -19,7 +19,7 @@ import { GetPostsForSpecifiedBlogCommand } from '../../domain/posts/use-cases/ge
 import { GetBlogParamsDto } from '../../dto/blogs/get-blog.params.dto';
 import { exceptionHandler } from '../../exception.handler';
 
-@Controller()
+@Controller(RouterPaths.blogs)
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
@@ -28,12 +28,12 @@ export class BlogController {
   ) {}
 
   @UseGuards(ThrottlerGuard)
-  @Get(`${RouterPaths.blogs}`)
+  @Get()
   async getBlogs(@Query() params: BlogsQueryDto) {
     return await this.blogsQueryRepository.getSortedBlogs(params);
   }
 
-  @Get(`${RouterPaths.blogs}/:id`)
+  @Get(':id')
   async getCurrentBlog(@Param() params: GetBlogParamsDto) {
     const foundBlog = await this.commandBus.execute(
       new FindBlogByIdCommand(params.id),
@@ -46,7 +46,7 @@ export class BlogController {
     return foundBlog;
   }
 
-  @Get(`${RouterPaths.blogs}/:id/posts`)
+  @Get(':id/posts')
   async getPostsForSpecifiedBlogForAllUsers(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,

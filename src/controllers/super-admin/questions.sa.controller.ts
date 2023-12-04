@@ -25,7 +25,7 @@ import { PublishQuestionCommand } from '../../domain/questions/use-cases/publish
 import { PublishQuestionInputDto } from '../../dto/question/publish-question.input.dto';
 import { DeleteQuestionCommand } from '../../domain/questions/use-cases/delete-question-use-case';
 
-@Controller()
+@Controller(RouterPaths.questions)
 export class QuestionsSaController {
   constructor(
     private readonly questionsQueryRepository: QuestionsQueryRepository,
@@ -33,19 +33,19 @@ export class QuestionsSaController {
   ) {}
 
   @UseGuards(BasicAuthGuard)
-  @Get(`${RouterPaths.questions}`)
+  @Get()
   async getUser(@Query() params: QuestionsQueryDto) {
     return await this.questionsQueryRepository.getSortedQuestions(params);
   }
 
   @UseGuards(BasicAuthGuard)
-  @Post(`${RouterPaths.questions}`)
+  @Post()
   async createQuestion(@Body() body: QuestionInputDto) {
     return await this.commandBus.execute(new CreateQuestionCommand(body));
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(`${RouterPaths.questions}/:id`)
+  @Put(':id')
   async UpdateQuestion(
     @Body() body: UpdateQuestionInputDto,
     @Param() params: QuestionParamsDto,
@@ -57,7 +57,7 @@ export class QuestionsSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(`${RouterPaths.questions}/:id/publish`)
+  @Put(':id/publish')
   async PublishQuestion(
     @Body() body: PublishQuestionInputDto,
     @Param() params: QuestionParamsDto,
@@ -69,7 +69,7 @@ export class QuestionsSaController {
   }
 
   @UseGuards(BasicAuthGuard)
-  @Delete(`${RouterPaths.questions}/:id`)
+  @Delete(':id')
   async DeleteQuestion(
     @Param() params: QuestionParamsDto,
     @Res() res: Response,

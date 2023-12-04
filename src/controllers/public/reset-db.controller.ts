@@ -10,6 +10,8 @@ export class ResetDbController {
   @Delete(`${RouterPaths.testing}/all-data`)
   @HttpCode(204)
   async resetDb() {
+    // await this.dataSource.query(`DROP DATABASE IF EXISTS "postgres_typeorm";`);
+    // await this.dataSource.query(`SELECT truncate_tables('postgres_typeorm');`);
     await this.dataSource.query('DELETE from "blogs"');
     await this.dataSource.query('DELETE from "comments"');
     await this.dataSource.query('DELETE from "commentLikes"');
@@ -17,8 +19,11 @@ export class ResetDbController {
     await this.dataSource.query('DELETE from "posts"');
     await this.dataSource.query('DELETE from "postLikes"');
     await this.dataSource.query('DELETE from "invalidRefreshTokens"');
-    await this.dataSource.query('DELETE from "users"');
     await this.dataSource.query('DELETE from "questions"');
     await this.dataSource.query('DELETE from "answers"');
+    await this.dataSource.query('DELETE from "games"');
+    await this.dataSource.query('DELETE from "gamePlayers"');
+    await this.dataSource.query('DELETE from "questions_games_games"');
+    await this.dataSource.query('DELETE from "users"');
   }
 }

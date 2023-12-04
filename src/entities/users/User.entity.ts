@@ -10,6 +10,7 @@ import { InvalidRefreshToken } from './Invalid-refresh-tokens.entity';
 import { PostLike } from '../posts/Post-like.entity';
 import { Comment } from '../comments/Comment.entity';
 import { CommentLike } from '../comments/Comment-like.entity';
+import { Player } from '../game/Player.entity';
 
 @Entity('users')
 export class User {
@@ -37,6 +38,8 @@ export class User {
   @OneToMany(() => Device, (device) => device.user)
   device: Device[];
 
+  @OneToMany(() => Player, (player) => player.user)
+  player: Player[];
   // @OneToMany(() => Blog, (blog) => blog.user)
   // blog: Blog[];
 
