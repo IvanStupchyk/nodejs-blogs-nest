@@ -46,7 +46,7 @@ export class FindSpecifiedGameUseCase
         answers: game.firstPlayer.answers
           ? game.firstPlayer.answers.map((a) => {
               return {
-                questionId: a.id,
+                questionId: a.question.id,
                 answerStatus: a.answerStatus,
                 addedAt: a.addedAt,
               };
@@ -59,12 +59,12 @@ export class FindSpecifiedGameUseCase
         score: game.firstPlayer.score,
       },
       secondPlayerProgress:
-        game.status === GameStatus.Active
+        game.status === GameStatus.Active || game.status === GameStatus.Finished
           ? {
               answers: game.secondPlayer.answers
                 ? game.secondPlayer.answers.map((a) => {
                     return {
-                      questionId: a.id,
+                      questionId: a.question.id,
                       answerStatus: a.answerStatus,
                       addedAt: a.addedAt,
                     };
@@ -79,7 +79,7 @@ export class FindSpecifiedGameUseCase
           : null,
       status: game.status,
       questions:
-        game.status === GameStatus.Active
+        game.status === GameStatus.Active || game.status === GameStatus.Finished
           ? game.questions.map((q) => {
               return { id: q.id.toString(), body: q.body };
             })

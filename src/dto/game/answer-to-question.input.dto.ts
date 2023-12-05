@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class AnswerToQuestionInputDto {
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsString()
   answer: string;
 }

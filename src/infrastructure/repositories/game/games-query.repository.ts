@@ -20,15 +20,22 @@ export class GamesQueryRepository {
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'frp')
       .leftJoinAndSelect('frp.answers', 'fra')
+      .leftJoinAndSelect('fra.question', 'fraq')
       .leftJoinAndSelect('frp.user', 'fru')
       .leftJoinAndSelect('g.secondPlayer', 'scp')
       .leftJoinAndSelect('scp.answers', 'sca')
+      .leftJoinAndSelect('sca.question', 'scaq')
       .leftJoinAndSelect('scp.user', 'scu')
       .leftJoinAndSelect('g.questions', 'q')
-      .where(`fru.id = :userId or scu.id = :userId`, {
+      .where(`g.status = :pending or g.status = :active`, {
+        pending: GameStatus.PendingSecondPlayer,
+        active: GameStatus.Active,
+      })
+      .andWhere(`fru.id = :userId or scu.id = :userId`, {
         userId,
       })
-      .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
+      .orderBy('fra.addedAt')
+      .addOrderBy('sca.addedAt')
       .getOne();
 
     return game
@@ -38,7 +45,7 @@ export class GamesQueryRepository {
             answers: game.firstPlayer.answers
               ? game.firstPlayer.answers.map((a) => {
                   return {
-                    questionId: a.id,
+                    questionId: a.question.id,
                     answerStatus: a.answerStatus,
                     addedAt: a.addedAt,
                   };
@@ -56,7 +63,7 @@ export class GamesQueryRepository {
                   answers: game.secondPlayer.answers
                     ? game.secondPlayer.answers.map((a) => {
                         return {
-                          questionId: a.id,
+                          questionId: a.question.id,
                           answerStatus: a.answerStatus,
                           addedAt: a.addedAt,
                         };

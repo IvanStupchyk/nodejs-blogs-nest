@@ -18,6 +18,7 @@ import { GetGameParamsDto } from '../../dto/game/get-game.params.dto';
 import { ConnectUserToGameCommand } from '../../domain/game/use-cases/connect-user-to-game-use-case';
 import { AnswerToQuestionInputDto } from '../../dto/game/answer-to-question.input.dto';
 import { FindSpecifiedGameCommand } from '../../domain/game/use-cases/find-specified-game-use-case';
+import { AnswerToQuestionCommand } from '../../domain/game/use-cases/answer-to-question-use-case';
 
 @Controller(RouterPaths.game)
 export class GameController {
@@ -60,9 +61,14 @@ export class GameController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
   @Post('my-current/answers')
   async answerToQuestion(
     @Body() body: AnswerToQuestionInputDto,
     @CurrentUserId() currentUserId,
-  ) {}
+  ) {
+    return await this.commandBus.execute(
+      new AnswerToQuestionCommand(currentUserId, body.answer),
+    );
+  }
 }

@@ -89,6 +89,7 @@ import { GamesQueryRepository } from './infrastructure/repositories/game/games-q
 import { ConnectUserToGameUseCase } from './domain/game/use-cases/connect-user-to-game-use-case';
 import { GamesRepository } from './infrastructure/repositories/game/games.repository';
 import { FindSpecifiedGameUseCase } from './domain/game/use-cases/find-specified-game-use-case';
+import { AnswerToQuestionUseCase } from './domain/game/use-cases/answer-to-question-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -127,6 +128,7 @@ const useCases = [
   DeleteQuestionUseCase,
   ConnectUserToGameUseCase,
   FindSpecifiedGameUseCase,
+  AnswerToQuestionUseCase,
 ];
 
 const entities = [
