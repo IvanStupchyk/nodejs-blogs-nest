@@ -23,7 +23,7 @@ export class GamesRepository {
       .getOne();
   }
 
-  async findGameInActiveStatusByUserId(userId: string): Promise<Game> {
+  async findGameInActiveStatusByUserId(userId: string): Promise<Game | null> {
     return await this.gamesRepository
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'frp')
@@ -39,6 +39,7 @@ export class GamesRepository {
       .andWhere('frp.userId = :userId or scp.userId = :userId', {
         userId,
       })
+      .orderBy('q.createdAt', 'DESC')
       .getOne();
   }
 

@@ -58,6 +58,7 @@ describe('tests for /sa/quiz/questions', () => {
   let newQuestion6: QuestionViewType;
   let user1;
   let user2;
+  let user3;
   let accessTokenUser1: string;
   let refreshTokenUser1: string;
   let accessTokenUser2: string;
@@ -255,7 +256,7 @@ describe('tests for /sa/quiz/questions', () => {
       refreshTokenUser2 = exampleCookie2?.refreshToken;
 
       const resp3 = await usersTestManager.createUser(httpServer, thirdUser);
-
+      user3 = resp3.createdUser;
       const result3 = await request(httpServer)
         .post(`${RouterPaths.auth}/login`)
         .send({
@@ -820,7 +821,7 @@ describe('tests for /sa/quiz/questions', () => {
       });
 
       const middleResult = await request(httpServer)
-        .get(`${RouterPaths.game}/${gameId}`)
+        .get(`${RouterPaths.game}/my-current`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
@@ -1148,6 +1149,426 @@ describe('tests for /sa/quiz/questions', () => {
           Authorization: `Bearer ${accessTokenUser4}`,
         })
         .expect(200);
+
+      const activeGame = await gamesRepository.findGameInActiveStatusByUserId(
+        user3.id,
+      );
+
+      const correctAnswer1 = activeGame.questions[0].correctAnswers;
+      const correctAnswer2 = activeGame.questions[1].correctAnswers;
+
+      const responseUser3 = await request(httpServer)
+        .post(`${RouterPaths.game}/my-current/answers`)
+        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser3}`,
+        })
+        .send({
+          answer: correctAnswer1[0],
+        })
+        .expect(200);
+
+      expect(responseUser3.body).toEqual({
+        questionId: activeGame.questions[0].id,
+        answerStatus: AnswerStatus.Correct,
+        addedAt: expect.any(String),
+      });
+
+      const responseUser4 = await request(httpServer)
+        .post(`${RouterPaths.game}/my-current/answers`)
+        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser4}`,
+        })
+        .send({
+          answer: 'sdf',
+        })
+        .expect(200);
+
+      expect(responseUser4.body).toEqual({
+        questionId: activeGame.questions[0].id,
+        answerStatus: AnswerStatus.Incorrect,
+        addedAt: expect.any(String),
+      });
+
+      const response2User4 = await request(httpServer)
+        .post(`${RouterPaths.game}/my-current/answers`)
+        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser4}`,
+        })
+        .send({
+          answer: correctAnswer2[0],
+        })
+        .expect(200);
+
+      expect(response2User4.body).toEqual({
+        questionId: activeGame.questions[1].id,
+        answerStatus: AnswerStatus.Correct,
+        addedAt: expect.any(String),
+      });
+      //
+      // const response2User1 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .send({
+      //     answer: correctAnswer2[0],
+      //   })
+      //   .expect(200);
+      //
+      // expect(response2User1.body).toEqual({
+      //   questionId: activeGame.questions[1].id,
+      //   answerStatus: AnswerStatus.Correct,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response3User1 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .send({
+      //     answer: 'sdsf',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response3User1.body).toEqual({
+      //   questionId: activeGame.questions[2].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response1User2 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: 'sdsf',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response1User2.body).toEqual({
+      //   questionId: activeGame.questions[0].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response2User2 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: correctAnswer2[0],
+      //   })
+      //   .expect(200);
+      //
+      // expect(response2User2.body).toEqual({
+      //   questionId: activeGame.questions[1].id,
+      //   answerStatus: AnswerStatus.Correct,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const middleResult = await request(httpServer)
+      //   .get(`${RouterPaths.game}/my-current`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .expect(200);
+      //
+      // expect(middleResult.body).toEqual({
+      //   id: expect.any(String),
+      //   firstPlayerProgress: {
+      //     answers: [
+      //       {
+      //         questionId: activeGame.questions[0].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[1].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[2].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //     ],
+      //     player: {
+      //       id: user1.id,
+      //       login: user1.login,
+      //     },
+      //     score: 2,
+      //   },
+      //   secondPlayerProgress: {
+      //     answers: [
+      //       {
+      //         questionId: activeGame.questions[0].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[1].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //     ],
+      //     player: {
+      //       id: user2.id,
+      //       login: user2.login,
+      //     },
+      //     score: 1,
+      //   },
+      //   questions: [
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //   ],
+      //   status: GameStatus.Active,
+      //   pairCreatedDate: expect.any(String),
+      //   startGameDate: expect.any(String),
+      //   finishGameDate: null,
+      // });
+      //
+      // const response3User2 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: 'sdf',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response3User2.body).toEqual({
+      //   questionId: activeGame.questions[2].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response4User2 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: 'prel',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response4User2.body).toEqual({
+      //   questionId: activeGame.questions[3].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response5User2 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: 'last',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response5User2.body).toEqual({
+      //   questionId: activeGame.questions[4].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser2}`,
+      //   })
+      //   .send({
+      //     answer: 'last',
+      //   })
+      //   .expect(403);
+      //
+      // const response4User1 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .send({
+      //     answer: 'resp4u1',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response4User1.body).toEqual({
+      //   questionId: activeGame.questions[3].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // const response5User1 = await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .send({
+      //     answer: 'resp5u1',
+      //   })
+      //   .expect(200);
+      //
+      // expect(response5User1.body).toEqual({
+      //   questionId: activeGame.questions[4].id,
+      //   answerStatus: AnswerStatus.Incorrect,
+      //   addedAt: expect.any(String),
+      // });
+      //
+      // await request(httpServer)
+      //   .post(`${RouterPaths.game}/my-current/answers`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .send({
+      //     answer: 'resp6u1',
+      //   })
+      //   .expect(403);
+      //
+      // const finalResult = await request(httpServer)
+      //   .get(`${RouterPaths.game}/${gameId}`)
+      //   .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      //   .set({
+      //     Authorization: `Bearer ${accessTokenUser1}`,
+      //   })
+      //   .expect(200);
+      //
+      // expect(finalResult.body).toEqual({
+      //   id: expect.any(String),
+      //   firstPlayerProgress: {
+      //     answers: [
+      //       {
+      //         questionId: activeGame.questions[0].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[1].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[2].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[3].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[4].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //     ],
+      //     player: {
+      //       id: user1.id,
+      //       login: user1.login,
+      //     },
+      //     score: 2,
+      //   },
+      //   secondPlayerProgress: {
+      //     answers: [
+      //       {
+      //         questionId: activeGame.questions[0].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[1].id,
+      //         answerStatus: AnswerStatus.Correct,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[2].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[3].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //       {
+      //         questionId: activeGame.questions[4].id,
+      //         answerStatus: AnswerStatus.Incorrect,
+      //         addedAt: expect.any(String),
+      //       },
+      //     ],
+      //     player: {
+      //       id: user2.id,
+      //       login: user2.login,
+      //     },
+      //     score: 2,
+      //   },
+      //   questions: [
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //     {
+      //       id: expect.any(String),
+      //       body: expect.any(String),
+      //     },
+      //   ],
+      //   status: GameStatus.Finished,
+      //   pairCreatedDate: expect.any(String),
+      //   startGameDate: expect.any(String),
+      //   finishGameDate: expect.any(String),
+      // });
     });
   });
 });
