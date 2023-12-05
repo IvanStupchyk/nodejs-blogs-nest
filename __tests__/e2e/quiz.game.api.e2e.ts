@@ -1087,5 +1087,15 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(404);
     });
+
+    it('should connect user to the game if there is no started game', async () => {
+      await request(httpServer)
+        .post(`${RouterPaths.game}/connection`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
+    });
   });
 });
