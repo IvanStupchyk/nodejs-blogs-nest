@@ -1070,12 +1070,20 @@ describe('tests for /sa/quiz/questions', () => {
       });
     });
 
-    it('should return game in finished status for my-current endpoint', async () => {
+    it('should not return a game with finished status', async () => {
       await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(404);
+
+      await request(httpServer)
+        .get(`${RouterPaths.game}/my-current`)
+        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser2}`,
         })
         .expect(404);
     });

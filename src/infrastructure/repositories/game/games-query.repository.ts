@@ -27,18 +27,16 @@ export class GamesQueryRepository {
       .leftJoinAndSelect('sca.question', 'scaq')
       .leftJoinAndSelect('scp.user', 'scu')
       .leftJoinAndSelect('g.questions', 'q')
-      .where(`g.status = :pending or g.status = :active`, {
-        pending: GameStatus.PendingSecondPlayer,
-        active: GameStatus.Active,
-      })
-      .andWhere(`fru.id = :userId or scu.id = :userId`, {
+      .where(`fru.id = :userId or scu.id = :userId`, {
         userId,
       })
+      // .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
+      // .andWhere(`g.status != 'Finished'`)
       .orderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
       .getOne();
 
-    return game
+    return game && game.status !== GameStatus.Finished
       ? {
           id: game.id,
           firstPlayerProgress: {
