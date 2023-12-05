@@ -34,6 +34,7 @@ export class GamesQueryRepository {
       // .andWhere(`g.status != 'Finished'`)
       .orderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
+      .addOrderBy('q.createdAt', 'DESC')
       .getOne();
 
     return game && game.status !== GameStatus.Finished

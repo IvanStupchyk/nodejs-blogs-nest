@@ -71,6 +71,7 @@ export class GamesRepository {
       })
       .orderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
+      .addOrderBy('q.createdAt', 'DESC')
       .getOne();
   }
 
