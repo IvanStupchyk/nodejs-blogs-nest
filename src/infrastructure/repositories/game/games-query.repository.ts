@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
@@ -27,17 +27,26 @@ export class GamesQueryRepository {
       .leftJoinAndSelect('sca.question', 'scaq')
       .leftJoinAndSelect('scp.user', 'scu')
       .leftJoinAndSelect('g.questions', 'q')
-      .where(`fru.id = :userId or scu.id = :userId`, {
-        userId,
-      })
-      // .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
-      // .andWhere(`g.status != 'Finished'`)
+      .where(
+        new Brackets((qb) => {
+          qb.where(`g.status = '${GameStatus.PendingSecondPlayer}'`).orWhere(
+            `g.status = '${GameStatus.Active}'`,
+          );
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('fru.id = :userId', { userId }).orWhere('scu.id = :userId', {
+            userId,
+          });
+        }),
+      )
       .orderBy('q.createdAt', 'DESC')
       .addOrderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
       .getOne();
 
-    return game && game.status !== GameStatus.Finished
+    return game
       ? {
           id: game.id,
           firstPlayerProgress: {
