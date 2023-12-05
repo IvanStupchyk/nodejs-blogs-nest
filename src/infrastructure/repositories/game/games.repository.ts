@@ -14,7 +14,7 @@ export class GamesRepository {
     private readonly playersRepository: Repository<Player>,
   ) {}
 
-  async findActiveGameByUserId(userId: string): Promise<any> {
+  async findActiveGameByUserId(userId: string): Promise<Game> {
     return await this.gamesRepository
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'fp')
@@ -23,15 +23,6 @@ export class GamesRepository {
         userId,
       })
       .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
-      .getRawOne();
-  }
-
-  async findPlayerByUserId(userId: string): Promise<Player> {
-    return await this.playersRepository
-      .createQueryBuilder('p')
-      .where('p.userId = :userId', {
-        userId,
-      })
       .getOne();
   }
 

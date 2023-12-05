@@ -36,7 +36,7 @@ export class ConnectUserToGameUseCase
       user.id,
     );
     // console.log('existingGame', isActiveGameExist);
-    if (isActiveGameExist) {
+    if (isActiveGameExist && isActiveGameExist.status !== GameStatus.Finished) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
