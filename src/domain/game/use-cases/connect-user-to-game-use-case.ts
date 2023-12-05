@@ -35,8 +35,8 @@ export class ConnectUserToGameUseCase
     const isActiveGameExist = await this.gamesRepository.findActiveGameByUserId(
       user.id,
     );
-    // console.log('existingGame', isActiveGameExist);
-    if (isActiveGameExist && isActiveGameExist.status !== GameStatus.Finished) {
+
+    if (isActiveGameExist) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 

@@ -16,10 +16,23 @@ export class GamesRepository {
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'fp')
       .leftJoinAndSelect('g.secondPlayer', 'sp')
-      .where('fp.userId = :userId or sp.userId = :userId', {
-        userId,
-      })
-      // .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
+      .where(
+        new Brackets((qb) => {
+          qb.where(`g.status = '${GameStatus.PendingSecondPlayer}'`).orWhere(
+            `g.status = '${GameStatus.Active}'`,
+          );
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('fp.userId = :userId', { userId }).orWhere(
+            'sp.userId = :userId',
+            {
+              userId,
+            },
+          );
+        }),
+      )
       .getOne();
   }
 
