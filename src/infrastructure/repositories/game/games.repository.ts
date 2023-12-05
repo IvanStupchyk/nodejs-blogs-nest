@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Game } from '../../../entities/game/Game.entity';
 import { GameStatus } from '../../../types/general.types';
@@ -33,12 +33,18 @@ export class GamesRepository {
       .leftJoinAndSelect('scp.answers', 'sca')
       .leftJoinAndSelect('scp.user', 'scu')
       .leftJoinAndSelect('g.questions', 'q')
-      .where(`g.status = :active`, {
-        active: GameStatus.Active,
-      })
-      .andWhere('frp.userId = :userId or scp.userId = :userId', {
-        userId,
-      })
+      .where(
+        new Brackets((qb) => {
+          qb.where(`g.status = '${GameStatus.Active}'`);
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('fru.id = :userId', { userId }).orWhere('scu.id = :userId', {
+            userId,
+          });
+        }),
+      )
       .orderBy('q.createdAt', 'DESC')
       .getOne();
   }
