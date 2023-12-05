@@ -69,9 +69,9 @@ export class GamesRepository {
       .where('g.id = :id', {
         id,
       })
-      .orderBy('fra.addedAt')
+      .orderBy('q.createdAt', 'DESC')
+      .addOrderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
-      .addOrderBy('q.createdAt', 'DESC')
       .getOne();
   }
 
@@ -83,6 +83,7 @@ export class GamesRepository {
       .leftJoinAndSelect('g.secondPlayer', 'sp')
       .leftJoinAndSelect('g.questions', 'q')
       .where(`g.status = 'PendingSecondPlayer'`)
+      .orderBy('q.createdAt', 'DESC')
       .getOne();
   }
 }
