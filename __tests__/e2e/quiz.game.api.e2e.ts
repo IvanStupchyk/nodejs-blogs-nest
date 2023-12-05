@@ -43,6 +43,12 @@ describe('tests for /sa/quiz/questions', () => {
     password: '123456',
     email: 'third@gmai.com',
   };
+
+  const fourthUser: UserInputDto = {
+    login: 'Fourth',
+    password: '123456',
+    email: 'fourth@gmai.com',
+  };
   const newQuestions: Array<QuestionViewType> = [];
   let newQuestion: QuestionViewType;
   let newQuestion2: QuestionViewType;
@@ -58,6 +64,8 @@ describe('tests for /sa/quiz/questions', () => {
   let refreshTokenUser2: string;
   let accessTokenUser3: string;
   let refreshTokenUser3: string;
+  let accessTokenUser4: string;
+  let refreshTokenUser4: string;
   let gameId: string;
   describe('question and users for future tests', () => {
     it('should create 7 questions and publish them', async () => {
@@ -205,7 +213,7 @@ describe('tests for /sa/quiz/questions', () => {
       });
     }, 10000);
 
-    it('should create and log in 3 users and for future tests', async () => {
+    it('should create and log in 4 users and for future tests', async () => {
       const resp1 = await usersTestManager.createUser(httpServer, userData1);
       user1 = resp1.createdUser;
       const result1 = await request(httpServer)
@@ -275,6 +283,42 @@ describe('tests for /sa/quiz/questions', () => {
           pageSize: 10,
           totalCount: 3,
           items: [resp3.createdUser, resp2.createdUser, resp1.createdUser],
+        });
+
+      const resp4 = await usersTestManager.createUser(httpServer, fourthUser);
+
+      const result4 = await request(httpServer)
+        .post(`${RouterPaths.auth}/login`)
+        .send({
+          loginOrEmail: fourthUser.login,
+          password: fourthUser.password,
+        })
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(result4.body.accessToken).not.toBeUndefined();
+      const cookies4 = result4.headers['set-cookie'];
+      const parsedCookies4: Array<any> = cookies4.map(parse);
+      const exampleCookie4 = parsedCookies4.find(
+        (cookie) => cookie?.refreshToken,
+      );
+      expect(exampleCookie4?.refreshToken).not.toBeUndefined();
+      accessTokenUser4 = result4.body.accessToken;
+      refreshTokenUser4 = exampleCookie4.refreshToken;
+
+      await request(httpServer)
+        .get(`${RouterPaths.users}`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .expect(HTTP_STATUSES.OK_200, {
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 4,
+          items: [
+            resp4.createdUser,
+            resp3.createdUser,
+            resp2.createdUser,
+            resp1.createdUser,
+          ],
         });
     });
   });
@@ -1091,9 +1135,17 @@ describe('tests for /sa/quiz/questions', () => {
     it('should connect user to the game if there is no started game', async () => {
       await request(httpServer)
         .post(`${RouterPaths.game}/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
+          Authorization: `Bearer ${accessTokenUser3}`,
+        })
+        .expect(200);
+
+      await request(httpServer)
+        .post(`${RouterPaths.game}/connection`)
+        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser4}`,
         })
         .expect(200);
     });
