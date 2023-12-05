@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
 import { GameStatus } from '../../../types/general.types';
 
@@ -10,11 +9,9 @@ export class GamesRepository {
   constructor(
     @InjectRepository(Game)
     private readonly gamesRepository: Repository<Game>,
-    @InjectRepository(Player)
-    private readonly playersRepository: Repository<Player>,
   ) {}
 
-  async findActiveGameByUserId(userId: string): Promise<any> {
+  async findActiveGameByUserId(userId: string): Promise<Game> {
     return await this.gamesRepository
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'fp')
@@ -22,16 +19,7 @@ export class GamesRepository {
       .where('fp.userId = :userId or sp.userId = :userId', {
         userId,
       })
-      .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
-      .getRawOne();
-  }
-
-  async findPlayerByUserId(userId: string): Promise<Player> {
-    return await this.playersRepository
-      .createQueryBuilder('p')
-      .where('p.userId = :userId', {
-        userId,
-      })
+      // .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
       .getOne();
   }
 
