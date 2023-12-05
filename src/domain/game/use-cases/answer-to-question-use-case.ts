@@ -53,6 +53,24 @@ export class AnswerToQuestionUseCase
     newAnswer.addedAt = new Date();
     newAnswer.question = currentQuestion;
 
+    if (
+      (activeGame.firstPlayer.answers.length === 5 &&
+        activeGame.secondPlayer.answers.length === 4) ||
+      (activeGame.firstPlayer.answers.length === 4 &&
+        activeGame.secondPlayer.answers.length === 5)
+    ) {
+      let fasterPlayer = activeGame.firstPlayer;
+      if (activeGame.secondPlayer.answers.length === 5) {
+        fasterPlayer = activeGame.secondPlayer;
+      }
+
+      if (fasterPlayer.score !== 0) {
+        fasterPlayer.score = ++fasterPlayer.score;
+      }
+
+      await this.dataSourceRepository.save(fasterPlayer);
+    }
+
     if (currentQuestion.correctAnswers.includes(answer)) {
       newAnswer.answerStatus = AnswerStatus.Correct;
       player.answers.push(newAnswer);
@@ -69,33 +87,6 @@ export class AnswerToQuestionUseCase
       activeGame.status = GameStatus.Finished;
       activeGame.finishGameDate = new Date();
     }
-
-    if (
-      (activeGame.firstPlayer.answers.length === 5 &&
-        activeGame.secondPlayer.answers.length === 4) ||
-      (activeGame.firstPlayer.answers.length === 4 &&
-        activeGame.secondPlayer.answers.length === 5)
-    ) {
-      let fasterPlayer = activeGame.firstPlayer;
-      if (activeGame.secondPlayer.answers.length === 5) {
-        fasterPlayer = activeGame.secondPlayer;
-      }
-
-      if (fasterPlayer.score !== 0) {
-        fasterPlayer.score = ++fasterPlayer.score;
-      }
-
-      // activeGame.status = GameStatus.Finished;
-      // activeGame.finishGameDate = new Date();
-      await this.dataSourceRepository.save(fasterPlayer);
-    }
-    // if (
-    //   player.answers.length === 5 &&
-    //   activeGame.status === GameStatus.Active &&
-    //   player.score !== 0
-    // ) {
-    //   player.score = +1;
-    // }
 
     await this.dataSourceRepository.save(newAnswer);
     await this.dataSourceRepository.save(player);

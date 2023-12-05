@@ -981,6 +981,107 @@ describe('tests for /sa/quiz/questions', () => {
         addedAt: expect.any(String),
       });
 
+      const middleResult2 = await request(httpServer)
+        .get(`${RouterPaths.game}/my-current`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
+
+      expect(middleResult2.body).toEqual({
+        id: expect.any(String),
+        firstPlayerProgress: {
+          answers: [
+            {
+              questionId: activeGame.questions[0].id,
+              answerStatus: AnswerStatus.Correct,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[1].id,
+              answerStatus: AnswerStatus.Correct,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[2].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[3].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+          ],
+          player: {
+            id: user1.id,
+            login: user1.login,
+          },
+          score: 2,
+        },
+        secondPlayerProgress: {
+          answers: [
+            {
+              questionId: activeGame.questions[0].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[1].id,
+              answerStatus: AnswerStatus.Correct,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[2].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[3].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+            {
+              questionId: activeGame.questions[4].id,
+              answerStatus: AnswerStatus.Incorrect,
+              addedAt: expect.any(String),
+            },
+          ],
+          player: {
+            id: user2.id,
+            login: user2.login,
+          },
+          score: 1,
+        },
+        questions: [
+          {
+            id: expect.any(String),
+            body: expect.any(String),
+          },
+          {
+            id: expect.any(String),
+            body: expect.any(String),
+          },
+          {
+            id: expect.any(String),
+            body: expect.any(String),
+          },
+          {
+            id: expect.any(String),
+            body: expect.any(String),
+          },
+          {
+            id: expect.any(String),
+            body: expect.any(String),
+          },
+        ],
+        status: GameStatus.Active,
+        pairCreatedDate: expect.any(String),
+        startGameDate: expect.any(String),
+        finishGameDate: null,
+      });
+
       const response5User1 = await request(httpServer)
         .post(`${RouterPaths.game}/my-current/answers`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
