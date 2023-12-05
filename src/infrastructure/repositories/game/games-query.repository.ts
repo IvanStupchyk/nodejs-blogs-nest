@@ -32,9 +32,9 @@ export class GamesQueryRepository {
       })
       // .andWhere(`g.status = 'PendingSecondPlayer' or g.status = 'Active'`)
       // .andWhere(`g.status != 'Finished'`)
-      .orderBy('fra.addedAt')
+      .orderBy('q.createdAt', 'DESC')
+      .addOrderBy('fra.addedAt')
       .addOrderBy('sca.addedAt')
-      .addOrderBy('q.createdAt', 'DESC')
       .getOne();
 
     return game && game.status !== GameStatus.Finished
