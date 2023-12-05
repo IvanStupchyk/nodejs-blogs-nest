@@ -71,12 +71,32 @@ export class AnswerToQuestionUseCase
     }
 
     if (
-      player.answers.length === 5 &&
-      activeGame.status === GameStatus.Active &&
-      player.score !== 0
+      (activeGame.firstPlayer.answers.length === 5 &&
+        activeGame.secondPlayer.answers.length === 4) ||
+      (activeGame.firstPlayer.answers.length === 4 &&
+        activeGame.secondPlayer.answers.length === 5)
     ) {
-      player.score = ++player.score;
+      let fasterPlayer = activeGame.firstPlayer;
+      if (activeGame.secondPlayer.answers.length === 5) {
+        fasterPlayer = activeGame.secondPlayer;
+      }
+
+      if (fasterPlayer.score !== 0) {
+        fasterPlayer.score = ++fasterPlayer.score;
+      }
+
+      // activeGame.status = GameStatus.Finished;
+      // activeGame.finishGameDate = new Date();
+      await this.dataSourceRepository.save(fasterPlayer);
     }
+    // if (
+    //   player.answers.length === 5 &&
+    //   activeGame.status === GameStatus.Active &&
+    //   player.score !== 0
+    // ) {
+    //   player.score = +1;
+    // }
+
     await this.dataSourceRepository.save(newAnswer);
     await this.dataSourceRepository.save(player);
     await this.dataSourceRepository.save(activeGame);
