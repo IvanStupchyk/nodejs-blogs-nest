@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
 import { GameStatus } from '../../../types/general.types';
 
@@ -10,8 +9,6 @@ export class GamesRepository {
   constructor(
     @InjectRepository(Game)
     private readonly gamesRepository: Repository<Game>,
-    @InjectRepository(Player)
-    private readonly playersRepository: Repository<Player>,
   ) {}
 
   async findActiveGameByUserId(userId: string): Promise<Game> {
