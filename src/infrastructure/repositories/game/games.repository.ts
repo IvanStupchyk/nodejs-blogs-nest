@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
+import { GameStatus } from '../../../types/general.types';
 
 @Injectable()
 export class GamesRepository {
@@ -44,10 +45,12 @@ export class GamesRepository {
       .leftJoinAndSelect('scp.answers', 'sca')
       .leftJoinAndSelect('scp.user', 'scu')
       .leftJoinAndSelect('g.questions', 'q')
-      .where('frp.userId = :userId or scp.userId = :userId', {
+      .where(`g.status = :active`, {
+        active: GameStatus.Active,
+      })
+      .andWhere('frp.userId = :userId or scp.userId = :userId', {
         userId,
       })
-      .andWhere(`g.status = 'Active'`)
       .getOne();
   }
 

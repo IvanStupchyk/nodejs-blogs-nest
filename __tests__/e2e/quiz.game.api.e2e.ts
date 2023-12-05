@@ -315,6 +315,17 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
+      await request(httpServer)
+        .post(`${RouterPaths.game}/my-current/answers`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .send({
+          answer: 'efe',
+        })
+        .expect(403);
+
       const response = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
