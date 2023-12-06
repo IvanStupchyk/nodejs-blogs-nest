@@ -12,6 +12,7 @@ import { UserInputDto } from '../../src/dto/users/user.input.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { GamesRepository } from '../../src/infrastructure/repositories/game/games.repository';
+import { GameTestManager } from '../utils/game-manager';
 const { parse } = require('cookie');
 
 describe('tests for /sa/quiz/questions', () => {
@@ -736,90 +737,46 @@ describe('tests for /sa/quiz/questions', () => {
       const correctAnswer1 = activeGame.questions[0].correctAnswers;
       const correctAnswer2 = activeGame.questions[1].correctAnswers;
 
-      const responseUser1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: correctAnswer1[0],
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[0].id,
+        correctAnswer1[0],
+        AnswerStatus.Correct,
+      );
 
-      expect(responseUser1.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[1].id,
+        correctAnswer2[0],
+        AnswerStatus.Correct,
+      );
 
-      const response2User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: correctAnswer2[0],
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[2].id,
+      );
 
-      expect(response2User1.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[0].id,
+      );
 
-      const response3User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'sdsf',
-        })
-        .expect(200);
-
-      expect(response3User1.body).toEqual({
-        questionId: activeGame.questions[2].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response1User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'sdsf',
-        })
-        .expect(200);
-
-      expect(response1User2.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response2User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: correctAnswer2[0],
-        })
-        .expect(200);
-
-      expect(response2User2.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[1].id,
+        correctAnswer2[0],
+        AnswerStatus.Correct,
+      );
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -902,84 +859,43 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
-      const response3User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[2].id,
+      );
 
-      expect(response3User2.body).toEqual({
-        questionId: activeGame.questions[2].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[3].id,
+      );
 
-      const response4User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'prel',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[4].id,
+      );
 
-      expect(response4User2.body).toEqual({
-        questionId: activeGame.questions[3].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        'id',
+        'ans',
+        'stat',
+        403,
+      );
 
-      const response5User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'last',
-        })
-        .expect(200);
-
-      expect(response5User2.body).toEqual({
-        questionId: activeGame.questions[4].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'last',
-        })
-        .expect(403);
-
-      const response4User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp4u1',
-        })
-        .expect(200);
-
-      expect(response4User1.body).toEqual({
-        questionId: activeGame.questions[3].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[3].id,
+      );
 
       const middleResult2 = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1082,33 +998,22 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
-      const response5User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp5u1',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[4].id,
+      );
 
-      expect(response5User1.body).toEqual({
-        questionId: activeGame.questions[4].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp6u1',
-        })
-        .expect(403);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        'id',
+        'ans',
+        'stat',
+        403,
+      );
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/${gameId}`)
@@ -1260,56 +1165,30 @@ describe('tests for /sa/quiz/questions', () => {
 
       const correctAnswer1 = activeGame.questions[0].correctAnswers;
 
-      const responseUser3 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser3}`,
-        })
-        .send({
-          answer: correctAnswer1[0],
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser3,
+        refreshTokenUser3,
+        activeGame.questions[0].id,
+        correctAnswer1[0],
+        AnswerStatus.Correct,
+      );
 
-      expect(responseUser3.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser3,
+        refreshTokenUser3,
+        activeGame.questions[1].id,
+      );
 
-      const response2User3 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser3}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
-
-      expect(response2User3.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const responseUser4 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser4}`,
-        })
-        .send({
-          answer: correctAnswer1[0],
-        })
-        .expect(200);
-
-      expect(responseUser4.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser4,
+        refreshTokenUser4,
+        activeGame.questions[0].id,
+        correctAnswer1[0],
+        AnswerStatus.Correct,
+      );
 
       await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1335,73 +1214,33 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
-      const response2User4 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser4}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser4,
+        refreshTokenUser4,
+        activeGame.questions[1].id,
+      );
 
-      expect(response2User4.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser4,
+        refreshTokenUser4,
+        activeGame.questions[2].id,
+      );
 
-      const response3User4 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser4}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser4,
+        refreshTokenUser4,
+        activeGame.questions[3].id,
+      );
 
-      expect(response3User4.body).toEqual({
-        questionId: activeGame.questions[2].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response4User4 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser4}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
-
-      expect(response4User4.body).toEqual({
-        questionId: activeGame.questions[3].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response5User4 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser4}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
-
-      expect(response5User4.body).toEqual({
-        questionId: activeGame.questions[4].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser4,
+        refreshTokenUser4,
+        activeGame.questions[4].id,
+      );
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1521,22 +1360,14 @@ describe('tests for /sa/quiz/questions', () => {
       const correctAnswer1 = activeGame.questions[0].correctAnswers;
       const correctAnswer2 = activeGame.questions[1].correctAnswers;
 
-      const responseUser1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: correctAnswer1[0],
-        })
-        .expect(200);
-
-      expect(responseUser1.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[0].id,
+        correctAnswer1[0],
+        AnswerStatus.Correct,
+      );
 
       await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1562,73 +1393,37 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
-      const response2User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: correctAnswer2[0],
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[1].id,
+        correctAnswer2[0],
+        AnswerStatus.Correct,
+      );
 
-      expect(response2User1.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[2].id,
+      );
 
-      const response3User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'sdsf',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[0].id,
+      );
 
-      expect(response3User1.body).toEqual({
-        questionId: activeGame.questions[2].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response1User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'sdsf',
-        })
-        .expect(200);
-
-      expect(response1User2.body).toEqual({
-        questionId: activeGame.questions[0].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      const response2User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: correctAnswer2[0],
-        })
-        .expect(200);
-
-      expect(response2User2.body).toEqual({
-        questionId: activeGame.questions[1].id,
-        answerStatus: AnswerStatus.Correct,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[1].id,
+        correctAnswer2[0],
+        AnswerStatus.Correct,
+      );
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1711,84 +1506,43 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
-      const response3User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'sdf',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[2].id,
+      );
 
-      expect(response3User2.body).toEqual({
-        questionId: activeGame.questions[2].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[3].id,
+      );
 
-      const response4User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'prel',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        activeGame.questions[4].id,
+      );
 
-      expect(response4User2.body).toEqual({
-        questionId: activeGame.questions[3].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser2,
+        refreshTokenUser2,
+        'id',
+        'ans',
+        'stat',
+        403,
+      );
 
-      const response5User2 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'last',
-        })
-        .expect(200);
-
-      expect(response5User2.body).toEqual({
-        questionId: activeGame.questions[4].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser2}`,
-        })
-        .send({
-          answer: 'last',
-        })
-        .expect(403);
-
-      const response4User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp4u1',
-        })
-        .expect(200);
-
-      expect(response4User1.body).toEqual({
-        questionId: activeGame.questions[3].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[3].id,
+      );
 
       const middleResult2 = await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
@@ -1891,33 +1645,22 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
-      const response5User1 = await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp5u1',
-        })
-        .expect(200);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        activeGame.questions[4].id,
+      );
 
-      expect(response5User1.body).toEqual({
-        questionId: activeGame.questions[4].id,
-        answerStatus: AnswerStatus.Incorrect,
-        addedAt: expect.any(String),
-      });
-
-      await request(httpServer)
-        .post(`${RouterPaths.game}/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-        .set({
-          Authorization: `Bearer ${accessTokenUser1}`,
-        })
-        .send({
-          answer: 'resp6u1',
-        })
-        .expect(403);
+      await GameTestManager.answerToQuestion(
+        httpServer,
+        accessTokenUser1,
+        refreshTokenUser1,
+        'id',
+        'ans',
+        'stat',
+        403,
+      );
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/${gameId}`)
