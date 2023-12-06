@@ -81,7 +81,7 @@ export class FindSpecifiedGameUseCase
       questions:
         game.status === GameStatus.Active || game.status === GameStatus.Finished
           ? game.questions.map((q) => {
-              return { id: q.id.toString(), body: q.body };
+              return { id: q.id, body: q.body };
             })
           : null,
       pairCreatedDate: game.pairCreatedDate,

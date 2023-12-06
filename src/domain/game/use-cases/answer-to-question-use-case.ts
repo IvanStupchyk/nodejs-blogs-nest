@@ -6,6 +6,7 @@ import { exceptionHandler } from '../../../exception.handler';
 import { AnswerStatus, GameStatus } from '../../../types/general.types';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Answer } from '../../../entities/game/Answer.entity';
+import { Game } from '../../../entities/game/Game.entity';
 
 export class AnswerToQuestionCommand {
   constructor(
@@ -28,14 +29,12 @@ export class AnswerToQuestionUseCase
 
     const activeGame =
       await this.gamesRepository.findGameInActiveStatusByUserId(userId);
-    // console.log('activeGame', activeGame);
 
     if (!activeGame) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
     let player = activeGame.firstPlayer;
-
     if (activeGame.secondPlayer.user.id === userId) {
       player = activeGame.secondPlayer;
     }
@@ -45,31 +44,14 @@ export class AnswerToQuestionUseCase
     }
 
     const currentQuestionIndex = player.answers.length;
-
     const currentQuestion = activeGame.questions[currentQuestionIndex];
-    // console.log('activeGame.questions', activeGame.questions);
+
     const newAnswer = new Answer();
     newAnswer.player = player;
     newAnswer.addedAt = new Date();
     newAnswer.question = currentQuestion;
 
-    if (
-      (activeGame.firstPlayer.answers.length === 5 &&
-        activeGame.secondPlayer.answers.length === 4) ||
-      (activeGame.firstPlayer.answers.length === 4 &&
-        activeGame.secondPlayer.answers.length === 5)
-    ) {
-      let fasterPlayer = activeGame.firstPlayer;
-      if (activeGame.secondPlayer.answers.length === 5) {
-        fasterPlayer = activeGame.secondPlayer;
-      }
-
-      if (fasterPlayer.score !== 0) {
-        fasterPlayer.score = ++fasterPlayer.score;
-      }
-
-      await this.dataSourceRepository.save(fasterPlayer);
-    }
+    await this._addAdditionalPoint(activeGame);
 
     if (currentQuestion.correctAnswers.includes(answer)) {
       newAnswer.answerStatus = AnswerStatus.Correct;
@@ -97,5 +79,25 @@ export class AnswerToQuestionUseCase
       answerStatus: newAnswer.answerStatus,
       addedAt: newAnswer.addedAt,
     };
+  }
+
+  async _addAdditionalPoint(activeGame: Game) {
+    if (
+      (activeGame.firstPlayer.answers.length === 5 &&
+        activeGame.secondPlayer.answers.length === 4) ||
+      (activeGame.firstPlayer.answers.length === 4 &&
+        activeGame.secondPlayer.answers.length === 5)
+    ) {
+      let fasterPlayer = activeGame.firstPlayer;
+      if (activeGame.secondPlayer.answers.length === 5) {
+        fasterPlayer = activeGame.secondPlayer;
+      }
+
+      if (fasterPlayer.score !== 0) {
+        fasterPlayer.score = ++fasterPlayer.score;
+      }
+
+      await this.dataSourceRepository.save(fasterPlayer);
+    }
   }
 }

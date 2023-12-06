@@ -40,71 +40,55 @@ export class ConnectUserToGameUseCase
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
-    const pendingGame = await this.gamesRepository.findPendingGame();
-    // console.log('pendingGame', pendingGame);
+    let game = await this.gamesRepository.findPendingGame();
+    const player = new Player();
+    player.user = user;
 
-    if (pendingGame) {
-      // console.log('pendingGame', pendingGame);
-      const secondPlayer = new Player();
-      secondPlayer.user = user;
-      await this.dataSourceRepository.save(secondPlayer);
-      pendingGame.secondPlayer = secondPlayer;
-      pendingGame.status = GameStatus.Active;
-      pendingGame.startGameDate = new Date();
-      const savedGame = await this.dataSourceRepository.save(pendingGame);
-
-      return {
-        id: savedGame.id,
-        firstPlayerProgress: {
-          answers: [],
-          player: {
-            id: savedGame.firstPlayer.user.id,
-            login: savedGame.firstPlayer.user.login,
-          },
-          score: savedGame.firstPlayer.score,
-        },
-        secondPlayerProgress: {
-          answers: [],
-          player: { id: user.id, login: user.login },
-          score: savedGame.secondPlayer.score,
-        },
-        questions: savedGame.questions.map((q) => {
-          return { id: q.id.toString(), body: q.body };
-        }),
-        status: savedGame.status,
-        pairCreatedDate: savedGame.pairCreatedDate,
-        startGameDate: savedGame.startGameDate,
-        finishGameDate: null,
-      };
+    if (game) {
+      game.secondPlayer = player;
+      game.status = GameStatus.Active;
+      game.startGameDate = new Date();
     } else {
       const questions =
         await this.questionsRepository.takeBunchRandomQuestions(5);
 
-      const firstPlayer = new Player();
-      firstPlayer.user = user;
-      await this.dataSourceRepository.save(firstPlayer);
-
-      const newGame = new Game();
-      newGame.firstPlayer = firstPlayer;
-      newGame.questions = questions;
-      newGame.status = GameStatus.PendingSecondPlayer;
-
-      const savedGame = await this.dataSourceRepository.save(newGame);
-
-      return {
-        id: savedGame.id,
-        firstPlayerProgress: {
-          answers: [],
-          player: { id: user.id, login: user.login },
-          score: 0,
-        },
-        secondPlayerProgress: null,
-        questions: null,
-        status: savedGame.status,
-        pairCreatedDate: savedGame.pairCreatedDate,
-        startGameDate: null,
-        finishGameDate: null,
-      };
+      game = new Game();
+      game.firstPlayer = player;
+      game.questions = questions;
+      game.status = GameStatus.PendingSecondPlayer;
     }
+
+    await this.dataSourceRepository.save(player);
+    const savedGame = await this.dataSourceRepository.save(game);
+
+    return {
+      id: savedGame.id,
+      firstPlayerProgress: {
+        answers: [],
+        player: {
+          id: savedGame.firstPlayer.user.id,
+          login: savedGame.firstPlayer.user.login,
+        },
+        score: savedGame.firstPlayer.score,
+      },
+      secondPlayerProgress:
+        savedGame.status !== GameStatus.PendingSecondPlayer
+          ? {
+              answers: [],
+              player: { id: user.id, login: user.login },
+              score: savedGame.secondPlayer.score,
+            }
+          : null,
+      questions:
+        savedGame.status !== GameStatus.PendingSecondPlayer
+          ? savedGame.questions.map((q) => {
+              return { id: q.id, body: q.body };
+            })
+          : null,
+      status: savedGame.status,
+      pairCreatedDate: savedGame.pairCreatedDate,
+      startGameDate: savedGame.startGameDate ?? null,
+      finishGameDate: null,
+    };
   }
 }
