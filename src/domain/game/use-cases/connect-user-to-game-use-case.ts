@@ -56,6 +56,7 @@ export class ConnectUserToGameUseCase
       game.firstPlayer = player;
       game.questions = questions;
       game.status = GameStatus.PendingSecondPlayer;
+      // player.game = game;
     }
 
     await this.dataSourceRepository.save(player);

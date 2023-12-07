@@ -2,6 +2,7 @@ import { SortOrder } from '../constants/sort.order';
 import {
   mockBlogModel,
   mockCommentModel,
+  mockGameModel,
   mockPostModel,
   mockQuestionModel,
   mockUserModel,
@@ -11,6 +12,7 @@ import { BlogViewType } from './blogs.types';
 import { CommentViewType } from './comments.types';
 import { PostType } from './posts.types';
 import { QuestionViewType } from './question.types';
+import { Game } from '../entities/game/Game.entity';
 
 export enum likeStatus {
   None = 'None',
@@ -37,12 +39,14 @@ export type SortConditionsType = {
     | keyof PostType
     | keyof UserViewType
     | keyof CommentViewType
-    | keyof QuestionViewType;
+    | keyof QuestionViewType
+    | keyof Game;
   model:
     | typeof mockBlogModel
     | typeof mockPostModel
     | typeof mockUserModel
     | typeof mockCommentModel
-    | typeof mockQuestionModel;
+    | typeof mockQuestionModel
+    | typeof mockGameModel;
   sortDirection: SortOrder.asc | SortOrder.desc;
 };

@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RouterPaths } from '../../constants/router.paths';
@@ -19,6 +20,7 @@ import { ConnectUserToGameCommand } from '../../domain/game/use-cases/connect-us
 import { AnswerToQuestionInputDto } from '../../dto/game/answer-to-question.input.dto';
 import { FindSpecifiedGameCommand } from '../../domain/game/use-cases/find-specified-game-use-case';
 import { AnswerToQuestionCommand } from '../../domain/game/use-cases/answer-to-question-use-case';
+import { GamesQueryDto } from '../../dto/game/games.query.dto';
 
 @Controller(RouterPaths.game)
 export class GameController {
@@ -28,7 +30,7 @@ export class GameController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('my-current')
+  @Get('pairs/my-current')
   async getCurrentGame(@CurrentUserId() currentUserId) {
     const game =
       await this.gamesQueryRepository.findGameForSpecifiedUser(currentUserId);
@@ -41,7 +43,7 @@ export class GameController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
+  @Get('pairs/:id')
   async getSpecifiedGame(
     @CurrentUserId() currentUserId,
     @Param() params: GetGameParamsDto,
@@ -53,7 +55,7 @@ export class GameController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  @Post('connection')
+  @Post('pairs/connection')
   async connectToTheGame(@CurrentUserId() currentUserId) {
     return await this.commandBus.execute(
       new ConnectUserToGameCommand(currentUserId),
@@ -62,7 +64,7 @@ export class GameController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  @Post('my-current/answers')
+  @Post('pairs/my-current/answers')
   async answerToQuestion(
     @Body() body: AnswerToQuestionInputDto,
     @CurrentUserId() currentUserId,
@@ -70,5 +72,20 @@ export class GameController {
     return await this.commandBus.execute(
       new AnswerToQuestionCommand(currentUserId, body.answer),
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pairs/users/my-statistic')
+  async userStatistic(@CurrentUserId() currentUserId) {
+    return await this.gamesQueryRepository.getUserStatistic(currentUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pairs/my')
+  async getUserGames(
+    @Query() query: GamesQueryDto,
+    @CurrentUserId() currentUserId,
+  ) {
+    return await this.gamesQueryRepository.getUserGames(query, currentUserId);
   }
 }
