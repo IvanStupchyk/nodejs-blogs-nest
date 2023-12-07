@@ -113,12 +113,7 @@ export class GamesQueryRepository {
           p
             .select('sum(p.score)')
             .from(Player, 'p')
-            // .leftJoin(Game, 'g', `g.status = '${GameStatus.Finished}'`)
-            // .where(
-            //   new Brackets((qb) => {
-            //     qb.where(`g.status = '${GameStatus.Finished}'`);
-            //   }),
-            // )
+            .where('p.finished = true')
             .andWhere(
               new Brackets((qb) => {
                 qb.where('p.userId = :userId', { userId });
@@ -133,7 +128,8 @@ export class GamesQueryRepository {
               'CASE WHEN AVG(p.score) % 1 = 0 THEN AVG(p.score)::INT ELSE ROUND(AVG(p.score), 2) END',
             )
             .from(Player, 'p')
-            .where(
+            .where('p.finished = true')
+            .andWhere(
               new Brackets((qb) => {
                 qb.where('p.userId = :userId', { userId });
               }),
@@ -261,7 +257,7 @@ export class GamesQueryRepository {
         userId,
       })
       .getRawMany();
-    console.log('statistic', statistic);
+
     return {
       sumScore: Number(statistic[0].sumScore),
       avgScores: Number(statistic[0].avgScores),

@@ -68,10 +68,13 @@ export class AnswerToQuestionUseCase
     ) {
       activeGame.status = GameStatus.Finished;
       activeGame.finishGameDate = new Date();
+      activeGame.firstPlayer.finished = true;
+      activeGame.secondPlayer.finished = true;
     }
 
     await this.dataSourceRepository.save(newAnswer);
-    await this.dataSourceRepository.save(player);
+    await this.dataSourceRepository.save(activeGame.firstPlayer);
+    await this.dataSourceRepository.save(activeGame.secondPlayer);
     await this.dataSourceRepository.save(activeGame);
 
     return {
