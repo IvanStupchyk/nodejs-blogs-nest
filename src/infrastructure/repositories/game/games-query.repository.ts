@@ -9,7 +9,7 @@ import {
   UserStatisticType,
 } from '../../../types/game.types';
 import { GameStatus } from '../../../types/general.types';
-import { createDefaultSortedParams } from '../../../utils/utils';
+import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { mockGameModel } from '../../../constants/blanks';
 import { GamesQueryDto } from '../../../dto/game/games.query.dto';
 
@@ -271,7 +271,7 @@ export class GamesQueryRepository {
   async getUserGames(
     params: GamesQueryDto,
     userId: string,
-  ): Promise<UserGamesViewType | null> {
+  ): Promise<UserGamesViewType | any> {
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
       createDefaultSortedParams({
         sortBy: params.sortBy,
@@ -281,6 +281,125 @@ export class GamesQueryRepository {
         model: mockGameModel,
       });
 
-    return null;
+    const games = await this.gamesRepository
+      .createQueryBuilder('g')
+      .leftJoinAndSelect('g.firstPlayer', 'frp')
+      .leftJoinAndSelect('frp.answers', 'fra')
+      .leftJoinAndSelect('fra.question', 'fraq')
+      .leftJoinAndSelect('frp.user', 'fru')
+      .leftJoinAndSelect('g.secondPlayer', 'scp')
+      .leftJoinAndSelect('scp.answers', 'sca')
+      .leftJoinAndSelect('sca.question', 'scaq')
+      .leftJoinAndSelect('scp.user', 'scu')
+      .leftJoinAndSelect('g.questions', 'q')
+      .where(
+        new Brackets((qb) => {
+          qb.where(`g.status = '${GameStatus.Active}'`).orWhere(
+            `g.status = '${GameStatus.Finished}'`,
+          );
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('fru.id = :userId', { userId }).orWhere('scu.id = :userId', {
+            userId,
+          });
+        }),
+      )
+      // .orderBy({
+      //   'fra.addedAt': 'ASC',
+      //   'sca.addedAt': 'ASC',
+      //   'q.createdAt': 'DESC',
+      //   [`g.${sortBy}`]: sortDirection,
+      //   'g.pairCreatedDate': 'DESC',
+      // })
+      .orderBy('q.createdAt', 'DESC')
+      .addOrderBy(`g.${sortBy}`, sortDirection)
+      .addOrderBy(`g.pairCreatedDate`, 'DESC')
+      .skip(skipSize)
+      .take(pageSize)
+      .getMany();
+    console.log('games.length', games.length);
+    const gamesCount = await this.gamesRepository
+      .createQueryBuilder('g')
+      .leftJoinAndSelect('g.firstPlayer', 'frp')
+      .leftJoinAndSelect('frp.user', 'fru')
+      .leftJoinAndSelect('g.secondPlayer', 'scp')
+      .leftJoinAndSelect('scp.user', 'scu')
+      .where(
+        new Brackets((qb) => {
+          qb.where(`g.status = '${GameStatus.Active}'`).orWhere(
+            `g.status = '${GameStatus.Finished}'`,
+          );
+        }),
+      )
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('fru.id = :userId', { userId }).orWhere('scu.id = :userId', {
+            userId,
+          });
+        }),
+      )
+      .getCount();
+
+    const pagesCount = getPagesCount(gamesCount, pageSize);
+
+    console.log('gamesCount', gamesCount);
+    console.log('games', games);
+
+    return {
+      pagesCount,
+      page: pageNumber,
+      pageSize,
+      totalCount: gamesCount,
+      items: games.map((game) => {
+        return {
+          id: game.id,
+          firstPlayerProgress: {
+            answers: game.firstPlayer.answers
+              ? game.firstPlayer.answers
+                  .map((a) => {
+                    return {
+                      questionId: a.question.id,
+                      answerStatus: a.answerStatus,
+                      addedAt: a.addedAt,
+                    };
+                  })
+                  .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
+              : [],
+            player: {
+              id: game.firstPlayer.user.id,
+              login: game.firstPlayer.user.login,
+            },
+            score: game.firstPlayer.score,
+          },
+          secondPlayerProgress: {
+            answers: game.secondPlayer.answers
+              ? game.secondPlayer.answers
+                  .map((a) => {
+                    return {
+                      questionId: a.question.id,
+                      answerStatus: a.answerStatus,
+                      addedAt: a.addedAt,
+                    };
+                  })
+                  .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
+              : [],
+            player: {
+              id: game.secondPlayer.user.id,
+              login: game.secondPlayer.user.login,
+            },
+            score: game.secondPlayer.score,
+          },
+          status: game.status,
+          questions: game.questions.map((q) => {
+            return { id: q.id, body: q.body };
+          }),
+          pairCreatedDate: game.pairCreatedDate,
+          startGameDate: game.startGameDate,
+          finishGameDate: game.finishGameDate,
+        };
+      }),
+    };
   }
 }
