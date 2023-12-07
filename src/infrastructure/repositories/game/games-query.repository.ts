@@ -3,8 +3,15 @@ import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
-import { GameViewType } from '../../../types/game.types';
+import {
+  GameViewType,
+  UserGamesViewType,
+  UserStatisticType,
+} from '../../../types/game.types';
 import { GameStatus } from '../../../types/general.types';
+import { createDefaultSortedParams } from '../../../utils/utils';
+import { mockGameModel } from '../../../constants/blanks';
+import { GamesQueryDto } from '../../../dto/game/games.query.dto';
 
 @Injectable()
 export class GamesQueryRepository {
@@ -96,5 +103,188 @@ export class GamesQueryRepository {
           finishGameDate: game.finishGameDate,
         }
       : null;
+  }
+
+  async getUserStatistic(userId: string): Promise<UserStatisticType> {
+    const statistic = await this.playersRepository
+      .createQueryBuilder('pl')
+      .addSelect(
+        (p) =>
+          p
+            .select('sum(p.score)')
+            .from(Player, 'p')
+            // .leftJoin(Game, 'g', `g.status = '${GameStatus.Finished}'`)
+            // .where(
+            //   new Brackets((qb) => {
+            //     qb.where(`g.status = '${GameStatus.Finished}'`);
+            //   }),
+            // )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('p.userId = :userId', { userId });
+              }),
+            ),
+        'sumScore',
+      )
+      .addSelect(
+        (p) =>
+          p
+            .select(
+              'CASE WHEN AVG(p.score) % 1 = 0 THEN AVG(p.score)::INT ELSE ROUND(AVG(p.score), 2) END',
+            )
+            .from(Player, 'p')
+            .where(
+              new Brackets((qb) => {
+                qb.where('p.userId = :userId', { userId });
+              }),
+            ),
+        'avgScores',
+      )
+      .addSelect(
+        (g) =>
+          g
+            .select('count(*)')
+            .from(Game, 'g')
+            .leftJoin('g.firstPlayer', 'fpl')
+            .leftJoin('g.secondPlayer', 'spl')
+            .where(
+              new Brackets((qb) => {
+                qb.where(`g.status = '${GameStatus.Finished}'`);
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('fpl.userId = :userId', { userId }).orWhere(
+                  'spl.userId = :userId',
+                  {
+                    userId,
+                  },
+                );
+              }),
+            ),
+        'gamesCount',
+      )
+      .addSelect(
+        (g) =>
+          g
+            .select('count(*)')
+            .from(Game, 'g')
+            .leftJoin('g.firstPlayer', 'fpl')
+            .leftJoin('g.secondPlayer', 'spl')
+            .where(
+              new Brackets((qb) => {
+                qb.where(`g.status = '${GameStatus.Finished}'`);
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('fpl.userId = :userId', { userId }).orWhere(
+                  'spl.userId = :userId',
+                  {
+                    userId,
+                  },
+                );
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('fpl.score = spl.score');
+              }),
+            ),
+        'drawsCount',
+      )
+      .addSelect(
+        (g) =>
+          g
+            .select('count(*)')
+            .from(Game, 'g')
+            .leftJoin('g.firstPlayer', 'fpl')
+            .leftJoin('g.secondPlayer', 'spl')
+            .where(
+              new Brackets((qb) => {
+                qb.where(`g.status = '${GameStatus.Finished}'`);
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('fpl.userId = :userId', { userId }).orWhere(
+                  'spl.userId = :userId',
+                  {
+                    userId,
+                  },
+                );
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where(
+                  `fpl.userId = :userId and fpl.score > spl.score or spl.userId = :userId and spl.score > fpl.score`,
+                  { userId },
+                );
+              }),
+            ),
+        'winsCount',
+      )
+      .addSelect(
+        (g) =>
+          g
+            .select('count(*)')
+            .from(Game, 'g')
+            .leftJoin('g.firstPlayer', 'fpl')
+            .leftJoin('g.secondPlayer', 'spl')
+            .where(
+              new Brackets((qb) => {
+                qb.where(`g.status = '${GameStatus.Finished}'`);
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where('fpl.userId = :userId', { userId }).orWhere(
+                  'spl.userId = :userId',
+                  {
+                    userId,
+                  },
+                );
+              }),
+            )
+            .andWhere(
+              new Brackets((qb) => {
+                qb.where(
+                  `fpl.userId = :userId and fpl.score < spl.score or spl.userId = :userId and spl.score < fpl.score`,
+                  { userId },
+                );
+              }),
+            ),
+        'lossesCount',
+      )
+      .where('pl.userId = :userId', {
+        userId,
+      })
+      .getRawMany();
+    console.log('statistic', statistic);
+    return {
+      sumScore: Number(statistic[0].sumScore),
+      avgScores: Number(statistic[0].avgScores),
+      gamesCount: Number(statistic[0].gamesCount),
+      winsCount: Number(statistic[0].winsCount),
+      lossesCount: Number(statistic[0].lossesCount),
+      drawsCount: Number(statistic[0].drawsCount),
+    };
+  }
+
+  async getUserGames(
+    params: GamesQueryDto,
+    userId: string,
+  ): Promise<UserGamesViewType | null> {
+    const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
+      createDefaultSortedParams({
+        sortBy: params.sortBy,
+        sortDirection: params.sortDirection,
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+        model: mockGameModel,
+      });
+
+    return null;
   }
 }

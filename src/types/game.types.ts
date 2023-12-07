@@ -30,3 +30,20 @@ export type GameViewType = {
   startGameDate: Date | null;
   finishGameDate: Date | null;
 };
+
+export type UserStatisticType = {
+  sumScore: number;
+  avgScores: number;
+  gamesCount: number;
+  winsCount: number;
+  lossesCount: number;
+  drawsCount: number;
+};
+
+export type UserGamesViewType = {
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: Array<GameViewType>;
+};

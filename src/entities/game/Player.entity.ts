@@ -32,6 +32,10 @@ export class Player {
   @OneToOne(() => Game)
   game: Game;
 
+  // @OneToOne(() => Game, (game) => game.firstPlayer)
+  // @JoinColumn()
+  // game: Game;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 }

@@ -14,7 +14,7 @@ export const GameTestManager = {
     expectedStatusCode: HttpStatusType = 200,
   ) {
     const response = await request(httpServer)
-      .post(`${RouterPaths.game}/my-current/answers`)
+      .post(`${RouterPaths.game}/pairs/my-current/answers`)
       .set('Cookie', `refreshToken=${refreshToken}`)
       .set({
         Authorization: `Bearer ${accessToken}`,

@@ -24,6 +24,14 @@ export const mockPostModel = {
   blogName: '',
 };
 
+export const mockGameModel = {
+  id: '',
+  status: '',
+  pairCreatedDate: '',
+  startGameDate: '',
+  finishGameDate: '',
+};
+
 export const mockCommentModel = {
   id: '',
   content: '',
