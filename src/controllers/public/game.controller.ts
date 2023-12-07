@@ -84,7 +84,7 @@ export class GameController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('pairs/users/my-statistic')
+  @Get('users/my-statistic')
   async userStatistic(@CurrentUserId() currentUserId) {
     return await this.gamesQueryRepository.getUserStatistic(currentUserId);
   }

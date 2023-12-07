@@ -15,6 +15,9 @@ import { GamesRepository } from '../../src/infrastructure/repositories/game/game
 import { GameTestManager } from '../utils/game-manager';
 const { parse } = require('cookie');
 
+const sleep = (seconds: number) =>
+  new Promise((r) => setTimeout(r, seconds * 1000));
+
 describe('tests for /sa/quiz/questions', () => {
   let app: INestApplication;
   let httpServer;
@@ -2235,7 +2238,7 @@ describe('tests for /sa/quiz/questions', () => {
   describe('my statistic endpoint', () => {
     test('should return user statistic', async () => {
       const responseUser1 = await request(httpServer)
-        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .get(`${RouterPaths.game}/users/my-statistic`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
@@ -2252,7 +2255,7 @@ describe('tests for /sa/quiz/questions', () => {
       });
 
       const responseUser2 = await request(httpServer)
-        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .get(`${RouterPaths.game}/users/my-statistic`)
         .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
@@ -2269,7 +2272,7 @@ describe('tests for /sa/quiz/questions', () => {
       });
 
       const responseUser3 = await request(httpServer)
-        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .get(`${RouterPaths.game}/users/my-statistic`)
         .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
@@ -2286,7 +2289,7 @@ describe('tests for /sa/quiz/questions', () => {
       });
 
       const responseUser4 = await request(httpServer)
-        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .get(`${RouterPaths.game}/users/my-statistic`)
         .set('Cookie', `refreshToken=${refreshTokenUser4}`)
         .set({
           Authorization: `Bearer ${accessTokenUser4}`,
@@ -2306,6 +2309,7 @@ describe('tests for /sa/quiz/questions', () => {
 
   describe('my games endpoint', () => {
     test('should return all user games', async () => {
+      await sleep(1);
       const responseUser1 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my`)
         .set('Cookie', `refreshToken=${refreshTokenUser1}`)
