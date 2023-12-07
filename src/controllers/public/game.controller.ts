@@ -30,6 +30,15 @@ export class GameController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
+  @Get('pairs/my')
+  async getUserGames(
+    @Query() query: GamesQueryDto,
+    @CurrentUserId() currentUserId,
+  ) {
+    return await this.gamesQueryRepository.getUserGames(query, currentUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('pairs/my-current')
   async getCurrentGame(@CurrentUserId() currentUserId) {
     const game =
@@ -78,14 +87,5 @@ export class GameController {
   @Get('pairs/users/my-statistic')
   async userStatistic(@CurrentUserId() currentUserId) {
     return await this.gamesQueryRepository.getUserStatistic(currentUserId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('pairs/my')
-  async getUserGames(
-    @Query() query: GamesQueryDto,
-    @CurrentUserId() currentUserId,
-  ) {
-    return await this.gamesQueryRepository.getUserGames(query, currentUserId);
   }
 }

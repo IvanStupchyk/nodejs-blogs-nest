@@ -70,6 +70,9 @@ describe('tests for /sa/quiz/questions', () => {
   let accessTokenUser4: string;
   let refreshTokenUser4: string;
   let gameId: string;
+  let game1User1;
+  let game2User1;
+  let game3User1;
   describe('question and users for future tests', () => {
     it('should create 7 questions and publish them', async () => {
       const { createdQuestion } = await questionsTestManager.createQuestion(
@@ -1023,6 +1026,7 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
+      game1User1 = finalResult.body;
       expect(finalResult.body).toEqual({
         id: expect.any(String),
         firstPlayerProgress: {
@@ -1806,6 +1810,7 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
+      game2User1 = finalResult.body;
       expect(finalResult.body).toEqual({
         id: expect.any(String),
         firstPlayerProgress: {
@@ -2123,6 +2128,15 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
+      const finalResult = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/${gameId}`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
+
+      game3User1 = finalResult.body;
       expect(middleResult2.body).toEqual({
         id: expect.any(String),
         firstPlayerProgress: {
@@ -2228,7 +2242,6 @@ describe('tests for /sa/quiz/questions', () => {
         })
         .expect(200);
 
-      // /* eslint-disable prettier/prettier */
       expect(responseUser1.body).toEqual({
         sumScore: 5,
         avgScores: 2.5,
@@ -2237,10 +2250,80 @@ describe('tests for /sa/quiz/questions', () => {
         lossesCount: 0,
         drawsCount: 1,
       });
-      /* eslint-enable prettier/prettier */
+
+      const responseUser2 = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser2}`,
+        })
+        .expect(200);
+
+      expect(responseUser2.body).toEqual({
+        sumScore: 4,
+        avgScores: 2,
+        gamesCount: 2,
+        winsCount: 0,
+        lossesCount: 1,
+        drawsCount: 1,
+      });
+
+      const responseUser3 = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser3}`,
+        })
+        .expect(200);
+
+      expect(responseUser3.body).toEqual({
+        sumScore: 3,
+        avgScores: 3,
+        gamesCount: 1,
+        winsCount: 1,
+        lossesCount: 0,
+        drawsCount: 0,
+      });
+
+      const responseUser4 = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser4}`,
+        })
+        .expect(200);
+
+      expect(responseUser4.body).toEqual({
+        sumScore: 2,
+        avgScores: 2,
+        gamesCount: 1,
+        winsCount: 0,
+        lossesCount: 1,
+        drawsCount: 0,
+      });
+    });
+  });
+
+  describe('my games endpoint', () => {
+    test('should return all user games', async () => {
+      const responseUser1 = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/my`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
+
+      expect(responseUser1.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 3,
+        items: [game3User1, game2User1, game1User1],
+      });
 
       // const responseUser2 = await request(httpServer)
-      //   .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+      //   .get(`${RouterPaths.game}/pairs/my`)
       //   .set('Cookie', `refreshToken=${refreshTokenUser2}`)
       //   .set({
       //     Authorization: `Bearer ${accessTokenUser2}`,
@@ -2248,16 +2331,15 @@ describe('tests for /sa/quiz/questions', () => {
       //   .expect(200);
       //
       // expect(responseUser2.body).toEqual({
-      //   sumScore: 4,
-      //   avgScores: 2,
-      //   gamesCount: 2,
-      //   winsCount: 0,
-      //   lossesCount: 1,
-      //   drawsCount: 1,
+      //   pagesCount: 1,
+      //   page: 1,
+      //   pageSize: 10,
+      //   totalCount: 0,
+      //   items: {},
       // });
       //
       // const responseUser3 = await request(httpServer)
-      //   .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+      //   .get(`${RouterPaths.game}/pairs/my`)
       //   .set('Cookie', `refreshToken=${refreshTokenUser3}`)
       //   .set({
       //     Authorization: `Bearer ${accessTokenUser3}`,
@@ -2265,16 +2347,15 @@ describe('tests for /sa/quiz/questions', () => {
       //   .expect(200);
       //
       // expect(responseUser3.body).toEqual({
-      //   sumScore: 3,
-      //   avgScores: 3,
-      //   gamesCount: 1,
-      //   winsCount: 1,
-      //   lossesCount: 0,
-      //   drawsCount: 0,
+      //   pagesCount: 1,
+      //   page: 1,
+      //   pageSize: 10,
+      //   totalCount: 0,
+      //   items: {},
       // });
       //
       // const responseUser4 = await request(httpServer)
-      //   .get(`${RouterPaths.game}/pairs/users/my-statistic`)
+      //   .get(`${RouterPaths.game}/pairs/my`)
       //   .set('Cookie', `refreshToken=${refreshTokenUser4}`)
       //   .set({
       //     Authorization: `Bearer ${accessTokenUser4}`,
@@ -2282,81 +2363,12 @@ describe('tests for /sa/quiz/questions', () => {
       //   .expect(200);
       //
       // expect(responseUser4.body).toEqual({
-      //   sumScore: 2,
-      //   avgScores: 2,
-      //   gamesCount: 1,
-      //   winsCount: 0,
-      //   lossesCount: 1,
-      //   drawsCount: 0,
+      //   pagesCount: 1,
+      //   page: 1,
+      //   pageSize: 10,
+      //   totalCount: 0,
+      //   items: {},
       // });
     });
   });
-
-  // describe('my games endpoint', () => {
-  //   test('should return all user games', async () => {
-  //     const responseUser1 = await request(httpServer)
-  //       .get(`${RouterPaths.game}/pairs/my`)
-  //       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-  //       .set({
-  //         Authorization: `Bearer ${accessTokenUser1}`,
-  //       })
-  //       .expect(200);
-  //
-  //     expect(responseUser1.body).toEqual({
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 0,
-  //       items: {},
-  //     });
-  //
-  //     const responseUser2 = await request(httpServer)
-  //       .get(`${RouterPaths.game}/pairs/my`)
-  //       .set('Cookie', `refreshToken=${refreshTokenUser2}`)
-  //       .set({
-  //         Authorization: `Bearer ${accessTokenUser2}`,
-  //       })
-  //       .expect(200);
-  //
-  //     expect(responseUser2.body).toEqual({
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 0,
-  //       items: {},
-  //     });
-  //
-  //     const responseUser3 = await request(httpServer)
-  //       .get(`${RouterPaths.game}/pairs/my`)
-  //       .set('Cookie', `refreshToken=${refreshTokenUser3}`)
-  //       .set({
-  //         Authorization: `Bearer ${accessTokenUser3}`,
-  //       })
-  //       .expect(200);
-  //
-  //     expect(responseUser3.body).toEqual({
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 0,
-  //       items: {},
-  //     });
-  //
-  //     const responseUser4 = await request(httpServer)
-  //       .get(`${RouterPaths.game}/pairs/my`)
-  //       .set('Cookie', `refreshToken=${refreshTokenUser4}`)
-  //       .set({
-  //         Authorization: `Bearer ${accessTokenUser4}`,
-  //       })
-  //       .expect(200);
-  //
-  //     expect(responseUser4.body).toEqual({
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: 0,
-  //       items: {},
-  //     });
-  //   });
-  // });
 });
