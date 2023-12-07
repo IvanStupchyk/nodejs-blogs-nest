@@ -319,7 +319,7 @@ export class GamesQueryRepository {
       .skip(skipSize)
       .take(pageSize)
       .getMany();
-    console.log('games.length', games.length);
+
     const gamesCount = await this.gamesRepository
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.firstPlayer', 'frp')
@@ -343,9 +343,6 @@ export class GamesQueryRepository {
       .getCount();
 
     const pagesCount = getPagesCount(gamesCount, pageSize);
-
-    console.log('gamesCount', gamesCount);
-    console.log('games', games);
 
     return {
       pagesCount,
