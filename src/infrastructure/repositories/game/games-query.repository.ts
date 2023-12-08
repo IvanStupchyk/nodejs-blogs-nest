@@ -53,56 +53,7 @@ export class GamesQueryRepository {
       .addOrderBy('sca.addedAt')
       .getOne();
 
-    return game
-      ? {
-          id: game.id,
-          firstPlayerProgress: {
-            answers: game.firstPlayer.answers
-              ? game.firstPlayer.answers.map((a) => {
-                  return {
-                    questionId: a.question.id,
-                    answerStatus: a.answerStatus,
-                    addedAt: a.addedAt,
-                  };
-                })
-              : [],
-            player: {
-              id: game.firstPlayer.user.id,
-              login: game.firstPlayer.user.login,
-            },
-            score: game.firstPlayer.score,
-          },
-          secondPlayerProgress:
-            game.status === GameStatus.Active
-              ? {
-                  answers: game.secondPlayer.answers
-                    ? game.secondPlayer.answers.map((a) => {
-                        return {
-                          questionId: a.question.id,
-                          answerStatus: a.answerStatus,
-                          addedAt: a.addedAt,
-                        };
-                      })
-                    : [],
-                  player: {
-                    id: game.secondPlayer.user.id,
-                    login: game.secondPlayer.user.login,
-                  },
-                  score: game.secondPlayer.score,
-                }
-              : null,
-          status: game.status,
-          questions:
-            game.status === GameStatus.Active
-              ? game.questions.map((q) => {
-                  return { id: q.id, body: q.body };
-                })
-              : null,
-          pairCreatedDate: game.pairCreatedDate,
-          startGameDate: game.startGameDate,
-          finishGameDate: game.finishGameDate,
-        }
-      : null;
+    return game ? this._resultMapper([game])[0] : null;
   }
 
   async getUserStatistic(userId: string): Promise<UserStatisticType> {
@@ -349,54 +300,66 @@ export class GamesQueryRepository {
       page: pageNumber,
       pageSize,
       totalCount: gamesCount,
-      items: games.map((game) => {
-        return {
-          id: game.id,
-          firstPlayerProgress: {
-            answers: game.firstPlayer.answers
-              ? game.firstPlayer.answers
-                  .map((a) => {
-                    return {
-                      questionId: a.question.id,
-                      answerStatus: a.answerStatus,
-                      addedAt: a.addedAt,
-                    };
-                  })
-                  .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
-              : [],
-            player: {
-              id: game.firstPlayer.user.id,
-              login: game.firstPlayer.user.login,
-            },
-            score: game.firstPlayer.score,
-          },
-          secondPlayerProgress: {
-            answers: game.secondPlayer.answers
-              ? game.secondPlayer.answers
-                  .map((a) => {
-                    return {
-                      questionId: a.question.id,
-                      answerStatus: a.answerStatus,
-                      addedAt: a.addedAt,
-                    };
-                  })
-                  .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
-              : [],
-            player: {
-              id: game.secondPlayer.user.id,
-              login: game.secondPlayer.user.login,
-            },
-            score: game.secondPlayer.score,
-          },
-          status: game.status,
-          questions: game.questions.map((q) => {
-            return { id: q.id, body: q.body };
-          }),
-          pairCreatedDate: game.pairCreatedDate,
-          startGameDate: game.startGameDate,
-          finishGameDate: game.finishGameDate,
-        };
-      }),
+      items: games.length ? this._resultMapper(games) : [],
     };
+  }
+
+  _resultMapper(games: Game[]): GameViewType[] {
+    return games.map((game) => {
+      return {
+        id: game.id,
+        firstPlayerProgress: {
+          answers: game.firstPlayer.answers
+            ? game.firstPlayer.answers
+                .map((a) => {
+                  return {
+                    questionId: a.question.id,
+                    answerStatus: a.answerStatus,
+                    addedAt: a.addedAt,
+                  };
+                })
+                .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
+            : [],
+          player: {
+            id: game.firstPlayer.user.id,
+            login: game.firstPlayer.user.login,
+          },
+          score: game.firstPlayer.score,
+        },
+        secondPlayerProgress:
+          game.status === GameStatus.Active ||
+          game.status === GameStatus.Finished
+            ? {
+                answers: game.secondPlayer.answers
+                  ? game.secondPlayer.answers
+                      .map((a) => {
+                        return {
+                          questionId: a.question.id,
+                          answerStatus: a.answerStatus,
+                          addedAt: a.addedAt,
+                        };
+                      })
+                      .sort((a, b) => a.addedAt.valueOf() - b.addedAt.valueOf())
+                  : [],
+                player: {
+                  id: game.secondPlayer.user.id,
+                  login: game.secondPlayer.user.login,
+                },
+                score: game.secondPlayer.score,
+              }
+            : null,
+        status: game.status,
+        questions:
+          game.status === GameStatus.Active ||
+          game.status === GameStatus.Finished
+            ? game.questions.map((q) => {
+                return { id: q.id, body: q.body };
+              })
+            : null,
+        pairCreatedDate: game.pairCreatedDate,
+        startGameDate: game.startGameDate,
+        finishGameDate: game.finishGameDate,
+      };
+    });
   }
 }
