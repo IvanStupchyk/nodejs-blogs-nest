@@ -34,19 +34,19 @@ export enum GameStatus {
 export type SortConditionsType = {
   pageNumber: string;
   pageSize: string;
-  sortBy:
+  sortBy?:
     | keyof BlogViewType
     | keyof PostType
     | keyof UserViewType
     | keyof CommentViewType
     | keyof QuestionViewType
     | keyof Game;
-  model:
+  model?:
     | typeof mockBlogModel
     | typeof mockPostModel
     | typeof mockUserModel
     | typeof mockCommentModel
     | typeof mockQuestionModel
     | typeof mockGameModel;
-  sortDirection: SortOrder.asc | SortOrder.desc;
+  sortDirection?: SortOrder.asc | SortOrder.desc;
 };

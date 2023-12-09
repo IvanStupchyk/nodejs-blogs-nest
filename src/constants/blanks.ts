@@ -58,3 +58,12 @@ export const mockGetItems = {
   totalCount: 0,
   items: [],
 };
+
+export const mockToPlayers = {
+  sumScore: '',
+  avgScores: '',
+  gamesCount: '',
+  winsCount: '',
+  lossesCount: '',
+  drawsCount: '',
+};
