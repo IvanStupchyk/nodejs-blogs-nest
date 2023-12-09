@@ -1,5 +1,5 @@
 export class TopPlayersQueryDto {
-  sort: string = 'sort=avgScores desc&sort=sumScore desc';
+  sort: string | Array<string>;
   pageNumber: string;
   pageSize: string;
 }

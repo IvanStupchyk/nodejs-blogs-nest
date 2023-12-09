@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
@@ -11,7 +11,7 @@ import {
 } from '../../../types/game.types';
 import { GameStatus } from '../../../types/general.types';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
-import { mockGameModel } from '../../../constants/blanks';
+import { mockGameModel, mockToPlayers } from '../../../constants/blanks';
 import { GamesQueryDto } from '../../../dto/game/games.query.dto';
 import { TopPlayersQueryDto } from '../../../dto/game/top-players.query.dto';
 import { User } from '../../../entities/users/User.entity';
@@ -234,30 +234,9 @@ export class GamesQueryRepository {
 
     const topPlayers = await this.playersRepository
       .createQueryBuilder('pl')
-      // .addSelect('pl.user', 'u_id')
-      .select('DISTINCT(pl.user)')
-      // .leftJoinAndSelect('pl.user', 'u')
-      // .addSelect('pl.user', 'u_id')
-      // .addSelect(
-      //   (p) =>
-      //     p
-      //       .select('p.score')
-      //       .from(Player, 'p')
-      //       // .leftJoinAndSelect('p.user', 'u')
-      //       // .addSelect('p.user', 'u')
-      //       .where('p.finished = true')
-      //       .andWhere(
-      //         new Brackets((qb) => {
-      //           qb.where('p.userId = pl.userId');
-      //         }),
-      //       )
-      //       .andWhere(
-      //         new Brackets((qb) => {
-      //           qb.where('p.id = pl.id');
-      //         }),
-      //       ),
-      //   'login',
-      // )
+      .select('pl.user', 'u_id')
+      .addSelect('u.login', 'u_login')
+      .leftJoin('pl.user', 'u')
       .addSelect(
         (p) =>
           p
@@ -269,7 +248,7 @@ export class GamesQueryRepository {
                 qb.where('p.userId = pl.userId');
               }),
             ),
-        'sumScore',
+        'sumscore',
       )
       .addSelect(
         (p) =>
@@ -284,7 +263,7 @@ export class GamesQueryRepository {
                 qb.where('p.userId = pl.userId');
               }),
             ),
-        'avgScores',
+        'avgscores',
       )
       .addSelect(
         (g) =>
@@ -305,7 +284,7 @@ export class GamesQueryRepository {
                 );
               }),
             ),
-        'gamesCount',
+        'gamescount',
       )
       .addSelect(
         (g) =>
@@ -331,7 +310,7 @@ export class GamesQueryRepository {
                 qb.where('fpl.score = spl.score');
               }),
             ),
-        'drawsCount',
+        'drawscount',
       )
       .addSelect(
         (g) =>
@@ -359,7 +338,7 @@ export class GamesQueryRepository {
                 );
               }),
             ),
-        'winsCount',
+        'winscount',
       )
       .addSelect(
         (g) =>
@@ -387,28 +366,51 @@ export class GamesQueryRepository {
                 );
               }),
             ),
-        'lossesCount',
+        'lossescount',
       )
       .where('pl.finished = true')
-      // .leftJoinAndSelect('pl.user', 'user')
-      // .groupBy('pl.id, u.id')
-      // .groupBy('pl.id, u.id, u.login')
-      .getRawMany();
+      .groupBy('u_id, u_login')
+      .orderBy({
+        avgscores: 'DESC',
+        sumscore: 'DESC',
+      })
+      .offset(skipSize)
+      .limit(pageSize);
 
-    console.log('topPlayers.length', topPlayers.length);
-    console.log('topPlayers', topPlayers);
-    // const finalPlayers = await this.usersRepository
-    //   .createQueryBuilder('u')
-    //   .leftJoinAndSelect('u.player', 'pl')
-    //   .select('DISTINCT(pl.user)')
-    //   // .leftJoinAndSelect('pl.user', 'user')
-    //   // .groupBy('pl.id, u.id')
-    //   // .groupBy('pl.id, u.id, u.login')
-    //   .getRawMany();
+    const finalSortedPlayers = await GamesQueryRepository._topPlayersSorting(
+      topPlayers,
+      params.sort,
+    );
 
-    // console.log('finalPlayers.length', finalPlayers.length);
-    // console.log('finalPlayers', finalPlayers);
-    return topPlayers;
+    const playerCount = await this.playersRepository
+      .createQueryBuilder('pl')
+      .select('count(distinct "userId")', 'count')
+      .getRawOne();
+
+    const pagesCount = getPagesCount(Number(playerCount.count), pageSize);
+
+    return {
+      pagesCount,
+      page: pageNumber,
+      pageSize,
+      totalCount: Number(playerCount.count),
+      items: finalSortedPlayers.length
+        ? finalSortedPlayers.map((p) => {
+            return {
+              sumScore: Number(p.sumscore),
+              avgScores: Number(p.avgscores),
+              gamesCount: Number(p.gamescount),
+              winsCount: Number(p.winscount),
+              lossesCount: Number(p.lossescount),
+              drawsCount: Number(p.drawscount),
+              player: {
+                id: p.u_id,
+                login: p.u_login,
+              },
+            };
+          })
+        : [],
+    };
   }
 
   async getUserGames(
@@ -449,13 +451,6 @@ export class GamesQueryRepository {
           });
         }),
       )
-      // .orderBy({
-      //   'fra.addedAt': 'ASC',
-      //   'sca.addedAt': 'ASC',
-      //   'q.createdAt': 'DESC',
-      //   [`g.${sortBy}`]: sortDirection,
-      //   'g.pairCreatedDate': 'DESC',
-      // })
       .orderBy('q.createdAt', 'DESC')
       .addOrderBy(`g.${sortBy}`, sortDirection)
       .addOrderBy(`g.pairCreatedDate`, 'DESC')
@@ -496,7 +491,7 @@ export class GamesQueryRepository {
     };
   }
 
-  _resultMapper(games: Game[]): GameViewType[] {
+  private _resultMapper(games: Game[]): GameViewType[] {
     return games.map((game) => {
       return {
         id: game.id,
@@ -553,5 +548,191 @@ export class GamesQueryRepository {
         finishGameDate: game.finishGameDate,
       };
     });
+  }
+
+  private static async _topPlayersSorting(
+    builder: SelectQueryBuilder<Player>,
+    sort: Array<string> | string | undefined,
+  ): Promise<any[]> {
+    if (typeof sort === 'string') {
+      const field = sort.split(' ')[0];
+
+      if (mockToPlayers.hasOwnProperty(field)) {
+        const order = sort.split(' ')[1];
+        const finalOrder = order === 'asc' ? 'ASC' : 'DESC';
+        return builder.orderBy(`${field}`, `${finalOrder}`).getRawMany();
+      }
+    }
+
+    if (typeof sort === 'object' && sort.length > 6) {
+      return builder.getRawMany();
+    }
+
+    if (typeof sort === 'object' && sort.length === 2) {
+      const field1 = sort[0].split(' ')[0];
+      const field2 = sort[1].split(' ')[0];
+
+      if (
+        mockToPlayers.hasOwnProperty(field1) &&
+        mockToPlayers.hasOwnProperty(field2)
+      ) {
+        const order1 = sort[0].split(' ')[1];
+        const finalOrder1 = order1 === 'asc' ? 'ASC' : 'DESC';
+
+        const order2 = sort[1].split(' ')[1];
+        const finalOrder2 = order2 === 'asc' ? 'ASC' : 'DESC';
+
+        return builder
+          .orderBy(`${field1}`, `${finalOrder1}`)
+          .addOrderBy(`${field2}`, `${finalOrder2}`)
+          .getRawMany();
+      }
+    }
+
+    if (typeof sort === 'object' && sort.length === 3) {
+      const field1 = sort[0].split(' ')[0];
+      const field2 = sort[1].split(' ')[0];
+      const field3 = sort[2].split(' ')[0];
+
+      if (
+        mockToPlayers.hasOwnProperty(field1) &&
+        mockToPlayers.hasOwnProperty(field2) &&
+        mockToPlayers.hasOwnProperty(field3)
+      ) {
+        const order1 = sort[0].split(' ')[1];
+        const finalOrder1 = order1 === 'asc' ? 'ASC' : 'DESC';
+
+        const order2 = sort[1].split(' ')[1];
+        const finalOrder2 = order2 === 'asc' ? 'ASC' : 'DESC';
+
+        const order3 = sort[2].split(' ')[1];
+        const finalOrder3 = order3 === 'asc' ? 'ASC' : 'DESC';
+
+        return builder
+          .orderBy(`${field1}`, `${finalOrder1}`)
+          .addOrderBy(`${field2}`, `${finalOrder2}`)
+          .addOrderBy(`${field3}`, `${finalOrder3}`)
+          .getRawMany();
+      }
+    }
+
+    if (typeof sort === 'object' && sort.length === 4) {
+      const field1 = sort[0].split(' ')[0];
+      const field2 = sort[1].split(' ')[0];
+      const field3 = sort[2].split(' ')[0];
+      const field4 = sort[3].split(' ')[0];
+
+      if (
+        mockToPlayers.hasOwnProperty(field1) &&
+        mockToPlayers.hasOwnProperty(field2) &&
+        mockToPlayers.hasOwnProperty(field3) &&
+        mockToPlayers.hasOwnProperty(field4)
+      ) {
+        const order1 = sort[0].split(' ')[1];
+        const finalOrder1 = order1 === 'asc' ? 'ASC' : 'DESC';
+
+        const order2 = sort[1].split(' ')[1];
+        const finalOrder2 = order2 === 'asc' ? 'ASC' : 'DESC';
+
+        const order3 = sort[2].split(' ')[1];
+        const finalOrder3 = order3 === 'asc' ? 'ASC' : 'DESC';
+
+        const order4 = sort[3].split(' ')[1];
+        const finalOrder4 = order4 === 'asc' ? 'ASC' : 'DESC';
+
+        return builder
+          .orderBy(`${field1}`, `${finalOrder1}`)
+          .addOrderBy(`${field2}`, `${finalOrder2}`)
+          .addOrderBy(`${field3}`, `${finalOrder3}`)
+          .addOrderBy(`${field4}`, `${finalOrder4}`)
+          .getRawMany();
+      }
+    }
+
+    if (typeof sort === 'object' && sort.length === 5) {
+      const field1 = sort[0].split(' ')[0];
+      const field2 = sort[1].split(' ')[0];
+      const field3 = sort[2].split(' ')[0];
+      const field4 = sort[3].split(' ')[0];
+      const field5 = sort[4].split(' ')[0];
+
+      if (
+        mockToPlayers.hasOwnProperty(field1) &&
+        mockToPlayers.hasOwnProperty(field2) &&
+        mockToPlayers.hasOwnProperty(field3) &&
+        mockToPlayers.hasOwnProperty(field4) &&
+        mockToPlayers.hasOwnProperty(field5)
+      ) {
+        const order1 = sort[0].split(' ')[1];
+        const finalOrder1 = order1 === 'asc' ? 'ASC' : 'DESC';
+
+        const order2 = sort[1].split(' ')[1];
+        const finalOrder2: 'ASC' | 'DESC' = order2 === 'asc' ? 'ASC' : 'DESC';
+
+        const order3 = sort[2].split(' ')[1];
+        const finalOrder3: 'ASC' | 'DESC' = order3 === 'asc' ? 'ASC' : 'DESC';
+
+        const order4 = sort[3].split(' ')[1];
+        const finalOrder4: 'ASC' | 'DESC' = order4 === 'asc' ? 'ASC' : 'DESC';
+
+        const order5 = sort[4].split(' ')[1];
+        const finalOrder5: 'ASC' | 'DESC' = order5 === 'asc' ? 'ASC' : 'DESC';
+
+        return builder
+          .orderBy(`${field1}`, `${finalOrder1}`)
+          .addOrderBy(`${field2}`, `${finalOrder2}`)
+          .addOrderBy(`${field3}`, `${finalOrder3}`)
+          .addOrderBy(`${field4}`, `${finalOrder4}`)
+          .addOrderBy(`${field5}`, `${finalOrder5}`)
+          .getRawMany();
+      }
+    }
+
+    if (typeof sort === 'object' && sort.length === 6) {
+      const field1 = sort[0].split(' ')[0];
+      const field2 = sort[1].split(' ')[0];
+      const field3 = sort[2].split(' ')[0];
+      const field4 = sort[3].split(' ')[0];
+      const field5 = sort[4].split(' ')[0];
+      const field6 = sort[5].split(' ')[0];
+
+      if (
+        mockToPlayers.hasOwnProperty(field1) &&
+        mockToPlayers.hasOwnProperty(field2) &&
+        mockToPlayers.hasOwnProperty(field3) &&
+        mockToPlayers.hasOwnProperty(field4) &&
+        mockToPlayers.hasOwnProperty(field5) &&
+        mockToPlayers.hasOwnProperty(field6)
+      ) {
+        const order1 = sort[0].split(' ')[1];
+        const finalOrder1 = order1 === 'asc' ? 'ASC' : 'DESC';
+
+        const order2 = sort[1].split(' ')[1];
+        const finalOrder2 = order2 === 'asc' ? 'ASC' : 'DESC';
+
+        const order3 = sort[2].split(' ')[1];
+        const finalOrder3 = order3 === 'asc' ? 'ASC' : 'DESC';
+
+        const order4 = sort[3].split(' ')[1];
+        const finalOrder4: 'ASC' | 'DESC' = order4 === 'asc' ? 'ASC' : 'DESC';
+
+        const order5 = sort[4].split(' ')[1];
+        const finalOrder5 = order5 === 'asc' ? 'ASC' : 'DESC';
+
+        const order6 = sort[5].split(' ')[1];
+        const finalOrder6 = order6 === 'asc' ? 'ASC' : 'DESC';
+
+        return builder
+          .orderBy(`${field1}`, `${finalOrder1}`)
+          .addOrderBy(`${field2}`, `${finalOrder2}`)
+          .addOrderBy(`${field3}`, `${finalOrder3}`)
+          .addOrderBy(`${field4}`, `${finalOrder4}`)
+          .addOrderBy(`${field5}`, `${finalOrder5}`)
+          .addOrderBy(`${field6}`, `${finalOrder6}`)
+          .getRawMany();
+      }
+    }
+
+    return builder.getRawMany();
   }
 }
