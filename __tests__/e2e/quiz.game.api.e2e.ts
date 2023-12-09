@@ -2307,6 +2307,108 @@ describe('tests for /sa/quiz/questions', () => {
     });
   });
 
+  describe('top players endpoint', () => {
+    test('should return user statistic', async () => {
+      const response1 = await request(httpServer)
+        .get(`${RouterPaths.game}/users/top`)
+        .expect(200);
+
+      expect(response1.body).toEqual({});
+      // expect(response1.body).toEqual({
+      //   pagesCount: 1,
+      //   page: 1,
+      //   pageSize: 10,
+      //   totalCount: 4,
+      //   items: [
+      //     {
+      //       sumScore: 3,
+      //       avgScores: 3,
+      //       gamesCount: 1,
+      //       winsCount: 1,
+      //       lossesCount: 0,
+      //       drawsCount: 0,
+      //       player: {
+      //         id: user3.id,
+      //         login: user3.login,
+      //       },
+      //     },
+      //     {
+      //       sumScore: 5,
+      //       avgScores: 2.5,
+      //       gamesCount: 2,
+      //       winsCount: 1,
+      //       lossesCount: 0,
+      //       drawsCount: 1,
+      //       player: {
+      //         id: user1.id,
+      //         login: user1.login,
+      //       },
+      //     },
+      //     {
+      //       sumScore: 4,
+      //       avgScores: 2,
+      //       gamesCount: 2,
+      //       winsCount: 0,
+      //       lossesCount: 1,
+      //       drawsCount: 1,
+      //       player: {
+      //         id: user2.id,
+      //         login: user2.login,
+      //       },
+      //     },
+      //     {
+      //       sumScore: 2,
+      //       avgScores: 2,
+      //       gamesCount: 1,
+      //       winsCount: 0,
+      //       lossesCount: 1,
+      //       drawsCount: 0,
+      //       player: {
+      //         id: user4.id,
+      //         login: user4.login,
+      //       },
+      //     },
+      //   ],
+      // });
+
+      // expect(responseUser1.body).toEqual({
+      //   sumScore: 5,
+      //   avgScores: 2.5,
+      //   gamesCount: 2,
+      //   winsCount: 1,
+      //   lossesCount: 0,
+      //   drawsCount: 1,
+      // });
+
+      // expect(responseUser2.body).toEqual({
+      //   sumScore: 4,
+      //   avgScores: 2,
+      //   gamesCount: 2,
+      //   winsCount: 0,
+      //   lossesCount: 1,
+      //   drawsCount: 1,
+      // });
+
+      // expect(responseUser3.body).toEqual({
+      //   sumScore: 3,
+      //   avgScores: 3,
+      //   gamesCount: 1,
+      //   winsCount: 1,
+      //   lossesCount: 0,
+      //   drawsCount: 0,
+      // });
+
+      // expect(responseUser4.body).toEqual({
+      //   sumScore: 2,
+      //   avgScores: 2,
+      //   gamesCount: 1,
+      //   winsCount: 0,
+      //   lossesCount: 1,
+      //   drawsCount: 0,
+      // });
+    });
+  });
+
   describe('my games endpoint', () => {
     test('should return all user games', async () => {
       await sleep(1);

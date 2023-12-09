@@ -36,7 +36,8 @@ export const createDefaultSortedParams = (
     !isNaN(parsedPageSize) && parsedPageSize > 0 ? parsedPageSize : 10;
 
   const skipSize = countSkipSizeForDb(finalPageNumber, finalPageSize);
-  const finalSortBy = model.hasOwnProperty(sortBy) ? sortBy : 'createdAt';
+  const finalSortBy =
+    model && model.hasOwnProperty(sortBy) ? sortBy : 'createdAt';
   const finalSortDirection = sortDirection === 'asc' ? 'ASC' : 'DESC';
 
   return {

@@ -21,6 +21,7 @@ import { AnswerToQuestionInputDto } from '../../dto/game/answer-to-question.inpu
 import { FindSpecifiedGameCommand } from '../../domain/game/use-cases/find-specified-game-use-case';
 import { AnswerToQuestionCommand } from '../../domain/game/use-cases/answer-to-question-use-case';
 import { GamesQueryDto } from '../../dto/game/games.query.dto';
+import { TopPlayersQueryDto } from '../../dto/game/top-players.query.dto';
 
 @Controller(RouterPaths.game)
 export class GameController {
@@ -87,5 +88,10 @@ export class GameController {
   @Get('users/my-statistic')
   async userStatistic(@CurrentUserId() currentUserId) {
     return await this.gamesQueryRepository.getUserStatistic(currentUserId);
+  }
+
+  @Get('users/top')
+  async getTopPlayers(@Query() query: TopPlayersQueryDto) {
+    return await this.gamesQueryRepository.getTopPlayers(query);
   }
 }

@@ -40,6 +40,14 @@ export type UserStatisticType = {
   drawsCount: number;
 };
 
+export type TopPlayersType = {
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: Array<UserStatisticType>;
+};
+
 export type UserGamesViewType = {
   pagesCount: number;
   page: number;
