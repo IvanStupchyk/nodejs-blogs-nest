@@ -43,6 +43,8 @@ export class AnswerToQuestionUseCase
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
+    const answersCountUser1 = activeGame.firstPlayer.answers.length;
+    const answersCountUser2 = activeGame.secondPlayer.answers.length;
     const currentQuestionIndex = player.answers.length;
     const currentQuestion = activeGame.questions[currentQuestionIndex];
 
@@ -55,26 +57,25 @@ export class AnswerToQuestionUseCase
 
     if (currentQuestion.correctAnswers.includes(answer)) {
       newAnswer.answerStatus = AnswerStatus.Correct;
-      player.answers.push(newAnswer);
       player.score = ++player.score;
     } else {
       newAnswer.answerStatus = AnswerStatus.Incorrect;
-      player.answers.push(newAnswer);
     }
 
     if (
-      activeGame.firstPlayer.answers.length === 5 &&
-      activeGame.secondPlayer.answers.length === 5
+      (answersCountUser1 === 5 && answersCountUser2 === 4) ||
+      (answersCountUser1 === 4 && answersCountUser2 === 5)
     ) {
       activeGame.status = GameStatus.Finished;
       activeGame.finishGameDate = new Date();
       activeGame.firstPlayer.finished = true;
       activeGame.secondPlayer.finished = true;
+      await this.dataSourceRepository.save(activeGame.firstPlayer);
+      await this.dataSourceRepository.save(activeGame.secondPlayer);
     }
 
+    await this.dataSourceRepository.save(player);
     await this.dataSourceRepository.save(newAnswer);
-    await this.dataSourceRepository.save(activeGame.firstPlayer);
-    await this.dataSourceRepository.save(activeGame.secondPlayer);
     await this.dataSourceRepository.save(activeGame);
 
     return {
