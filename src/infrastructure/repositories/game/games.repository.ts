@@ -62,6 +62,18 @@ export class GamesRepository {
       .getOne();
   }
 
+  async findGamesInActiveStatusToFinish(): Promise<Game[] | null> {
+    return await this.gamesRepository
+      .createQueryBuilder('g')
+      .leftJoinAndSelect('g.firstPlayer', 'frp')
+      .leftJoinAndSelect('frp.answers', 'fra')
+      .leftJoinAndSelect('g.secondPlayer', 'scp')
+      .leftJoinAndSelect('scp.answers', 'sca')
+      .where(`g.status = '${GameStatus.Active}'`)
+      .andWhere('g.timeToFinishGame < now()')
+      .getMany();
+  }
+
   async findCurrentGame(id): Promise<Game | null> {
     return await this.gamesRepository
       .createQueryBuilder('g')

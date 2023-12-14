@@ -90,6 +90,8 @@ import { ConnectUserToGameUseCase } from './domain/game/use-cases/connect-user-t
 import { GamesRepository } from './infrastructure/repositories/game/games.repository';
 import { FindSpecifiedGameUseCase } from './domain/game/use-cases/find-specified-game-use-case';
 import { AnswerToQuestionUseCase } from './domain/game/use-cases/answer-to-question-use-case';
+import { FinishGameUseCase } from './domain/game/use-cases/finish-game-use-case';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const useCases = [
   CreatePostUseCase,
@@ -129,6 +131,7 @@ const useCases = [
   ConnectUserToGameUseCase,
   FindSpecifiedGameUseCase,
   AnswerToQuestionUseCase,
+  FinishGameUseCase,
 ];
 
 const entities = [
@@ -156,6 +159,7 @@ const entities = [
       },
     ]),
     configModule,
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(globalBdOptions),
     TypeOrmModule.forFeature([...entities]),
   ],
