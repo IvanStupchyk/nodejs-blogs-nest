@@ -1004,12 +1004,7 @@ describe('tests for /sa/quiz/questions', () => {
         finishGameDate: null,
       });
 
-      await GameTestManager.answerToQuestion(
-        httpServer,
-        accessTokenUser1,
-        refreshTokenUser1,
-        activeGame.questions[4].id,
-      );
+      await sleep(10);
 
       await GameTestManager.answerToQuestion(
         httpServer,
@@ -1054,11 +1049,11 @@ describe('tests for /sa/quiz/questions', () => {
               answerStatus: AnswerStatus.Incorrect,
               addedAt: expect.any(String),
             },
-            {
-              questionId: activeGame.questions[4].id,
-              answerStatus: AnswerStatus.Incorrect,
-              addedAt: expect.any(String),
-            },
+            // {
+            //   questionId: activeGame.questions[4].id,
+            //   answerStatus: AnswerStatus.Incorrect,
+            //   addedAt: expect.any(String),
+            // },
           ],
           player: {
             id: user1.id,

@@ -7,6 +7,7 @@ import { AnswerStatus, GameStatus } from '../../../types/general.types';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Answer } from '../../../entities/game/Answer.entity';
 import { Game } from '../../../entities/game/Game.entity';
+import add from 'date-fns/add';
 
 export class AnswerToQuestionCommand {
   constructor(
@@ -39,7 +40,7 @@ export class AnswerToQuestionUseCase
       player = activeGame.secondPlayer;
     }
 
-    if (player.answers.length === 5) {
+    if (player.answers.length >= 5) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
@@ -60,6 +61,15 @@ export class AnswerToQuestionUseCase
       player.score = ++player.score;
     } else {
       newAnswer.answerStatus = AnswerStatus.Incorrect;
+    }
+
+    if (
+      (answersCountUser1 === 4 && player.id === activeGame.firstPlayer.id) ||
+      (answersCountUser2 === 4 && player.id === activeGame.secondPlayer.id)
+    ) {
+      activeGame.timeToFinishGame = add(new Date(), {
+        seconds: 9,
+      });
     }
 
     if (
