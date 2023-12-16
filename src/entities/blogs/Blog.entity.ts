@@ -45,7 +45,7 @@ export class Blog extends AggregateRoot {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  static createBlog(
+  static create(
     name: string,
     description: string,
     websiteUrl: string,
@@ -65,7 +65,7 @@ export class Blog extends AggregateRoot {
     return blog;
   }
 
-  static updateBlog(
+  static update(
     blog: Blog | null,
     description: string,
     websiteUrl: string,

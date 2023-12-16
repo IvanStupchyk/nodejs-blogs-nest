@@ -37,10 +37,7 @@ export class CreateCommentUseCase
     const user = await this.usersRepository.fetchAllUserDataById(userId);
     if (!user) return null;
 
-    const newComment = new Comment();
-    newComment.content = content;
-    newComment.user = user;
-    newComment.post = foundPost;
+    const newComment = Comment.create(content, user, foundPost);
 
     const savedComment = await this.dataSourceRepository.save(newComment);
 

@@ -36,4 +36,25 @@ export class Question {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  static create(body: string, correctAnswers: string[]): Question {
+    const question = new Question();
+
+    question.body = body;
+    question.correctAnswers = correctAnswers;
+
+    return question;
+  }
+
+  static update(
+    question: Question,
+    body: string,
+    correctAnswers: string[],
+  ): Question {
+    question.body = body;
+    question.correctAnswers = correctAnswers;
+    question.updatedAt = new Date();
+
+    return question;
+  }
 }

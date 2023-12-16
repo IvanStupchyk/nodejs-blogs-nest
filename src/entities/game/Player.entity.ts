@@ -37,4 +37,11 @@ export class Player {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  static create(user: User): Player {
+    const player = new Player();
+    player.user = user;
+
+    return player;
+  }
 }

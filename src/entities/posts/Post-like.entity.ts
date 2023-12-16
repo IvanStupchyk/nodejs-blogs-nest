@@ -34,4 +34,15 @@ export class PostLike {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  static create() {
+    return new PostLike();
+  }
+
+  static update(like: PostLike, likeStatus: string, post: Post, user: User) {
+    like.likeStatus = likeStatus;
+    like.post = post;
+    like.user = user;
+    like.addedAt = new Date();
+  }
 }

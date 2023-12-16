@@ -27,7 +27,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       command.userId,
     );
 
-    const newBlog = Blog.createBlog(name, description, websiteUrl, user);
+    const newBlog = Blog.create(name, description, websiteUrl, user);
     const savedBlog = await this.dataSourceRepository.save(newBlog);
 
     newBlog.getUncommittedEvents().forEach((e) => this.eventBus.publish(e));

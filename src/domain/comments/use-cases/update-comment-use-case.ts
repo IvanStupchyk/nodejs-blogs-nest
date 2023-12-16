@@ -3,6 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
 import { isUUID } from '../../../utils/utils';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { Comment } from '../../../entities/comments/Comment.entity';
 
 export class UpdateCommentCommand {
   constructor(
@@ -26,17 +27,10 @@ export class UpdateCommentUseCase
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
     const comment = await this.commentsRepository.fetchAllCommentDataById(id);
-    if (!comment) return HttpStatus.NOT_FOUND;
+    Comment.update(comment, content, userId);
 
-    if (comment && comment.user.id !== userId) {
-      return HttpStatus.FORBIDDEN;
-    }
+    await this.dataSourceRepository.save(comment);
 
-    comment.content = content;
-    const isCommentUpdated = await this.dataSourceRepository.save(comment);
-
-    if (isCommentUpdated) return HttpStatus.NO_CONTENT;
-
-    return HttpStatus.NOT_FOUND;
+    return HttpStatus.NO_CONTENT;
   }
 }

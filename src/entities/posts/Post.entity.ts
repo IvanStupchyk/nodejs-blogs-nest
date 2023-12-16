@@ -10,6 +10,8 @@ import {
 import { Blog } from '../blogs/Blog.entity';
 import { PostLike } from './Post-like.entity';
 import { Comment } from '../comments/Comment.entity';
+import { exceptionHandler } from '../../exception.handler';
+import { HttpStatus } from '@nestjs/common';
 
 @Entity('posts')
 export class Post {
@@ -48,4 +50,43 @@ export class Post {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  static create(
+    title: string,
+    content: string,
+    shortDescription: string,
+    blogName: string,
+    blog: Blog,
+  ): Post {
+    const post = new Post();
+    post.title = title;
+    post.content = content;
+    post.shortDescription = shortDescription;
+    post.blogName = blogName;
+    post.blog = blog;
+
+    return post;
+  }
+
+  static update(
+    blog: Blog | null,
+    post: Post,
+    title: string,
+    content: string,
+    shortDescription: string,
+    userId: string,
+  ) {
+    if (blog && blog.user && blog.user.id !== userId) {
+      return exceptionHandler(HttpStatus.FORBIDDEN);
+    }
+    if (!blog) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    post.title = title;
+    post.content = content;
+    post.shortDescription = shortDescription;
+
+    return post;
+  }
 }

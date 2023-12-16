@@ -5,6 +5,7 @@ import { QuestionParamsDto } from '../../../application/dto/question/question.pa
 import { QuestionsRepository } from '../../../infrastructure/repositories/questions/questions.repository';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
+import { Question } from '../../../entities/game/Question.entity';
 
 export class UpdateQuestionCommand {
   constructor(
@@ -30,9 +31,11 @@ export class UpdateQuestionUseCase
     );
     if (!question) return HttpStatus.NOT_FOUND;
 
-    question.body = command.questionData.body;
-    question.correctAnswers = command.questionData.correctAnswers;
-    question.updatedAt = new Date();
+    Question.update(
+      question,
+      command.questionData.body,
+      command.questionData.correctAnswers,
+    );
 
     await this.dataSourceRepository.save(question);
 

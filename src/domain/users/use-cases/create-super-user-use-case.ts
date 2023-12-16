@@ -20,11 +20,7 @@ export class CreateSuperUserUseCase
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = new User();
-    newUser.login = login;
-    newUser.email = email;
-    newUser.passwordHash = passwordHash;
-    newUser.isConfirmed = true;
+    const newUser = User.createAdminUser(login, email, passwordHash);
 
     const savedUser = await this.dataSourceRepository.save(newUser);
 

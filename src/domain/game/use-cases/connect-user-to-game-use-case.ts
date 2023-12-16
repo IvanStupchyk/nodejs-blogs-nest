@@ -41,21 +41,15 @@ export class ConnectUserToGameUseCase
     }
 
     let game = await this.gamesRepository.findPendingGame();
-    const player = new Player();
-    player.user = user;
+    const player = Player.create(user);
 
     if (game) {
-      game.secondPlayer = player;
-      game.status = GameStatus.Active;
-      game.startGameDate = new Date();
+      Game.connectSecondPlayer(game, player);
     } else {
       const questions =
         await this.questionsRepository.takeBunchRandomQuestions(5);
 
-      game = new Game();
-      game.firstPlayer = player;
-      game.questions = questions;
-      game.status = GameStatus.PendingSecondPlayer;
+      game = Game.create(player, questions);
     }
 
     await this.dataSourceRepository.save(player);

@@ -61,13 +61,10 @@ export class ChangePostLikesCountUseCase
     if (userPostLike) {
       likeStatement = userPostLike;
     } else {
-      likeStatement = new PostLike();
+      likeStatement = PostLike.create();
     }
 
-    likeStatement.likeStatus = myStatus;
-    likeStatement.post = foundPost;
-    likeStatement.user = user;
-    likeStatement.addedAt = new Date();
+    PostLike.update(likeStatement, myStatus, foundPost, user);
 
     await this.dataSourceRepository.save(likeStatement);
 

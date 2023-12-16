@@ -15,10 +15,10 @@ export class CreateQuestionUseCase
   constructor(private readonly dataSourceRepository: DataSourceRepository) {}
 
   async execute(command: CreateQuestionCommand): Promise<QuestionViewType> {
-    const newQuestion = new Question();
-
-    newQuestion.body = command.questionData.body;
-    newQuestion.correctAnswers = command.questionData.correctAnswers;
+    const newQuestion = Question.create(
+      command.questionData.body,
+      command.questionData.correctAnswers,
+    );
 
     const savedQuestion = await this.dataSourceRepository.save(newQuestion);
 
