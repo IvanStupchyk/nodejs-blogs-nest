@@ -1,5 +1,5 @@
-import { SortOrder } from '../../constants/sort.order';
-import { QuestionViewType } from '../../types/question.types';
+import { SortOrder } from '../../../constants/sort.order';
+import { QuestionViewType } from '../../../types/question.types';
 
 export class QuestionsQueryDto {
   bodySearchTerm: string;

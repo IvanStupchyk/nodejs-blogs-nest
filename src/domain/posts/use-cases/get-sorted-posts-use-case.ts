@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsQueryDto } from '../../../dto/posts/posts.query.dto';
+import { PostsQueryDto } from '../../../application/dto/posts/posts.query.dto';
 import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';

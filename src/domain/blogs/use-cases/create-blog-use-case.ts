@@ -1,5 +1,5 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogInputDto } from '../../../dto/blogs/blog.input.dto';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { BlogInputDto } from '../../../application/dto/blogs/blog.input.dto';
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogViewType } from '../../../types/blogs.types';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
@@ -17,6 +17,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   constructor(
     private readonly dataSourceRepository: DataSourceRepository,
     private readonly usersRepository: UsersRepository,
+    private eventBus: EventBus,
   ) {}
 
   async execute(command: CreateBlogCommand): Promise<BlogViewType> {
@@ -25,14 +26,11 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
     const user = await this.usersRepository.fetchAllUserDataById(
       command.userId,
     );
-    const newBlog = new Blog();
-    newBlog.name = name;
-    newBlog.description = description;
-    newBlog.websiteUrl = websiteUrl;
-    newBlog.websiteUrl = websiteUrl;
-    newBlog.user = user;
+
+    const newBlog = Blog.createBlog(name, description, websiteUrl, user);
     const savedBlog = await this.dataSourceRepository.save(newBlog);
 
+    newBlog.getUncommittedEvents().forEach((e) => this.eventBus.publish(e));
     return {
       id: savedBlog.id,
       name: savedBlog.name,

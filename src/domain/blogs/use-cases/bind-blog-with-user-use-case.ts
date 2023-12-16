@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { BindBlogParamsDto } from '../../../dto/blogs/bind-blog.params.dto';
+import { BindBlogParamsDto } from '../../../application/dto/blogs/bind-blog.params.dto';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { exceptionHandler } from '../../../exception.handler';
 import { HttpStatus } from '@nestjs/common';

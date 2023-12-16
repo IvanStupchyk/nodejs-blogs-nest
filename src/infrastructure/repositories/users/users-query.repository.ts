@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UsersQueryDto } from '../../../dto/users/users.query.dto';
+import { UsersQueryDto } from '../../../application/dto/users/users.query.dto';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { mockUserModel } from '../../../constants/blanks';
 import { Repository } from 'typeorm';

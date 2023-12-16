@@ -1,7 +1,7 @@
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { QuestionInputDto } from '../../src/dto/question/question.input.dto';
+import { QuestionInputDto } from '../../src/application/dto/question/question.input.dto';
 import { QuestionViewType } from '../../src/types/question.types';
 
 export const questionsTestManager = {

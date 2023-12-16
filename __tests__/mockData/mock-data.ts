@@ -1,8 +1,8 @@
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
-import { BlogInputDto } from '../../src/dto/blogs/blog.input.dto';
-import { PostInputDto } from '../../src/dto/posts/post.input.dto';
+import { UserInputDto } from '../../src/application/dto/users/user.input.dto';
+import { BlogInputDto } from '../../src/application/dto/blogs/blog.input.dto';
+import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { QuestionInputDto } from '../../src/dto/question/question.input.dto';
+import { QuestionInputDto } from '../../src/application/dto/question/question.input.dto';
 
 export const invalidUserData = {
   login: '',

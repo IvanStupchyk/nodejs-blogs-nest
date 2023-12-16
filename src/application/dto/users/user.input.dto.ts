@@ -1,7 +1,7 @@
 import { IsEmail, Length, Matches } from 'class-validator';
-import { IsLoginExist } from '../../utils/decorators/unique-login.decorator';
-import { errorsConstants } from '../../constants/errors.contants';
-import { IsEmailExist } from '../../utils/decorators/unique-email.decorator';
+import { IsLoginExist } from '../../../utils/decorators/unique-login.decorator';
+import { errorsConstants } from '../../../constants/errors.contants';
+import { IsEmailExist } from '../../../utils/decorators/unique-email.decorator';
 
 export class UserInputDto {
   @Length(3, 10)

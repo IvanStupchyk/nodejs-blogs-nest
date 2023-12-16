@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs/blogs-query.repository';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
-import { BlogsQueryDto } from '../../dto/blogs/blogs.query.dto';
+import { BlogsQueryDto } from '../../application/dto/blogs/blogs.query.dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CommandBus } from '@nestjs/cqrs';
 import { RouterPaths } from '../../constants/router.paths';
 import { JwtService } from '../../infrastructure/jwt.service';
-import { BindBlogParamsDto } from '../../dto/blogs/bind-blog.params.dto';
+import { BindBlogParamsDto } from '../../application/dto/blogs/bind-blog.params.dto';
 import { BindBlogWithUserCommand } from '../../domain/blogs/use-cases/bind-blog-with-user-use-case';
 
 @Controller(RouterPaths.saBlogs)

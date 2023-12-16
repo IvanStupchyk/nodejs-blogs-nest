@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as bcrypt from 'bcrypt';
 import { UserViewType } from '../../../types/users.types';
 import { User } from '../../../entities/users/User.entity';
-import { SAUserInputDto } from '../../../dto/users/sa-user.input.dto';
+import { SAUserInputDto } from '../../../application/dto/users/sa-user.input.dto';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 
 export class CreateSuperUserCommand {

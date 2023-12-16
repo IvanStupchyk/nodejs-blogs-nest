@@ -5,7 +5,7 @@ import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { usersTestManager } from '../utils/users-test-manager';
-import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
+import { LoginUserInputDto } from '../../src/application/dto/auth/login-user.input.dto';
 import { UserViewType } from '../../src/types/users.types';
 import { invalidUserData, userData1 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';

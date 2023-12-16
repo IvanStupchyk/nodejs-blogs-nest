@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { CommentsQueryDto } from '../../../dto/comments/comments.query.dto';
+import { CommentsQueryDto } from '../../../application/dto/comments/comments.query.dto';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
 import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';

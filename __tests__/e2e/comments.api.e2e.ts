@@ -1,21 +1,20 @@
 import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { likeStatus } from '../../src/types/general.types';
-import { usersTestManager } from '../utils/users-test-manager';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
-import { LoginUserInputDto } from '../../src/dto/auth/login-user.input.dto';
-import { CommentInputDto } from '../../src/dto/comments/comment.input.dto';
+import { LoginUserInputDto } from '../../src/application/dto/auth/login-user.input.dto';
+import { CommentInputDto } from '../../src/application/dto/comments/comment.input.dto';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { UserViewType } from '../../src/types/users.types';
 import { CommentViewType } from '../../src/types/comments.types';
 import { userData1, userData2, userData3 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
-import { BlogViewType } from '../../src/types/blogs.types';
+import { userCreator } from '../utils/user-creator';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
@@ -31,6 +30,11 @@ describe('tests for /comments and posts/:id/comments', () => {
 
   let app: INestApplication;
   let httpServer;
+  let user1: UserViewType;
+  let accessTokenUser1: string;
+  let refreshTokenUser1: string;
+  let accessTokenUser2: string;
+  let accessTokenUser3: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -42,6 +46,17 @@ describe('tests for /comments and posts/:id/comments', () => {
     app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+
+    const resp = await userCreator(httpServer, userData1);
+    user1 = resp.user;
+    accessTokenUser1 = resp.accessToken;
+    refreshTokenUser1 = resp.refreshToken;
+
+    const resp2 = await userCreator(httpServer, userData2);
+    accessTokenUser2 = resp2.accessToken;
+
+    const resp3 = await userCreator(httpServer, userData3);
+    accessTokenUser3 = resp3.accessToken;
   });
 
   afterAll(async () => {
@@ -50,90 +65,20 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   let newPost: PostType;
-  let newBlog: BlogViewType;
-  let user1: UserViewType;
-  let user2: UserViewType;
-  let user3: UserViewType;
   let comment1: CommentViewType;
-  let comment2: CommentViewType;
-  let comment3: CommentViewType;
   const newComments: Array<CommentViewType> = [];
-  let accessTokenUser1: string;
-  let accessTokenUser2: string;
-  let accessTokenUser3: string;
-
-  it('should create a user with correct credentials for future tests', async () => {
-    const { createdUser } = await usersTestManager.createUser(
-      httpServer,
-      userData1,
-    );
-    const secondUserData = await usersTestManager.createUser(
-      httpServer,
-      userData2,
-    );
-    const thirdUserData = await usersTestManager.createUser(
-      httpServer,
-      userData3,
-    );
-
-    user1 = createdUser;
-    user2 = secondUserData.createdUser;
-    user3 = thirdUserData.createdUser;
-
-    await getRequest()
-      .get(RouterPaths.users)
-      .auth('admin', 'qwerty', { type: 'basic' })
-      .expect(HTTP_STATUSES.OK_200, {
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: 3,
-        items: [
-          thirdUserData.createdUser,
-          secondUserData.createdUser,
-          createdUser,
-        ],
-      });
-  });
-
-  it('should log in a user with correct credentials and return access token', async () => {
-    const result = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData1.login,
-        password: userData1.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    const result2 = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData2.login,
-        password: userData2.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    const result3 = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData3.login,
-        password: userData3.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    expect(result.body.accessToken).toEqual(expect.any(String));
-
-    accessTokenUser1 = result.body.accessToken;
-    accessTokenUser2 = result2.body.accessToken;
-    accessTokenUser3 = result3.body.accessToken;
-  }, 10000);
 
   it('should create post if the user sent valid data with existing blog id', async () => {
-    const { createdBlog } = await blogsTestManager.createBlog(httpServer, {
-      name: 'new name',
-      description: 'new description',
-      websiteUrl: 'https://www.aaaaa.com',
-    });
+    const { createdBlog } = await blogsTestManager.createBlog(
+      httpServer,
+      {
+        name: 'new name',
+        description: 'new description',
+        websiteUrl: 'https://www.aaaaa.com',
+      },
+      accessTokenUser1,
+      refreshTokenUser1,
+    );
 
     await getRequest()
       .get(`${RouterPaths.blogs}/${createdBlog.id}`)
@@ -150,11 +95,12 @@ describe('tests for /comments and posts/:id/comments', () => {
       httpServer,
       validPostData,
       createdBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
 
     newPost = createdPost;
-    newBlog = createdBlog;
 
     await getRequest()
       .get(RouterPaths.posts)
@@ -256,9 +202,7 @@ describe('tests for /comments and posts/:id/comments', () => {
     );
 
     newComments.unshift(secondComment.createdComment);
-    comment2 = secondComment.createdComment;
     newComments.unshift(thirdComment.createdComment);
-    comment3 = thirdComment.createdComment;
     newComments.unshift(fourthComment.createdComment);
 
     const sortedComments = [...newComments]

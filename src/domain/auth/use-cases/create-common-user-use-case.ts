@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import bcrypt from 'bcrypt';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { UserInputDto } from '../../../dto/users/user.input.dto';
+import { UserInputDto } from '../../../application/dto/users/user.input.dto';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { User } from '../../../entities/users/User.entity';

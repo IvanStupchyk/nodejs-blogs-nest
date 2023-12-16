@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { mockCommentModel } from '../../../constants/blanks';
-import { CommentsQueryDto } from '../../../dto/comments/comments.query.dto';
+import { CommentsQueryDto } from '../../../application/dto/comments/comments.query.dto';
 import {
   CommentsViewType,
   CommentViewType,

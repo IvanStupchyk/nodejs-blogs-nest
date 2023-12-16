@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
-import { PostForSpecifiedBlogInputDto } from '../../../dto/posts/post-for-specified-blog.input.dto';
+import { PostForSpecifiedBlogInputDto } from '../../../application/dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { PostViewType } from '../../../types/posts.types';
