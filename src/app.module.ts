@@ -92,6 +92,10 @@ import { FindSpecifiedGameUseCase } from './domain/game/use-cases/find-specified
 import { AnswerToQuestionUseCase } from './domain/game/use-cases/answer-to-question-use-case';
 import { FinishGameUseCase } from './domain/game/use-cases/finish-game-use-case';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BloggerBlogsController } from './controllers/blogger/blogger.blogs.controller';
+import { IsUserExistConstraint } from './utils/decorators/existing-user.decorator';
+import { BindBlogWithUserCase } from './domain/blogs/use-cases/bind-blog-with-user-use-case';
+import { isBlogHasOwnerDataConstraint } from './utils/decorators/bind-blog-with-user.decorator';
 
 const useCases = [
   CreatePostUseCase,
@@ -132,6 +136,7 @@ const useCases = [
   FindSpecifiedGameUseCase,
   AnswerToQuestionUseCase,
   FinishGameUseCase,
+  BindBlogWithUserCase,
 ];
 
 const entities = [
@@ -167,6 +172,7 @@ const entities = [
     UsersSaController,
     BlogSaController,
     BlogController,
+    BloggerBlogsController,
     PostsController,
     CommentsController,
     ResetDbController,
@@ -199,6 +205,8 @@ const entities = [
     BasicStrategy,
     RefreshTokenMiddleware,
     IsBlogExistConstraint,
+    IsUserExistConstraint,
+    isBlogHasOwnerDataConstraint,
     IsEmailExistConstraint,
     IsLoginExistConstraint,
     ...useCases,

@@ -7,16 +7,24 @@ import { RouterPaths } from '../../src/constants/router.paths';
 import { postsTestManager } from '../utils/posts-test-manager';
 import {
   invalidBlogData,
+  userData1,
+  userData2,
   validBlogData,
   validPostData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
 import { BlogViewType } from '../../src/types/blogs.types';
+import { userCreator } from '../utils/user-creator';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
   let httpServer;
+  let user1;
+  let accessTokenUser1: string;
+  let refreshTokenUser1: string;
+  let accessTokenUser2: string;
+  let refreshTokenUser2: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -28,6 +36,15 @@ describe('tests for /blogs', () => {
     app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+
+    const resp = await userCreator(httpServer, userData1);
+    user1 = resp.user;
+    accessTokenUser1 = resp.accessToken;
+    refreshTokenUser1 = resp.refreshToken;
+
+    const resp2 = await userCreator(httpServer, userData2);
+    accessTokenUser2 = resp2.accessToken;
+    refreshTokenUser2 = resp2.refreshToken;
   });
 
   afterAll(async () => {
@@ -53,8 +70,9 @@ describe('tests for /blogs', () => {
     await blogsTestManager.createBlog(
       httpServer,
       invalidBlogData,
+      '1111',
+      '2222',
       HTTP_STATUSES.UNAUTHORIZED_401,
-      'sssss',
     );
   });
 
@@ -62,6 +80,8 @@ describe('tests for /blogs', () => {
     const { response } = await blogsTestManager.createBlog(
       httpServer,
       invalidBlogData,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -89,12 +109,16 @@ describe('tests for /blogs', () => {
   });
 
   let newBlog: BlogViewType;
+  let blog2: BlogViewType;
+  let blog3: BlogViewType;
   let newPost: PostType;
   let secondPost: PostType;
   it('should create a blog if the user sends the valid data', async () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,
       validBlogData,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     newBlog = createdBlog;
@@ -109,6 +133,25 @@ describe('tests for /blogs', () => {
         totalCount: 1,
         items: [createdBlog],
       });
+
+    await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            ...createdBlog,
+            blogOwnerInfo: {
+              userId: user1.id,
+              userLogin: user1.login,
+            },
+          },
+        ],
+      });
   });
 
   it('should return all posts for specified blog', async () => {
@@ -120,6 +163,8 @@ describe('tests for /blogs', () => {
       httpServer,
       validPostData1,
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
 
@@ -136,8 +181,11 @@ describe('tests for /blogs', () => {
       });
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
@@ -151,24 +199,41 @@ describe('tests for /blogs', () => {
     const pageNumber = 2;
     const pageSize = 2;
 
-    const secondBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validBlogData,
-      name: 'second',
-      description: 'a',
-    });
+    const secondBlog = await blogsTestManager.createBlog(
+      httpServer,
+      {
+        ...validBlogData,
+        name: 'second',
+        description: 'a',
+      },
+      accessTokenUser1,
+      refreshTokenUser1,
+    );
 
-    const thirdBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validBlogData,
-      name: 'third',
-      description: 'b',
-    });
+    const thirdBlog = await blogsTestManager.createBlog(
+      httpServer,
+      {
+        ...validBlogData,
+        name: 'third',
+        description: 'b',
+      },
+      accessTokenUser1,
+      refreshTokenUser1,
+    );
 
-    const fourthBlog = await blogsTestManager.createBlog(httpServer, {
-      ...validBlogData,
-      name: 'fourth',
-      description: 'c',
-    });
+    const fourthBlog = await blogsTestManager.createBlog(
+      httpServer,
+      {
+        ...validBlogData,
+        name: 'fourth',
+        description: 'c',
+      },
+      accessTokenUser2,
+      refreshTokenUser2,
+    );
 
+    blog2 = secondBlog.createdBlog;
+    blog3 = thirdBlog.createdBlog;
     newBlogs.unshift(secondBlog.createdBlog);
     newBlogs.unshift(thirdBlog.createdBlog);
     newBlogs.unshift(fourthBlog.createdBlog);
@@ -180,20 +245,34 @@ describe('tests for /blogs', () => {
         (pageNumber - 1) * pageSize + pageSize,
       );
 
+    await getRequest().get(RouterPaths.blogs).expect(HTTP_STATUSES.OK_200, {
+      pagesCount: 1,
+      page: 1,
+      pageSize: 10,
+      totalCount: 4,
+      items: newBlogs,
+    });
+
     await getRequest()
-      .get(RouterPaths.saBlogs)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(RouterPaths.blogger)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
         pageSize: 10,
-        totalCount: 4,
-        items: newBlogs,
+        totalCount: 3,
+        items: [blog3, blog2, newBlog],
       });
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}?searchNameTerm=second`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(`${RouterPaths.blogger}?searchNameTerm=second`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
@@ -204,9 +283,12 @@ describe('tests for /blogs', () => {
 
     await getRequest()
       .get(
-        `${RouterPaths.saBlogs}?sortBy=name&sortDirection=asc&pageSize=${pageSize}&pageNumber=${pageNumber}`,
+        `${RouterPaths.blogs}?sortBy=name&sortDirection=asc&pageSize=${pageSize}&pageNumber=${pageNumber}`,
       )
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 2,
         page: pageNumber,
@@ -225,6 +307,8 @@ describe('tests for /blogs', () => {
       httpServer,
       { ...validPostData1, title: 'second' },
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
 
@@ -241,8 +325,11 @@ describe('tests for /blogs', () => {
       });
 
     await getRequest()
-      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,
@@ -257,6 +344,8 @@ describe('tests for /blogs', () => {
       httpServer,
       validPostData,
       '333',
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.NOT_FOUND_404,
     );
 
@@ -273,10 +362,28 @@ describe('tests for /blogs', () => {
 
   it("shouldn't update a blog if the blog doesn't exist", async () => {
     await getRequest()
-      .put(`${RouterPaths.saBlogs}/22`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .put(`${RouterPaths.blogger}/22`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .send(validBlogData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
+  });
+
+  it("shouldn't update a blog that does not belong to current user", async () => {
+    const updatedValidData = {
+      ...validBlogData,
+      name: 'updated name',
+    };
+    await getRequest()
+      .put(`${RouterPaths.blogger}/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser2}`,
+      })
+      .send(updatedValidData)
+      .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
   it('should update a blog with valid data', async () => {
@@ -285,8 +392,11 @@ describe('tests for /blogs', () => {
       name: 'updated name',
     };
     await getRequest()
-      .put(`${RouterPaths.saBlogs}/${newBlog.id}`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .put(`${RouterPaths.blogger}/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .send(updatedValidData)
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
@@ -298,25 +408,69 @@ describe('tests for /blogs', () => {
       });
   });
 
+  it('should not bind a user to the blog if blog or user do not exist or user has already bind to the blog', async () => {
+    const resp = await getRequest()
+      .put(`${RouterPaths.saBlogs}/3211/bind-with-user/123`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.BAD_REQUEST_400);
+
+    expect(resp.body).toEqual({
+      errorsMessages: [
+        {
+          field: 'id',
+          message: 'such blog should exist',
+        },
+        {
+          field: 'userId',
+          message: 'user does not exist',
+        },
+      ],
+    });
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/${newBlog.id}/bind-with-user/${user1.id}`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.BAD_REQUEST_400);
+  });
+
   it("shouldn't delete a blog if the blog doesn't exist", async () => {
     await getRequest()
-      .delete(`${RouterPaths.saBlogs}/22`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .delete(`${RouterPaths.blogger}/22`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .send(validBlogData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
   });
 
+  it("shouldn't delete a blog that does not belong to current user", async () => {
+    await getRequest()
+      .delete(`${RouterPaths.blogger}/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser2}`,
+      })
+      .expect(HTTP_STATUSES.FORBIDDEN_403);
+  });
+
   it('should delete a blog with exiting id', async () => {
     await getRequest()
-      .delete(`${RouterPaths.saBlogs}/${newBlog.id}`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .delete(`${RouterPaths.blogger}/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
     const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
 
     await getRequest()
-      .get(RouterPaths.saBlogs)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(RouterPaths.blogs)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
         page: 1,

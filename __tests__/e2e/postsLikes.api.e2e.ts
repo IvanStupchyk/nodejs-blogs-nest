@@ -2,23 +2,17 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { usersTestManager } from '../utils/users-test-manager';
 import { likeStatus } from '../../src/types/general.types';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
-import { UserViewType } from '../../src/types/users.types';
 import { PostViewType } from '../../src/types/posts.types';
-import {
-  userData1,
-  userData2,
-  userData3,
-  validBlogData,
-} from '../mockData/mock-data';
+import { userData1, userData2, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { BlogViewType } from '../../src/types/blogs.types';
+import { userCreator } from '../utils/user-creator';
 
 describe('tests for /posts with likes logic', () => {
   let validPostData: PostInputDto = {
@@ -30,6 +24,11 @@ describe('tests for /posts with likes logic', () => {
 
   let app: INestApplication;
   let httpServer;
+  let user1;
+  let accessTokenUser1: string;
+  let refreshTokenUser1: string;
+  let user2;
+  let accessTokenUser2: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -41,6 +40,15 @@ describe('tests for /posts with likes logic', () => {
     app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+
+    const resp = await userCreator(httpServer, userData1);
+    user1 = resp.user;
+    accessTokenUser1 = resp.accessToken;
+    refreshTokenUser1 = resp.refreshToken;
+
+    const resp2 = await userCreator(httpServer, userData2);
+    user2 = resp2.user;
+    accessTokenUser2 = resp2.accessToken;
   });
 
   afterAll(async () => {
@@ -49,36 +57,13 @@ describe('tests for /posts with likes logic', () => {
   });
 
   let newBlog: BlogViewType;
-  let user1: UserViewType;
-  let user2: UserViewType;
-  let user3: UserViewType;
   let post1: PostViewType;
   let post2: PostViewType;
   let post3: PostViewType;
   let post4: PostViewType;
-  let accessTokenUser1: string;
-  let accessTokenUser2: string;
-  let accessTokenUser3: string;
   const newPosts: Array<PostViewType> = [];
 
-  it('should create users with for future tests', async () => {
-    const { createdUser } = await usersTestManager.createUser(
-      httpServer,
-      userData1,
-    );
-    const secondUserData = await usersTestManager.createUser(
-      httpServer,
-      userData2,
-    );
-    const thirdUserData = await usersTestManager.createUser(
-      httpServer,
-      userData3,
-    );
-
-    user1 = createdUser;
-    user2 = secondUserData.createdUser;
-    user3 = thirdUserData.createdUser;
-
+  it('should return two created users', async () => {
     await getRequest()
       .get(RouterPaths.users)
       .auth('admin', 'qwerty', { type: 'basic' })
@@ -86,12 +71,8 @@ describe('tests for /posts with likes logic', () => {
         pagesCount: 1,
         page: 1,
         pageSize: 10,
-        totalCount: 3,
-        items: [
-          thirdUserData.createdUser,
-          secondUserData.createdUser,
-          createdUser,
-        ],
+        totalCount: 2,
+        items: [user2, user1],
       });
   });
 
@@ -99,6 +80,8 @@ describe('tests for /posts with likes logic', () => {
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,
       validBlogData,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     await getRequest()
@@ -114,6 +97,8 @@ describe('tests for /posts with likes logic', () => {
       httpServer,
       validPostData,
       createdBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
     const createdPost2 = await postsTestManager.createPostForSpecifiedBlog(
@@ -125,6 +110,8 @@ describe('tests for /posts with likes logic', () => {
         shortDescription: 'shortDescription',
       },
       createdBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
     const createdPost3 = await postsTestManager.createPostForSpecifiedBlog(
@@ -136,6 +123,8 @@ describe('tests for /posts with likes logic', () => {
         shortDescription: 'shortDescription',
       },
       createdBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
     const createdPost4 = await postsTestManager.createPostForSpecifiedBlog(
@@ -147,6 +136,8 @@ describe('tests for /posts with likes logic', () => {
         shortDescription: 'shortDescription',
       },
       createdBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
 
@@ -171,38 +162,6 @@ describe('tests for /posts with likes logic', () => {
         items: [...newPosts],
       });
   });
-
-  it('should log in users with correct credentials and return access token', async () => {
-    const result = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData1.login,
-        password: userData1.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    const result2 = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData2.login,
-        password: userData2.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    const result3 = await getRequest()
-      .post(`${RouterPaths.auth}/login`)
-      .send({
-        loginOrEmail: userData3.login,
-        password: userData3.password,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    expect(result.body.accessToken).toEqual(expect.any(String));
-
-    accessTokenUser1 = result.body.accessToken;
-    accessTokenUser2 = result2.body.accessToken;
-    accessTokenUser3 = result3.body.accessToken;
-  }, 10000);
 
   it('should not like post with incorrect input data', async () => {
     const updateLike = {
@@ -467,8 +426,11 @@ describe('tests for /posts with likes logic', () => {
 
   it('should return all posts for specified blog', async () => {
     const res = await getRequest()
-      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200);
 
     expect(res.body).toEqual({
@@ -484,7 +446,7 @@ describe('tests for /posts with likes logic', () => {
           ...post1,
           extendedLikesInfo: {
             ...post1.extendedLikesInfo,
-            myStatus: 'None',
+            myStatus: 'Like',
             newestLikes: [
               {
                 addedAt: expect.any(String),
@@ -503,8 +465,11 @@ describe('tests for /posts with likes logic', () => {
     });
 
     const res2 = await getRequest()
-      .get(`${RouterPaths.saBlogs}/${newBlog.id}/posts`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.OK_200);
 
     expect(res2.body).toEqual({
@@ -520,7 +485,7 @@ describe('tests for /posts with likes logic', () => {
           ...post1,
           extendedLikesInfo: {
             ...post1.extendedLikesInfo,
-            myStatus: likeStatus.None,
+            myStatus: likeStatus.Like,
             newestLikes: [
               {
                 addedAt: expect.any(String),

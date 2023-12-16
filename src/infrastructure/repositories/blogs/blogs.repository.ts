@@ -24,6 +24,7 @@ export class BlogsRepository {
   async findBlogById(id: string): Promise<Blog | null> {
     return await this.blogRepository
       .createQueryBuilder('b')
+      .leftJoinAndSelect('b.user', 'user')
       .where('b.id = :id', {
         id,
       })
