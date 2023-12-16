@@ -4,7 +4,7 @@ import { mockQuestionModel } from '../../../constants/blanks';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Question } from '../../../entities/game/Question.entity';
-import { QuestionsQueryDto } from '../../../dto/question/questions.query.dto';
+import { QuestionsQueryDto } from '../../../application/dto/question/questions.query.dto';
 import { QuestionsViewType } from '../../../types/question.types';
 
 @Injectable()

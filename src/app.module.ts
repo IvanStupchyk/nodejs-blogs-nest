@@ -96,6 +96,8 @@ import { BloggerBlogsController } from './controllers/blogger/blogger.blogs.cont
 import { IsUserExistConstraint } from './utils/decorators/existing-user.decorator';
 import { BindBlogWithUserCase } from './domain/blogs/use-cases/bind-blog-with-user-use-case';
 import { isBlogHasOwnerDataConstraint } from './utils/decorators/bind-blog-with-user.decorator';
+import { BlogCreateHandler } from './application/events-handlers/create-blog.event.handler';
+import { BlogUpdateHandler } from './application/events-handlers/update-blog.event.handler';
 
 const useCases = [
   CreatePostUseCase,
@@ -209,6 +211,8 @@ const entities = [
     isBlogHasOwnerDataConstraint,
     IsEmailExistConstraint,
     IsLoginExistConstraint,
+    BlogCreateHandler,
+    BlogUpdateHandler,
     ...useCases,
   ],
 })

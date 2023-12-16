@@ -10,7 +10,7 @@ import {
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
 import { RefreshTokenMiddleware } from '../../middlewares/refresh-token.middleware';
-import { DeleteDeviceParamsDto } from '../../dto/devices/delete-device.params.dto';
+import { DeleteDeviceParamsDto } from '../../application/dto/devices/delete-device.params.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteDeviceCommand } from '../../domain/devices/use-cases/delete-device-use-case';
 import { DevicesQueryRepository } from '../../infrastructure/repositories/devices/devices-query.repository';

@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
-import { QuestionInputDto } from '../../../dto/question/question.input.dto';
+import { QuestionInputDto } from '../../../application/dto/question/question.input.dto';
 import { Question } from '../../../entities/game/Question.entity';
 import { QuestionViewType } from '../../../types/question.types';
 

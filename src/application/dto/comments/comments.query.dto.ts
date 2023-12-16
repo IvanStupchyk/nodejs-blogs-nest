@@ -1,5 +1,5 @@
-import { SortOrder } from '../../constants/sort.order';
-import { CommentViewType } from '../../types/comments.types';
+import { SortOrder } from '../../../constants/sort.order';
+import { CommentViewType } from '../../../types/comments.types';
 
 export class CommentsQueryDto {
   searchNameTerm: string;

@@ -4,7 +4,7 @@ import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { likeStatus } from '../../src/types/general.types';
 import { INestApplication } from '@nestjs/common';
-import { PostInputDto } from '../../src/dto/posts/post.input.dto';
+import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';

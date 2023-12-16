@@ -8,7 +8,7 @@ import { questionsTestManager } from '../utils/qestions-test-manager';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { usersTestManager } from '../utils/users-test-manager';
 import { AnswerStatus, GameStatus } from '../../src/types/general.types';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserInputDto } from '../../src/application/dto/users/user.input.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { GamesRepository } from '../../src/infrastructure/repositories/game/games.repository';

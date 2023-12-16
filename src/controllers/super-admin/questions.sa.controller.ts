@@ -14,15 +14,15 @@ import { Response } from 'express';
 import { BasicAuthGuard } from '../../auth/guards/basic-auth.guard';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { QuestionInputDto } from '../../dto/question/question.input.dto';
+import { QuestionInputDto } from '../../application/dto/question/question.input.dto';
 import { CreateQuestionCommand } from '../../domain/questions/use-cases/create-question-use-case';
-import { QuestionsQueryDto } from '../../dto/question/questions.query.dto';
+import { QuestionsQueryDto } from '../../application/dto/question/questions.query.dto';
 import { QuestionsQueryRepository } from '../../infrastructure/repositories/questions/questions-query.repository';
-import { UpdateQuestionInputDto } from '../../dto/question/update-question.input.dto';
-import { QuestionParamsDto } from '../../dto/question/question.params.dto';
+import { UpdateQuestionInputDto } from '../../application/dto/question/update-question.input.dto';
+import { QuestionParamsDto } from '../../application/dto/question/question.params.dto';
 import { UpdateQuestionCommand } from '../../domain/questions/use-cases/update-question-use-case';
 import { PublishQuestionCommand } from '../../domain/questions/use-cases/publish-question-use-case';
-import { PublishQuestionInputDto } from '../../dto/question/publish-question.input.dto';
+import { PublishQuestionInputDto } from '../../application/dto/question/publish-question.input.dto';
 import { DeleteQuestionCommand } from '../../domain/questions/use-cases/delete-question-use-case';
 
 @Controller(RouterPaths.questions)

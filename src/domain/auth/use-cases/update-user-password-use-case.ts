@@ -3,7 +3,7 @@ import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { NewPasswordInputDto } from '../../../dto/auth/new-password.input.dto';
+import { NewPasswordInputDto } from '../../../application/dto/auth/new-password.input.dto';
 import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 

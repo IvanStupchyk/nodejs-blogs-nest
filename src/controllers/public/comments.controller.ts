@@ -11,13 +11,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { GetCommentParamsDto } from '../../dto/comments/get-comment.params.dto';
-import { CommentInputDto } from '../../dto/comments/comment.input.dto';
-import { CommentParamsDto } from '../../dto/comments/comment.params.dto';
-import { DeleteCommentParamsDto } from '../../dto/comments/delete-comment.params.dto';
+import { GetCommentParamsDto } from '../../application/dto/comments/get-comment.params.dto';
+import { CommentInputDto } from '../../application/dto/comments/comment.input.dto';
+import { CommentParamsDto } from '../../application/dto/comments/comment.params.dto';
+import { DeleteCommentParamsDto } from '../../application/dto/comments/delete-comment.params.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
-import { ChangeLikeCountDto } from '../../dto/likes/change-like-count.dto';
+import { ChangeLikeCountDto } from '../../application/dto/likes/change-like-count.dto';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateCommentCommand } from '../../domain/comments/use-cases/update-comment-use-case';

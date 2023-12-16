@@ -12,8 +12,8 @@ import {
 import { GameStatus } from '../../../types/general.types';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { mockGameModel, mockToPlayers } from '../../../constants/blanks';
-import { GamesQueryDto } from '../../../dto/game/games.query.dto';
-import { TopPlayersQueryDto } from '../../../dto/game/top-players.query.dto';
+import { GamesQueryDto } from '../../../application/dto/game/games.query.dto';
+import { TopPlayersQueryDto } from '../../../application/dto/game/top-players.query.dto';
 import { User } from '../../../entities/users/User.entity';
 
 @Injectable()

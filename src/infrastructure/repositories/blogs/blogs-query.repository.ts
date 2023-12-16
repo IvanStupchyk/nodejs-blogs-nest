@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { mockBlogModel } from '../../../constants/blanks';
-import { BlogsQueryDto } from '../../../dto/blogs/blogs.query.dto';
+import { BlogsQueryDto } from '../../../application/dto/blogs/blogs.query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogsViewSAType, BlogsViewType } from '../../../types/blogs.types';

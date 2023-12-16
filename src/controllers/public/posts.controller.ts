@@ -12,15 +12,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { PostsQueryDto } from '../../dto/posts/posts.query.dto';
-import { PostParamsDto } from '../../dto/posts/post.params.dto';
-import { CommentParamsDto } from '../../dto/comments/comment.params.dto';
-import { CommentsQueryDto } from '../../dto/comments/comments.query.dto';
+import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
+import { PostParamsDto } from '../../application/dto/posts/post.params.dto';
+import { CommentParamsDto } from '../../application/dto/comments/comment.params.dto';
+import { CommentsQueryDto } from '../../application/dto/comments/comments.query.dto';
 import { RouterPaths } from '../../constants/router.paths';
-import { CommentInputDto } from '../../dto/comments/comment.input.dto';
+import { CommentInputDto } from '../../application/dto/comments/comment.input.dto';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { ChangeLikeCountDto } from '../../dto/likes/change-like-count.dto';
+import { ChangeLikeCountDto } from '../../application/dto/likes/change-like-count.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { ChangePostLikesCountCommand } from '../../domain/posts/use-cases/change-post-likes-count-use-case';
 import { GetSortedPostsCommand } from '../../domain/posts/use-cases/get-sorted-posts-use-case';

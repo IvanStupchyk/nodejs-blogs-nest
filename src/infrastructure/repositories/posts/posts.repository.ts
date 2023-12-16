@@ -3,7 +3,7 @@ import { likeStatus } from '../../../types/general.types';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
-import { PostsQueryDto } from '../../../dto/posts/posts.query.dto';
+import { PostsQueryDto } from '../../../application/dto/posts/posts.query.dto';
 import { mockPostModel } from '../../../constants/blanks';
 import { PostsType, PostViewType } from '../../../types/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';

@@ -2,7 +2,7 @@ import { usersTestManager } from './users-test-manager';
 import request from 'supertest';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { HTTP_STATUSES } from '../../src/utils/utils';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserInputDto } from '../../src/application/dto/users/user.input.dto';
 const { parse } = require('cookie');
 
 export const userCreator = async (

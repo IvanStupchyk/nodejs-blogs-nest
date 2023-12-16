@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
-import { QuestionParamsDto } from '../../../dto/question/question.params.dto';
+import { QuestionParamsDto } from '../../../application/dto/question/question.params.dto';
 import { QuestionsRepository } from '../../../infrastructure/repositories/questions/questions.repository';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
-import { PublishQuestionInputDto } from '../../../dto/question/publish-question.input.dto';
+import { PublishQuestionInputDto } from '../../../application/dto/question/publish-question.input.dto';
 
 export class PublishQuestionCommand {
   constructor(

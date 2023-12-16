@@ -5,7 +5,7 @@ import { postsTestManager } from '../utils/posts-test-manager';
 import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
-import { PostInputDto } from '../../src/dto/posts/post.input.dto';
+import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
 import {
   invalidPostData,

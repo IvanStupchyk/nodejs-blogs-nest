@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
-import { UpdateQuestionInputDto } from '../../../dto/question/update-question.input.dto';
-import { QuestionParamsDto } from '../../../dto/question/question.params.dto';
+import { UpdateQuestionInputDto } from '../../../application/dto/question/update-question.input.dto';
+import { QuestionParamsDto } from '../../../application/dto/question/question.params.dto';
 import { QuestionsRepository } from '../../../infrastructure/repositories/questions/questions.repository';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';

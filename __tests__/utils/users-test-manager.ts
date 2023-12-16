@@ -1,6 +1,6 @@
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import request from 'supertest';
-import { UserInputDto } from '../../src/dto/users/user.input.dto';
+import { UserInputDto } from '../../src/application/dto/users/user.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 
 export const usersTestManager = {

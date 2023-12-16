@@ -1,5 +1,5 @@
-import { SortOrder } from '../../constants/sort.order';
-import { UserViewType } from '../../types/users.types';
+import { SortOrder } from '../../../constants/sort.order';
+import { UserViewType } from '../../../types/users.types';
 
 export class UsersQueryDto {
   searchLoginTerm: string;

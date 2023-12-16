@@ -1,7 +1,7 @@
 import { IsString, Length } from 'class-validator';
-import { IsNotEmptyString } from '../../utils/decorators/check-empty-string.decorator';
+import { IsNotEmptyString } from '../../../utils/decorators/check-empty-string.decorator';
 
-export class UpdatePostInputDto {
+export class PostForSpecifiedBlogInputDto {
   @Length(1, 30)
   @IsString()
   @IsNotEmptyString()
