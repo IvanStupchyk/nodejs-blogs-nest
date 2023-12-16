@@ -9,12 +9,18 @@ export const postsTestManager = {
     httpServer: string,
     data: PostInputDto,
     blogId: any,
+    accessToken = '123',
+    refreshToken = '123',
     expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201,
-    password = 'qwerty',
   ) {
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
     const response = await request(httpServer)
-      .post(`${RouterPaths.saBlogs}/${blogId}/posts`)
-      .auth('admin', password, { type: 'basic' })
+      .post(`${RouterPaths.blogger}/${blogId}/posts`)
+      .set('Cookie', `refreshToken=${refreshToken}`)
+      .set(headers)
       .send(data)
       .expect(expectedStatusCode);
 

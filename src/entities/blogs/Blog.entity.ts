@@ -2,10 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../posts/Post.entity';
+import { User } from '../users/User.entity';
 
 @Entity('blogs')
 export class Blog {
@@ -24,14 +27,14 @@ export class Blog {
   @Column({ type: 'varchar' })
   websiteUrl: string;
 
-  // @ManyToOne(() => User, (user) => user.blog, {
-  //   onDelete: 'CASCADE',
-  // })
-  // @JoinColumn()
-  // user: User;
+  @ManyToOne(() => User, (user) => user.blog, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  user: User;
 
-  @Column({ type: 'uuid', nullable: true })
-  userId: string;
+  // @Column({ type: 'uuid', nullable: true })
+  // userId: string;
 
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];

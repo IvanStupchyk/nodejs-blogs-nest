@@ -7,10 +7,15 @@ import { RouterPaths } from '../../src/constants/router.paths';
 import { INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { invalidPostData, validBlogData } from '../mockData/mock-data';
+import {
+  invalidPostData,
+  userData1,
+  validBlogData,
+} from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
 import { BlogViewType } from '../../src/types/blogs.types';
+import { userCreator } from '../utils/user-creator';
 
 describe('tests for /posts', () => {
   let validPostData: PostInputDto = {
@@ -22,6 +27,8 @@ describe('tests for /posts', () => {
 
   let app: INestApplication;
   let httpServer;
+  let accessTokenUser1: string;
+  let refreshTokenUser1: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -33,6 +40,10 @@ describe('tests for /posts', () => {
     app = serverConfig.app;
 
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+
+    const resp = await userCreator(httpServer, userData1);
+    accessTokenUser1 = resp.accessToken;
+    refreshTokenUser1 = resp.refreshToken;
   });
 
   afterAll(async () => {
@@ -58,13 +69,16 @@ describe('tests for /posts', () => {
       httpServer,
       invalidPostData,
       'sdf',
+      'we',
+      'weff',
       HTTP_STATUSES.UNAUTHORIZED_401,
-      'sssss',
     );
 
     const { createdBlog } = await blogsTestManager.createBlog(
       httpServer,
       validBlogData,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     await getRequest()
@@ -79,6 +93,8 @@ describe('tests for /posts', () => {
       httpServer,
       invalidPostData,
       '1d5ab9c1-b16e-4640-80af-67822894e4e4',
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.BAD_REQUEST_400,
     );
 
@@ -116,6 +132,8 @@ describe('tests for /posts', () => {
       httpServer,
       validPostData,
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
       HTTP_STATUSES.CREATED_201,
     );
 
@@ -144,6 +162,8 @@ describe('tests for /posts', () => {
         title: 'second',
       },
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     const thirdPost = await postsTestManager.createPostForSpecifiedBlog(
@@ -153,6 +173,8 @@ describe('tests for /posts', () => {
         title: 'third',
       },
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     const fourthPost = await postsTestManager.createPostForSpecifiedBlog(
@@ -162,6 +184,8 @@ describe('tests for /posts', () => {
         title: 'fourth',
       },
       newBlog.id,
+      accessTokenUser1,
+      refreshTokenUser1,
     );
 
     newPosts.unshift(secondPost.createdPost);
@@ -210,8 +234,11 @@ describe('tests for /posts', () => {
       title: 'updated title',
     };
     await getRequest()
-      .put(`${RouterPaths.saBlogs}/${newPost.blogId}/posts/${newPost.id}`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .put(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .send(updatedValidData)
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
@@ -233,8 +260,11 @@ describe('tests for /posts', () => {
 
   it('should delete a post with exiting id', async () => {
     await getRequest()
-      .delete(`${RouterPaths.saBlogs}/${newPost.blogId}/posts/${newPost.id}`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .delete(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
     const filteredPosts = newPosts.filter((b) => b.id !== newPost.id);
@@ -248,7 +278,7 @@ describe('tests for /posts', () => {
     });
 
     await getRequest()
-      .get(RouterPaths.saBlogs)
+      .get(RouterPaths.blogs)
       .auth('admin', 'qwerty', { type: 'basic' })
       .expect(HTTP_STATUSES.OK_200, {
         pagesCount: 1,
