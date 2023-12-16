@@ -5,6 +5,7 @@ import { HttpStatus } from '@nestjs/common';
 import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { Post } from '../../../entities/posts/Post.entity';
 
 export class UpdatePostWithCheckingCommand {
   constructor(
@@ -32,16 +33,11 @@ export class UpdatePostWithCheckingUseCase
     if (!isUUID(command.postId)) return HttpStatus.NOT_FOUND;
 
     const blog = await this.blogsRepository.findBlogById(command.blogId);
-    if (!blog) return HttpStatus.NOT_FOUND;
-    if (blog && blog.user && blog.user.id !== command.userId)
-      return HttpStatus.FORBIDDEN;
-
     const post = await this.postsRepository.findPostById(command.postId);
 
     if (post) {
-      post.title = title;
-      post.content = content;
-      post.shortDescription = shortDescription;
+      Post.update(blog, post, title, content, shortDescription, command.userId);
+
       await this.dataSourceRepository.save(post);
 
       return HttpStatus.NO_CONTENT;

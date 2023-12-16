@@ -27,4 +27,21 @@ export class CommentLike {
   })
   @JoinColumn()
   user: User;
+
+  static create(): CommentLike {
+    return new CommentLike();
+  }
+
+  static update(
+    like: CommentLike,
+    likeStatus: string,
+    user: User,
+    comment: Comment,
+  ) {
+    like.likeStatus = likeStatus;
+    like.user = user;
+    like.comment = comment;
+
+    return like;
+  }
 }

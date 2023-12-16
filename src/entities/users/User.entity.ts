@@ -12,6 +12,8 @@ import { Comment } from '../comments/Comment.entity';
 import { CommentLike } from '../comments/Comment-like.entity';
 import { Player } from '../game/Player.entity';
 import { Blog } from '../blogs/Blog.entity';
+import { v4 as uuidv4 } from 'uuid';
+import add from 'date-fns/add';
 
 @Entity('users')
 export class User {
@@ -65,4 +67,37 @@ export class User {
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
+
+  static createCommonUser(
+    login: string,
+    email: string,
+    passwordHash: string,
+  ): User {
+    const user = new User();
+    user.login = login;
+    user.email = email;
+    user.passwordHash = passwordHash;
+    user.isConfirmed = false;
+    user.confirmationCode = uuidv4();
+    user.expirationDate = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    });
+
+    return user;
+  }
+
+  static createAdminUser(
+    login: string,
+    email: string,
+    passwordHash: string,
+  ): User {
+    const user = new User();
+    user.login = login;
+    user.email = email;
+    user.passwordHash = passwordHash;
+    user.isConfirmed = true;
+
+    return user;
+  }
 }

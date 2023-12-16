@@ -46,4 +46,20 @@ export class Game {
 
   @ManyToMany(() => Question, (question) => question.games)
   questions: Question[];
+
+  static create(player: Player, questions: Question[]): Game {
+    const game = new Game();
+
+    game.firstPlayer = player;
+    game.questions = questions;
+    game.status = GameStatus.PendingSecondPlayer;
+
+    return game;
+  }
+
+  static connectSecondPlayer(game: Game, player: Player) {
+    game.secondPlayer = player;
+    game.status = GameStatus.Active;
+    game.startGameDate = new Date();
+  }
 }

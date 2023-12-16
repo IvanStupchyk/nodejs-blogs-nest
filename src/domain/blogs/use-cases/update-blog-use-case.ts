@@ -28,7 +28,7 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
     const blog = await this.blogsRepository.findBlogById(command.id);
-    Blog.updateBlog(blog, description, websiteUrl, name, command.userId);
+    Blog.update(blog, description, websiteUrl, name, command.userId);
 
     await this.dataSourceRepository.save(blog);
 

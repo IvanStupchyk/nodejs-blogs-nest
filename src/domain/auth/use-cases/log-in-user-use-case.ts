@@ -57,14 +57,13 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
   ) {
     const result: any = await this.jwtService.verifyRefreshToken(refreshToken);
 
-    const newDevice = new Device();
-    newDevice.deviceId = deviceId;
-    newDevice.title = userAgent;
-    newDevice.ip = ip;
-    newDevice.user = userId;
-    newDevice.lastActiveDate = new Date(result.iat * 1000);
-    newDevice.expirationDate = new Date(result.exp * 1000);
-
-    return newDevice;
+    return Device.create(
+      deviceId,
+      userAgent,
+      ip,
+      userId,
+      result.iat,
+      result.exp,
+    );
   }
 }

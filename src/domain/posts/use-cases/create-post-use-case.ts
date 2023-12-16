@@ -37,12 +37,13 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
       return exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
-    const newPost = new Post();
-    newPost.title = title;
-    newPost.content = content;
-    newPost.shortDescription = shortDescription;
-    newPost.blogName = foundBlog.name;
-    newPost.blog = foundBlog;
+    const newPost = Post.create(
+      title,
+      content,
+      shortDescription,
+      foundBlog.name,
+      foundBlog,
+    );
 
     const savedPost = await this.dataSourceRepository.save(newPost);
 

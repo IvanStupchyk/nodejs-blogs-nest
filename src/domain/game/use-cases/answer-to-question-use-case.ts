@@ -3,7 +3,7 @@ import { AnswerType } from '../../../types/game.types';
 import { GamesRepository } from '../../../infrastructure/repositories/game/games.repository';
 import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../../exception.handler';
-import { AnswerStatus, GameStatus } from '../../../types/general.types';
+import { GameStatus } from '../../../types/general.types';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Answer } from '../../../entities/game/Answer.entity';
 import { Game } from '../../../entities/game/Game.entity';
@@ -49,18 +49,14 @@ export class AnswerToQuestionUseCase
     const currentQuestionIndex = player.answers.length;
     const currentQuestion = activeGame.questions[currentQuestionIndex];
 
-    const newAnswer = new Answer();
-    newAnswer.player = player;
-    newAnswer.addedAt = new Date();
-    newAnswer.question = currentQuestion;
+    const newAnswer = Answer.create(player, currentQuestion);
 
     await this._addAdditionalPoint(activeGame);
 
     if (currentQuestion.correctAnswers.includes(answer)) {
-      newAnswer.answerStatus = AnswerStatus.Correct;
-      player.score = ++player.score;
+      Answer.correctAnswer(newAnswer, player);
     } else {
-      newAnswer.answerStatus = AnswerStatus.Incorrect;
+      Answer.incorrectAnswer(newAnswer);
     }
 
     if (

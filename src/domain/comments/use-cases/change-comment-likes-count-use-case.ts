@@ -65,12 +65,10 @@ export class ChangeCommentLikesCountUseCase
     if (userCommentLike) {
       likeStatement = userCommentLike;
     } else {
-      likeStatement = new CommentLike();
+      likeStatement = CommentLike.create();
     }
 
-    likeStatement.user = user;
-    likeStatement.comment = foundComment;
-    likeStatement.likeStatus = myStatus;
+    CommentLike.update(likeStatement, myStatus, user, foundComment);
 
     await this.dataSourceRepository.save(likeStatement);
 
