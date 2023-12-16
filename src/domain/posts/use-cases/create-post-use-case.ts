@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { PostForSpecifiedBlogInputDto } from '../../../dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
@@ -7,6 +7,7 @@ import { PostViewType } from '../../../types/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { likeStatus } from '../../../types/general.types';
 import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { exceptionHandler } from '../../../exception.handler';
 
 export class CreatePostCommand {
   constructor(
@@ -23,18 +24,18 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
     private readonly blogsRepository: BlogsRepository,
   ) {}
 
-  async execute(command: CreatePostCommand): Promise<PostViewType> {
+  async execute(command: CreatePostCommand): Promise<PostViewType | void> {
     const { title, content, shortDescription } = command.postData;
 
     if (!isUUID(command.blogId)) return null;
     const foundBlog = await this.blogsRepository.findBlogById(command.blogId);
 
     if (!foundBlog) {
-      throw new NotFoundException();
+      return exceptionHandler(HttpStatus.NOT_FOUND);
     }
-    // if (foundBlog && foundBlog.userId !== command.userId) {
-    //   throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    // }
+    if (foundBlog && foundBlog.user && foundBlog.user.id !== command.userId) {
+      return exceptionHandler(HttpStatus.FORBIDDEN);
+    }
 
     const newPost = new Post();
     newPost.title = title;

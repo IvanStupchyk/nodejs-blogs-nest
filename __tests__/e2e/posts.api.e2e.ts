@@ -127,6 +127,22 @@ describe('tests for /posts', () => {
       .expect(HTTP_STATUSES.OK_200, mockGetItems);
   });
 
+  it("shouldn't create a post if the blog belongs to other user", async () => {
+    validPostData = {
+      ...validPostData,
+      blogId: newBlog.id,
+    };
+
+    await postsTestManager.createPostForSpecifiedBlog(
+      httpServer,
+      validPostData,
+      newBlog.id,
+      accessTokenUser2,
+      refreshTokenUser2,
+      HTTP_STATUSES.FORBIDDEN_403,
+    );
+  });
+
   let newPost: PostType;
   const newPosts: Array<PostType> = [];
 
