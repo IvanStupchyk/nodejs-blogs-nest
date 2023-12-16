@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   invalidPostData,
   userData1,
+  userData2,
   validBlogData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
@@ -29,6 +30,8 @@ describe('tests for /posts', () => {
   let httpServer;
   let accessTokenUser1: string;
   let refreshTokenUser1: string;
+  let accessTokenUser2: string;
+  let refreshTokenUser2: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -44,6 +47,10 @@ describe('tests for /posts', () => {
     const resp = await userCreator(httpServer, userData1);
     accessTokenUser1 = resp.accessToken;
     refreshTokenUser1 = resp.refreshToken;
+
+    const resp2 = await userCreator(httpServer, userData2);
+    accessTokenUser2 = resp2.accessToken;
+    refreshTokenUser2 = resp2.refreshToken;
   });
 
   afterAll(async () => {
@@ -222,10 +229,24 @@ describe('tests for /posts', () => {
 
   it("shouldn't update post if the post doesn't exist", async () => {
     await getRequest()
-      .put(`${RouterPaths.posts}/22`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .put(`${RouterPaths.blogger}/${newPost.blogId}/posts/123`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
       .send(validPostData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
+  });
+
+  it("shouldn't update post if the post belongs to other user", async () => {
+    await getRequest()
+      .put(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser2}`,
+      })
+      .send(validPostData)
+      .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
   it('should update a post with valid data', async () => {
@@ -252,10 +273,24 @@ describe('tests for /posts', () => {
 
   it("shouldn't delete a post if it doesn't exist", async () => {
     await getRequest()
-      .delete(`${RouterPaths.posts}/22`)
-      .auth('admin', 'qwerty', { type: 'basic' })
+      .delete(`${RouterPaths.blogger}/${newPost.blogId}/posts/321`)
+      .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser2}`,
+      })
       .send(validPostData)
       .expect(HTTP_STATUSES.NOT_FOUND_404);
+  });
+
+  it("shouldn't delete post if the post belongs to other user", async () => {
+    await getRequest()
+      .delete(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser2}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser2}`,
+      })
+      .send(validPostData)
+      .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
   it('should delete a post with exiting id', async () => {

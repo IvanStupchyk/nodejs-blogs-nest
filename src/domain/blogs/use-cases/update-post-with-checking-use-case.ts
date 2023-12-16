@@ -33,7 +33,8 @@ export class UpdatePostWithCheckingUseCase
 
     const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) return HttpStatus.NOT_FOUND;
-    // if (blog && blog.userId !== command.userId) return HttpStatus.FORBIDDEN;
+    if (blog && blog.user && blog.user.id !== command.userId)
+      return HttpStatus.FORBIDDEN;
 
     const post = await this.postsRepository.findPostById(command.postId);
 
