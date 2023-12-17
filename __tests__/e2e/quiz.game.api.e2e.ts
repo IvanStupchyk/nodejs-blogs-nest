@@ -5,15 +5,11 @@ import { userData1, userData2, validQuestionData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { QuestionViewType } from '../../src/types/question.types';
 import { questionsTestManager } from '../utils/qestions-test-manager';
-import { HTTP_STATUSES } from '../../src/utils/utils';
-import { usersTestManager } from '../utils/users-test-manager';
 import { AnswerStatus, GameStatus } from '../../src/types/general.types';
 import { UserInputDto } from '../../src/application/dto/users/user.input.dto';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { GamesRepository } from '../../src/infrastructure/repositories/game/games.repository';
 import { GameTestManager } from '../utils/game-manager';
-const { parse } = require('cookie');
+import { answersFinder } from '../utils/answers-finder';
+import { userCreator } from '../utils/user-creator';
 
 const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
@@ -21,26 +17,14 @@ const sleep = (seconds: number) =>
 describe('tests for /sa/quiz/questions', () => {
   let app: INestApplication;
   let httpServer;
-  let gamesRepository;
-
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    const serverConfig = await serverStarter();
-    httpServer = serverConfig.httpServer;
-    app = serverConfig.app;
-
-    gamesRepository = moduleFixture.get<GamesRepository>(GamesRepository);
-
-    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
-  });
-
-  afterAll(async () => {
-    // await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
-    await app.close();
-  });
+  let user1;
+  let user2;
+  let user3;
+  let user4;
+  let accessTokenUser1: string;
+  let accessTokenUser2: string;
+  let accessTokenUser3: string;
+  let accessTokenUser4: string;
 
   const thirdUser: UserInputDto = {
     login: 'Third',
@@ -53,37 +37,51 @@ describe('tests for /sa/quiz/questions', () => {
     password: '123456',
     email: 'fourth@gmai.com',
   };
-  const newQuestions: Array<QuestionViewType> = [];
-  let newQuestion: QuestionViewType;
-  let newQuestion2: QuestionViewType;
-  let newQuestion3: QuestionViewType;
-  let newQuestion4: QuestionViewType;
-  let newQuestion5: QuestionViewType;
-  let newQuestion6: QuestionViewType;
-  let user1;
-  let user2;
-  let user3;
-  let user4;
-  let accessTokenUser1: string;
-  let refreshTokenUser1: string;
-  let accessTokenUser2: string;
-  let refreshTokenUser2: string;
-  let accessTokenUser3: string;
-  let refreshTokenUser3: string;
-  let accessTokenUser4: string;
-  let refreshTokenUser4: string;
+
+  beforeAll(async () => {
+    const serverConfig = await serverStarter();
+    httpServer = serverConfig.httpServer;
+    app = serverConfig.app;
+
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+
+    const resp = await userCreator(httpServer, userData1);
+    user1 = resp.user;
+    accessTokenUser1 = resp.accessToken;
+
+    const resp2 = await userCreator(httpServer, userData2);
+    user2 = resp2.user;
+    accessTokenUser2 = resp2.accessToken;
+
+    const resp3 = await userCreator(httpServer, thirdUser);
+    user3 = resp3.user;
+    accessTokenUser3 = resp3.accessToken;
+
+    const resp4 = await userCreator(httpServer, fourthUser);
+    user4 = resp4.user;
+    accessTokenUser4 = resp4.accessToken;
+  });
+
+  afterAll(async () => {
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+    await app.close();
+  });
+
   let gameId: string;
   let game1User1;
   let game2User1;
   let game3User1;
-  describe('question and users for future tests', () => {
+  let adminQuestions;
+  describe('questions for future tests', () => {
     it('should create 7 questions and publish them', async () => {
+      const newQuestions: Array<QuestionViewType> = [];
+
       const { createdQuestion } = await questionsTestManager.createQuestion(
         httpServer,
         validQuestionData,
       );
 
-      newQuestion = createdQuestion;
+      const newQuestion = createdQuestion;
       newQuestions.push(createdQuestion);
 
       await request(httpServer)
@@ -102,7 +100,7 @@ describe('tests for /sa/quiz/questions', () => {
         correctAnswers: ['second'],
       });
 
-      newQuestion2 = question2.createdQuestion;
+      const newQuestion2 = question2.createdQuestion;
       newQuestions.unshift(question2.createdQuestion);
 
       await request(httpServer)
@@ -121,7 +119,7 @@ describe('tests for /sa/quiz/questions', () => {
         correctAnswers: ['third'],
       });
 
-      newQuestion3 = question3.createdQuestion;
+      const newQuestion3 = question3.createdQuestion;
       newQuestions.unshift(question3.createdQuestion);
 
       await request(httpServer)
@@ -140,7 +138,7 @@ describe('tests for /sa/quiz/questions', () => {
         correctAnswers: ['fourth'],
       });
 
-      newQuestion4 = question4.createdQuestion;
+      const newQuestion4 = question4.createdQuestion;
       newQuestions.unshift(question4.createdQuestion);
 
       await request(httpServer)
@@ -159,7 +157,7 @@ describe('tests for /sa/quiz/questions', () => {
         correctAnswers: ['fifth'],
       });
 
-      newQuestion5 = question5.createdQuestion;
+      const newQuestion5 = question5.createdQuestion;
       newQuestions.unshift(question5.createdQuestion);
 
       await request(httpServer)
@@ -178,7 +176,7 @@ describe('tests for /sa/quiz/questions', () => {
         correctAnswers: ['sixth'],
       });
 
-      newQuestion6 = question6.createdQuestion;
+      const newQuestion6 = question6.createdQuestion;
       newQuestions.unshift(question6.createdQuestion);
 
       await request(httpServer)
@@ -203,6 +201,7 @@ describe('tests for /sa/quiz/questions', () => {
         .get(RouterPaths.questions)
         .auth('admin', 'qwerty', { type: 'basic' })
         .expect(200);
+      adminQuestions = resp;
 
       expect(resp.body).toEqual({
         pagesCount: 1,
@@ -221,115 +220,6 @@ describe('tests for /sa/quiz/questions', () => {
         }),
       });
     }, 10000);
-
-    it('should create and log in 4 users and for future tests', async () => {
-      const resp1 = await usersTestManager.createUser(httpServer, userData1);
-      user1 = resp1.createdUser;
-      const result1 = await request(httpServer)
-        .post(`${RouterPaths.auth}/login`)
-        .send({
-          loginOrEmail: userData1.login,
-          password: userData1.password,
-        })
-        .expect(HTTP_STATUSES.OK_200);
-
-      expect(result1.body.accessToken).not.toBeUndefined();
-      const cookies1 = result1.headers['set-cookie'];
-      const parsedCookies1: Array<any> = cookies1.map(parse);
-      const exampleCookie1 = parsedCookies1.find(
-        (cookie) => cookie?.refreshToken,
-      );
-      expect(exampleCookie1?.refreshToken).not.toBeUndefined();
-      accessTokenUser1 = result1.body.accessToken;
-      refreshTokenUser1 = exampleCookie1?.refreshToken;
-
-      const resp2 = await usersTestManager.createUser(httpServer, userData2);
-      user2 = resp2.createdUser;
-      const result2 = await request(httpServer)
-        .post(`${RouterPaths.auth}/login`)
-        .send({
-          loginOrEmail: userData2.login,
-          password: userData2.password,
-        })
-        .expect(HTTP_STATUSES.OK_200);
-
-      expect(result2.body.accessToken).not.toBeUndefined();
-      const cookies2 = result2.headers['set-cookie'];
-      const parsedCookies2: Array<any> = cookies2.map(parse);
-      const exampleCookie2 = parsedCookies2.find(
-        (cookie) => cookie?.refreshToken,
-      );
-      expect(exampleCookie2?.refreshToken).not.toBeUndefined();
-      accessTokenUser2 = result2.body.accessToken;
-      refreshTokenUser2 = exampleCookie2?.refreshToken;
-
-      const resp3 = await usersTestManager.createUser(httpServer, thirdUser);
-      user3 = resp3.createdUser;
-      const result3 = await request(httpServer)
-        .post(`${RouterPaths.auth}/login`)
-        .send({
-          loginOrEmail: thirdUser.login,
-          password: thirdUser.password,
-        })
-        .expect(HTTP_STATUSES.OK_200);
-
-      expect(result3.body.accessToken).not.toBeUndefined();
-      const cookies3 = result3.headers['set-cookie'];
-      const parsedCookies3: Array<any> = cookies3.map(parse);
-      const exampleCookie3 = parsedCookies3.find(
-        (cookie) => cookie?.refreshToken,
-      );
-      expect(exampleCookie3?.refreshToken).not.toBeUndefined();
-      accessTokenUser3 = result3.body.accessToken;
-      refreshTokenUser3 = exampleCookie3?.refreshToken;
-
-      await request(httpServer)
-        .get(`${RouterPaths.users}`)
-        .auth('admin', 'qwerty', { type: 'basic' })
-        .expect(HTTP_STATUSES.OK_200, {
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [resp3.createdUser, resp2.createdUser, resp1.createdUser],
-        });
-
-      const resp4 = await usersTestManager.createUser(httpServer, fourthUser);
-      user4 = resp4.createdUser;
-      const result4 = await request(httpServer)
-        .post(`${RouterPaths.auth}/login`)
-        .send({
-          loginOrEmail: fourthUser.login,
-          password: fourthUser.password,
-        })
-        .expect(HTTP_STATUSES.OK_200);
-
-      expect(result4.body.accessToken).not.toBeUndefined();
-      const cookies4 = result4.headers['set-cookie'];
-      const parsedCookies4: Array<any> = cookies4.map(parse);
-      const exampleCookie4 = parsedCookies4.find(
-        (cookie) => cookie?.refreshToken,
-      );
-      expect(exampleCookie4?.refreshToken).not.toBeUndefined();
-      accessTokenUser4 = result4.body.accessToken;
-      refreshTokenUser4 = exampleCookie4.refreshToken;
-
-      await request(httpServer)
-        .get(`${RouterPaths.users}`)
-        .auth('admin', 'qwerty', { type: 'basic' })
-        .expect(HTTP_STATUSES.OK_200, {
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 4,
-          items: [
-            resp4.createdUser,
-            resp3.createdUser,
-            resp2.createdUser,
-            resp1.createdUser,
-          ],
-        });
-    });
   });
 
   describe('connection, my-current and pairs/id endpoints', () => {
@@ -346,7 +236,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const result = await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set(headers)
         .expect(200);
 
@@ -370,7 +259,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -381,7 +269,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const response = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set(headers)
         .expect(200);
 
@@ -407,7 +294,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const currentGame = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
         .expect(200);
 
@@ -431,7 +317,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -445,7 +330,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set(headers)
         .expect(403);
     });
@@ -457,7 +341,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const response = await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
         .expect(200);
 
@@ -509,7 +392,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -517,7 +399,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
         .expect(403);
     });
@@ -529,7 +410,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const responseUser1 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -583,7 +463,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const responseUser2 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
         .expect(200);
 
@@ -645,13 +524,11 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set(headers)
         .expect(403);
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/2323`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set(headers)
         .expect(400);
     });
@@ -663,7 +540,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const response = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set(headers)
         .expect(200);
 
@@ -723,7 +599,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/my-current/answers`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set(headers)
         .send({
           answer: 'new',
@@ -736,17 +611,27 @@ describe('tests for /sa/quiz/questions', () => {
     });
 
     it('should connect two users (user1 and user2) to the first game if there is no started game', async () => {
-      const activeGame = await gamesRepository.findGameInActiveStatusByUserId(
-        user1.id,
-      );
+      const res = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/my-current`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
 
-      const correctAnswer1 = activeGame.questions[0].correctAnswers;
-      const correctAnswer2 = activeGame.questions[1].correctAnswers;
+      const activeGame = res.body;
+
+      const correctAnswer1 = answersFinder(
+        adminQuestions,
+        activeGame.questions[0].id,
+      );
+      const correctAnswer2 = answersFinder(
+        adminQuestions,
+        activeGame.questions[1].id,
+      );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[0].id,
         correctAnswer1[0],
         AnswerStatus.Correct,
@@ -755,7 +640,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -764,21 +648,18 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[0].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -786,7 +667,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -868,28 +748,24 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[3].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[4].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         'id',
         'ans',
         'stat',
@@ -899,13 +775,11 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[3].id,
       );
 
       const middleResult2 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1009,7 +883,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         'id',
         'ans',
         'stat',
@@ -1018,7 +891,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1049,11 +921,6 @@ describe('tests for /sa/quiz/questions', () => {
               answerStatus: AnswerStatus.Incorrect,
               addedAt: expect.any(String),
             },
-            // {
-            //   questionId: activeGame.questions[4].id,
-            //   answerStatus: AnswerStatus.Incorrect,
-            //   addedAt: expect.any(String),
-            // },
           ],
           player: {
             id: user1.id,
@@ -1127,7 +994,6 @@ describe('tests for /sa/quiz/questions', () => {
     it('should not return a game with finished status', async () => {
       await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1135,7 +1001,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -1145,7 +1010,6 @@ describe('tests for /sa/quiz/questions', () => {
     it('should connect two users (user3 and user4) to the second game if there is no started game', async () => {
       const response = await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -1153,7 +1017,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
         .set({
           Authorization: `Bearer ${accessTokenUser4}`,
         })
@@ -1161,18 +1024,32 @@ describe('tests for /sa/quiz/questions', () => {
 
       const gameId = response.body.id;
 
-      const activeGame = await gamesRepository.findGameInActiveStatusByUserId(
-        user3.id,
+      const res = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/my-current`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser3}`,
+        })
+        .expect(200);
+
+      const activeGame = res.body;
+
+      const correctAnswer1 = answersFinder(
+        adminQuestions,
+        activeGame.questions[0].id,
+      );
+      const correctAnswer3 = answersFinder(
+        adminQuestions,
+        activeGame.questions[2].id,
       );
 
-      const correctAnswer1 = activeGame.questions[0].correctAnswers;
-      const correctAnswer3 = activeGame.questions[2].correctAnswers;
-      const correctAnswer5 = activeGame.questions[4].correctAnswers;
+      const correctAnswer5 = answersFinder(
+        adminQuestions,
+        activeGame.questions[4].id,
+      );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser3,
-        refreshTokenUser3,
         activeGame.questions[0].id,
         correctAnswer1[0],
         AnswerStatus.Correct,
@@ -1181,14 +1058,12 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser3,
-        refreshTokenUser3,
         activeGame.questions[1].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser4,
-        refreshTokenUser4,
         activeGame.questions[0].id,
         correctAnswer1[0],
         AnswerStatus.Correct,
@@ -1196,7 +1071,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -1204,7 +1078,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
         .set({
           Authorization: `Bearer ${accessTokenUser4}`,
         })
@@ -1212,7 +1085,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
         .set({
           Authorization: `Bearer ${accessTokenUser4}`,
         })
@@ -1221,34 +1093,29 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser4,
-        refreshTokenUser4,
         activeGame.questions[1].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser4,
-        refreshTokenUser4,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser4,
-        refreshTokenUser4,
         activeGame.questions[3].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser4,
-        refreshTokenUser4,
         activeGame.questions[4].id,
       );
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -1340,7 +1207,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser3,
-        refreshTokenUser3,
         activeGame.questions[2].id,
         correctAnswer3[0],
         AnswerStatus.Correct,
@@ -1349,14 +1215,12 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser3,
-        refreshTokenUser3,
         activeGame.questions[3].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser3,
-        refreshTokenUser3,
         activeGame.questions[4].id,
         correctAnswer5[0],
         AnswerStatus.Correct,
@@ -1364,7 +1228,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -1472,7 +1335,6 @@ describe('tests for /sa/quiz/questions', () => {
     it('should connect two users (user1 and user2) to the third game if there is no started game', async () => {
       const response = await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1480,7 +1342,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -1488,18 +1349,32 @@ describe('tests for /sa/quiz/questions', () => {
 
       const gameId = response.body.id;
 
-      const activeGame = await gamesRepository.findGameInActiveStatusByUserId(
-        user1.id,
+      const res = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/my-current`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
+
+      const activeGame = res.body;
+
+      const correctAnswer1 = answersFinder(
+        adminQuestions,
+        activeGame.questions[0].id,
+      );
+      const correctAnswer2 = answersFinder(
+        adminQuestions,
+        activeGame.questions[1].id,
       );
 
-      const correctAnswer1 = activeGame.questions[0].correctAnswers;
-      const correctAnswer2 = activeGame.questions[1].correctAnswers;
-      const correctAnswer5 = activeGame.questions[4].correctAnswers;
+      const correctAnswer5 = answersFinder(
+        adminQuestions,
+        activeGame.questions[4].id,
+      );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[0].id,
         correctAnswer1[0],
         AnswerStatus.Correct,
@@ -1507,7 +1382,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1515,7 +1389,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -1523,7 +1396,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1532,7 +1404,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -1541,21 +1412,18 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[0].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -1563,7 +1431,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1645,28 +1512,24 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[3].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[4].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         'id',
         'ans',
         'stat',
@@ -1676,13 +1539,11 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[3].id,
       );
 
       const middleResult2 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1784,7 +1645,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[4].id,
         correctAnswer5[0],
         AnswerStatus.Correct,
@@ -1793,7 +1653,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         'id',
         'ans',
         'stat',
@@ -1802,7 +1661,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1911,7 +1769,6 @@ describe('tests for /sa/quiz/questions', () => {
     it('should connect two users (user1 and user2) to the fourth game and do not finish it', async () => {
       const response = await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1919,7 +1776,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .post(`${RouterPaths.game}/pairs/connection`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -1927,17 +1783,27 @@ describe('tests for /sa/quiz/questions', () => {
 
       const gameId = response.body.id;
 
-      const activeGame = await gamesRepository.findGameInActiveStatusByUserId(
-        user1.id,
-      );
+      const res = await request(httpServer)
+        .get(`${RouterPaths.game}/pairs/my-current`)
+        .set({
+          Authorization: `Bearer ${accessTokenUser1}`,
+        })
+        .expect(200);
 
-      const correctAnswer1 = activeGame.questions[0].correctAnswers;
-      const correctAnswer2 = activeGame.questions[1].correctAnswers;
+      const activeGame = res.body;
+
+      const correctAnswer1 = answersFinder(
+        adminQuestions,
+        activeGame.questions[0].id,
+      );
+      const correctAnswer2 = answersFinder(
+        adminQuestions,
+        activeGame.questions[1].id,
+      );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[0].id,
         correctAnswer1[0],
         AnswerStatus.Correct,
@@ -1945,7 +1811,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1953,7 +1818,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -1961,7 +1825,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -1970,7 +1833,6 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -1979,21 +1841,18 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[0].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[1].id,
         correctAnswer2[0],
         AnswerStatus.Correct,
@@ -2001,7 +1860,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const middleResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -2083,28 +1941,24 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[2].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[3].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         activeGame.questions[4].id,
       );
 
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser2,
-        refreshTokenUser2,
         'id',
         'ans',
         'stat',
@@ -2114,13 +1968,11 @@ describe('tests for /sa/quiz/questions', () => {
       await GameTestManager.answerToQuestion(
         httpServer,
         accessTokenUser1,
-        refreshTokenUser1,
         activeGame.questions[3].id,
       );
 
       const middleResult2 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my-current`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -2128,7 +1980,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const finalResult = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/${gameId}`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -2234,7 +2085,6 @@ describe('tests for /sa/quiz/questions', () => {
     test('should return user statistic', async () => {
       const responseUser1 = await request(httpServer)
         .get(`${RouterPaths.game}/users/my-statistic`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })
@@ -2251,7 +2101,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const responseUser2 = await request(httpServer)
         .get(`${RouterPaths.game}/users/my-statistic`)
-        .set('Cookie', `refreshToken=${refreshTokenUser2}`)
         .set({
           Authorization: `Bearer ${accessTokenUser2}`,
         })
@@ -2268,7 +2117,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const responseUser3 = await request(httpServer)
         .get(`${RouterPaths.game}/users/my-statistic`)
-        .set('Cookie', `refreshToken=${refreshTokenUser3}`)
         .set({
           Authorization: `Bearer ${accessTokenUser3}`,
         })
@@ -2285,7 +2133,6 @@ describe('tests for /sa/quiz/questions', () => {
 
       const responseUser4 = await request(httpServer)
         .get(`${RouterPaths.game}/users/my-statistic`)
-        .set('Cookie', `refreshToken=${refreshTokenUser4}`)
         .set({
           Authorization: `Bearer ${accessTokenUser4}`,
         })
@@ -2551,7 +2398,6 @@ describe('tests for /sa/quiz/questions', () => {
       await sleep(1);
       const responseUser1 = await request(httpServer)
         .get(`${RouterPaths.game}/pairs/my`)
-        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
         .set({
           Authorization: `Bearer ${accessTokenUser1}`,
         })

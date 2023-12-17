@@ -7,7 +7,6 @@ export const GameTestManager = {
   async answerToQuestion(
     httpServer: string,
     accessToken: string,
-    refreshToken: string,
     questionId: string | undefined,
     answer: string = 'wrongAnswerToAllQuestions',
     answerStat: string = AnswerStatus.Incorrect,
@@ -15,7 +14,6 @@ export const GameTestManager = {
   ) {
     const response = await request(httpServer)
       .post(`${RouterPaths.game}/pairs/my-current/answers`)
-      .set('Cookie', `refreshToken=${refreshToken}`)
       .set({
         Authorization: `Bearer ${accessToken}`,
       })

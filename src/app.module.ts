@@ -87,7 +87,6 @@ import { Game } from './entities/game/Game.entity';
 import { GameController } from './controllers/public/game.controller';
 import { GamesQueryRepository } from './infrastructure/repositories/game/games-query.repository';
 import { ConnectUserToGameUseCase } from './domain/game/use-cases/connect-user-to-game-use-case';
-import { GamesRepository } from './infrastructure/repositories/game/games.repository';
 import { FindSpecifiedGameUseCase } from './domain/game/use-cases/find-specified-game-use-case';
 import { AnswerToQuestionUseCase } from './domain/game/use-cases/answer-to-question-use-case';
 import { FinishGameUseCase } from './domain/game/use-cases/finish-game-use-case';
@@ -98,6 +97,9 @@ import { BindBlogWithUserCase } from './domain/blogs/use-cases/bind-blog-with-us
 import { isBlogHasOwnerDataConstraint } from './utils/decorators/bind-blog-with-user.decorator';
 import { BlogCreateHandler } from './application/events-handlers/create-blog.event.handler';
 import { BlogUpdateHandler } from './application/events-handlers/update-blog.event.handler';
+import { GamesTransactionRepository } from './infrastructure/repositories/game/games-transaction.repository';
+import { UsersTransactionRepository } from './infrastructure/repositories/users/users.transaction.repository';
+import { QuestionsTransactionRepository } from './infrastructure/repositories/questions/questions-transaction.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -200,7 +202,9 @@ const entities = [
     QuestionsRepository,
     QuestionsQueryRepository,
     GamesQueryRepository,
-    GamesRepository,
+    GamesTransactionRepository,
+    UsersTransactionRepository,
+    QuestionsTransactionRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,
