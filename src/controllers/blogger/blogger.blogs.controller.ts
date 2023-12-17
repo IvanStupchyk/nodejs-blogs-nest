@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
-import { DeletePostWithCheckingCommand } from '../../domain/blogs/use-cases/delete-post-with-checking-use-case';
+import { DeletePostWithCheckingCommand } from '../../domain/posts/use-cases/delete-post-use-case';
 import { UpdateBlogCommand } from '../../domain/blogs/use-cases/update-blog-use-case';
 import { CreatePostCommand } from '../../domain/posts/use-cases/create-post-use-case';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs/blogs-query.repository';
@@ -34,7 +34,7 @@ import { DeleteBlogCommand } from '../../domain/blogs/use-cases/delete-blog-use-
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdatePostInputDto } from '../../application/dto/posts/update-post.input.dto';
 import { RouterPaths } from '../../constants/router.paths';
-import { UpdatePostWithCheckingCommand } from '../../domain/blogs/use-cases/update-post-with-checking-use-case';
+import { UpdatePostWithCheckingCommand } from '../../domain/posts/use-cases/update-post-use-case';
 import { JwtService } from '../../infrastructure/jwt.service';
 import { exceptionHandler } from '../../exception.handler';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';

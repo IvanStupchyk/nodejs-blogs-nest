@@ -1,7 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { isUUID } from '../../../utils/utils';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { CommentsTransactionsRepository } from '../../../infrastructure/repositories/comments/comments-transactions.repository';
 
 export class DeleteCommentCommand {
   constructor(
@@ -11,26 +14,46 @@ export class DeleteCommentCommand {
 }
 
 @CommandHandler(DeleteCommentCommand)
-export class DeleteCommentUseCase
-  implements ICommandHandler<DeleteCommentCommand>
-{
-  constructor(private readonly commentsRepository: CommentsRepository) {}
+export class DeleteCommentUseCase extends TransactionUseCase<
+  DeleteCommentCommand,
+  number
+> {
+  constructor(
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly commentsTransactionsRepository: CommentsTransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: DeleteCommentCommand): Promise<number> {
+  async mainLogic(
+    command: DeleteCommentCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     const { commentId, userId } = command;
 
     if (!isUUID(commentId)) return HttpStatus.NOT_FOUND;
 
     const foundComment =
-      await this.commentsRepository.fetchAllCommentDataById(commentId);
+      await this.commentsTransactionsRepository.fetchAllCommentDataById(
+        commentId,
+        manager,
+      );
     if (!foundComment) return HttpStatus.NOT_FOUND;
 
     if (foundComment && foundComment.user.id !== userId) {
       return HttpStatus.FORBIDDEN;
     }
 
-    const idDeleted = await this.commentsRepository.deleteComment(commentId);
+    const idDeleted = await this.commentsTransactionsRepository.deleteComment(
+      commentId,
+      manager,
+    );
 
     return idDeleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+  }
+
+  async execute(command: DeleteCommentCommand) {
+    return super.execute(command);
   }
 }

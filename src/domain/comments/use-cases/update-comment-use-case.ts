@@ -1,9 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
 import { isUUID } from '../../../utils/utils';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Comment } from '../../../entities/comments/Comment.entity';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { CommentsTransactionsRepository } from '../../../infrastructure/repositories/comments/comments-transactions.repository';
 
 export class UpdateCommentCommand {
   constructor(
@@ -14,23 +17,39 @@ export class UpdateCommentCommand {
 }
 
 @CommandHandler(UpdateCommentCommand)
-export class UpdateCommentUseCase
-  implements ICommandHandler<UpdateCommentCommand>
-{
+export class UpdateCommentUseCase extends TransactionUseCase<
+  UpdateCommentCommand,
+  number
+> {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly commentsTransactionsRepository: CommentsTransactionsRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: UpdateCommentCommand): Promise<number> {
+  async mainLogic(
+    command: UpdateCommentCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     const { id, userId, content } = command;
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const comment = await this.commentsRepository.fetchAllCommentDataById(id);
+    const comment =
+      await this.commentsTransactionsRepository.fetchAllCommentDataById(
+        id,
+        manager,
+      );
     Comment.update(comment, content, userId);
 
-    await this.dataSourceRepository.save(comment);
+    await this.transactionsRepository.save(comment, manager);
 
     return HttpStatus.NO_CONTENT;
+  }
+
+  async execute(command: UpdateCommentCommand) {
+    return super.execute(command);
   }
 }

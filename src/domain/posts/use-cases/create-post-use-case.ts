@@ -1,13 +1,16 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { PostForSpecifiedBlogInputDto } from '../../../application/dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
-import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { PostViewType } from '../../../types/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { likeStatus } from '../../../types/general.types';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { exceptionHandler } from '../../../exception.handler';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
 
 export class CreatePostCommand {
   constructor(
@@ -18,17 +21,30 @@ export class CreatePostCommand {
 }
 
 @CommandHandler(CreatePostCommand)
-export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
+export class CreatePostUseCase extends TransactionUseCase<
+  CreatePostCommand,
+  PostViewType | void
+> {
   constructor(
-    private readonly dataSourceRepository: DataSourceRepository,
-    private readonly blogsRepository: BlogsRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: CreatePostCommand): Promise<PostViewType | void> {
+  async mainLogic(
+    command: CreatePostCommand,
+    manager: EntityManager,
+  ): Promise<PostViewType | void> {
     const { title, content, shortDescription } = command.postData;
 
     if (!isUUID(command.blogId)) return null;
-    const foundBlog = await this.blogsRepository.findBlogById(command.blogId);
+    const foundBlog = await this.blogsTransactionsRepository.findBlogById(
+      command.blogId,
+      manager,
+    );
 
     if (!foundBlog) {
       return exceptionHandler(HttpStatus.NOT_FOUND);
@@ -45,7 +61,7 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
       foundBlog,
     );
 
-    const savedPost = await this.dataSourceRepository.save(newPost);
+    const savedPost = await this.transactionsRepository.save(newPost, manager);
 
     return {
       id: savedPost.id,
@@ -62,5 +78,9 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
         newestLikes: [],
       },
     };
+  }
+
+  async execute(command: CreatePostCommand) {
+    return super.execute(command);
   }
 }

@@ -76,25 +76,6 @@ export class CommentsRepository {
       : null;
   }
 
-  async fetchAllCommentDataById(id: string): Promise<Comment | null> {
-    return await this.commentsRepository
-      .createQueryBuilder('c')
-      .leftJoinAndSelect('c.user', 'u')
-      .where('c.id = :id', { id })
-      .getOne();
-  }
-
-  async deleteComment(commentId: string): Promise<boolean> {
-    const isDeleted = await this.commentsRepository
-      .createQueryBuilder('c')
-      .delete()
-      .from(Comment)
-      .where('id = :id', { id: commentId })
-      .execute();
-
-    return !!isDeleted.affected;
-  }
-
   async getSortedComments(
     params: CommentsQueryDto,
     postId: string,

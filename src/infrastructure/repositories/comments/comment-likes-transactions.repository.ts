@@ -1,30 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { Post } from '../../../entities/posts/Post.entity';
 import { CommentLike } from '../../../entities/comments/Comment-like.entity';
 
 @Injectable()
-export class CommentLikesRepository {
-  constructor(
-    @InjectRepository(CommentLike)
-    private readonly commentLikesRepository: Repository<CommentLike>,
-  ) {}
-
+export class CommentLikesTransactionsRepository {
   async findCommentLikesByUserIdAndCommentId(
     userId: string,
     commentId: string,
+    manager: EntityManager,
   ): Promise<CommentLike | null> {
-    return await this.commentLikesRepository
-      .createQueryBuilder('c')
+    return await manager
+      .createQueryBuilder(CommentLike, 'c')
       .where('c.commentId = :commentId', { commentId })
       .andWhere('c.userId = :userId', { userId })
       .getOne();
   }
 
-  async deleteAllCommentLikes(): Promise<boolean> {
-    const result = await this.commentLikesRepository
-      .createQueryBuilder('c')
+  async deleteAllCommentLikes(manager: EntityManager): Promise<boolean> {
+    const result = await manager
+      .createQueryBuilder(CommentLike, 'c')
       .delete()
       .from(Post)
       .execute();

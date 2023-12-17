@@ -1,22 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { PostLike } from '../../../entities/posts/Post-like.entity';
 import { Post } from '../../../entities/posts/Post.entity';
 
 @Injectable()
-export class PostLikesRepository {
-  constructor(
-    @InjectRepository(PostLike)
-    private readonly postLikesRepository: Repository<PostLike>,
-  ) {}
-
+export class PostLikesTransactionsRepository {
   async findPostLikesByUserIdAndPostId(
     userId: string,
     postId: string,
+    manager: EntityManager,
   ): Promise<PostLike | null> {
-    return await this.postLikesRepository
-      .createQueryBuilder('l')
+    return await manager
+      .createQueryBuilder(PostLike, 'l')
       .where('l.userId = :userId', {
         userId,
       })
@@ -26,9 +21,9 @@ export class PostLikesRepository {
       .getOne();
   }
 
-  async deleteAllPostLikes(): Promise<boolean> {
-    const result = await this.postLikesRepository
-      .createQueryBuilder('l')
+  async deleteAllPostLikes(manager: EntityManager): Promise<boolean> {
+    const result = await manager
+      .createQueryBuilder(PostLike, 'l')
       .delete()
       .from(Post)
       .execute();
