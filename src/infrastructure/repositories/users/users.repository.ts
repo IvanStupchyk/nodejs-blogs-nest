@@ -35,15 +35,6 @@ export class UsersRepository {
       .getOne();
   }
 
-  async findUserByConfirmationCode(code: string): Promise<any | null> {
-    return await this.usersRepository
-      .createQueryBuilder('u')
-      .where(`u.confirmationCode = :confirmationCode`, {
-        confirmationCode: code,
-      })
-      .getOne();
-  }
-
   async deleteUser(id: string): Promise<boolean> {
     const result = await this.usersRepository
       .createQueryBuilder('u')

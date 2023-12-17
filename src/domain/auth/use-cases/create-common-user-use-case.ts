@@ -1,34 +1,56 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import bcrypt from 'bcrypt';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
 import { UserInputDto } from '../../../application/dto/users/user.input.dto';
 import { User } from '../../../entities/users/User.entity';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class CreateCommonUserCommand {
   constructor(public userData: UserInputDto) {}
 }
 
 @CommandHandler(CreateCommonUserCommand)
-export class CreateCommonUserUseCase
-  implements ICommandHandler<CreateCommonUserCommand>
-{
-  constructor(private readonly dataSourceRepository: DataSourceRepository) {}
+export class CreateCommonUserUseCase extends TransactionUseCase<
+  CreateCommonUserCommand,
+  boolean
+> {
+  constructor(
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: CreateCommonUserCommand): Promise<boolean> {
+  async mainLogic(
+    command: CreateCommonUserCommand,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const { login, email, password } = command.userData;
 
     const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = User.createCommonUser(login, email, passwordHash);
 
+    const savedUser = await this.transactionsRepository.save(newUser, manager);
+
     try {
       await emailTemplatesManager.sendEmailConfirmationMessage(newUser);
     } catch (error) {
       console.log('sendEmailConfirmationMessage error', error);
+      await this.usersTransactionRepository.deleteUser(savedUser.id, manager);
       return false;
     }
 
-    return !!(await this.dataSourceRepository.save(newUser));
+    return !!savedUser;
+  }
+
+  async execute(command: CreateCommonUserCommand) {
+    return super.execute(command);
   }
 }

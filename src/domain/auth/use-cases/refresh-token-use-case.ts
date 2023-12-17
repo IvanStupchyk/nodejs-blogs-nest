@@ -1,9 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { DevicesRepository } from '../../../infrastructure/repositories/devices/devices.repository';
-import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens.repository';
 import { InvalidRefreshToken } from '../../../entities/users/Invalid-refresh-tokens.entity';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { InvalidRefreshTokensTransactionsRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
+import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
 
 export class RefreshTokenCommand {
   constructor(
@@ -14,24 +17,31 @@ export class RefreshTokenCommand {
 }
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenUseCase
-  implements ICommandHandler<RefreshTokenCommand>
-{
+export class RefreshTokenUseCase extends TransactionUseCase<
+  RefreshTokenCommand,
+  { accessToken: string; refreshToken: string } | null
+> {
   constructor(
-    private readonly devicesRepository: DevicesRepository,
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    private readonly invalidRefreshTokensRepository: InvalidRefreshTokensRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    private readonly devicesTransactionsRepository: DevicesTransactionsRepository,
+    private readonly invalidRefreshTokensTransactionsRepository: InvalidRefreshTokensTransactionsRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(
+  async mainLogic(
     command: RefreshTokenCommand,
+    manager: EntityManager,
   ): Promise<{ accessToken: string; refreshToken: string } | null> {
     const { userId, deviceId, oldRefreshToken } = command;
 
     const invalidRefreshTokens =
-      await this.invalidRefreshTokensRepository.getAllInvalidRefreshTokens(
+      await this.invalidRefreshTokensTransactionsRepository.getAllInvalidRefreshTokens(
         userId,
+        manager,
       );
 
     const index = invalidRefreshTokens?.findIndex(
@@ -51,21 +61,28 @@ export class RefreshTokenUseCase
     try {
       const result: any =
         await this.jwtService.verifyRefreshToken(refreshToken);
-      const device = await this.devicesRepository.findDeviceById(deviceId);
+      const device = await this.devicesTransactionsRepository.findDeviceById(
+        deviceId,
+        manager,
+      );
 
       device.lastActiveDate = new Date(result.iat * 1000);
       device.expirationDate = new Date(result.exp * 1000);
-      await this.dataSourceRepository.save(device);
+      await this.transactionsRepository.save(device, manager);
 
       const newInvalidRefreshToken = new InvalidRefreshToken();
       newInvalidRefreshToken.user = userId;
       newInvalidRefreshToken.refreshToken = oldRefreshToken;
 
-      await this.dataSourceRepository.save(newInvalidRefreshToken);
+      await this.transactionsRepository.save(newInvalidRefreshToken, manager);
     } catch (error) {
       console.log(error);
     }
 
     return { accessToken, refreshToken };
+  }
+
+  async execute(command: RefreshTokenCommand) {
+    return super.execute(command);
   }
 }

@@ -18,19 +18,4 @@ export class DevicesRepository {
       })
       .getOne()) as Device;
   }
-
-  async removeSpecifiedSession(
-    userId: string,
-    deviceId: string,
-  ): Promise<boolean> {
-    const isDeleted = await this.devicesRepository
-      .createQueryBuilder('d')
-      .delete()
-      .from(Device)
-      .where('deviceId = :deviceId', { deviceId })
-      .andWhere('userId = :userId', { userId })
-      .execute();
-
-    return !!isDeleted.affected;
-  }
 }

@@ -1,22 +1,35 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
-import { DevicesRepository } from '../../../infrastructure/repositories/devices/devices.repository';
-import { InvalidRefreshTokensRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
+import { InvalidRefreshTokensTransactionsRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
 
 export class LogOutUserCommand {
   constructor(public req: Request) {}
 }
 
 @CommandHandler(LogOutUserCommand)
-export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
+export class LogOutUserUseCase extends TransactionUseCase<
+  LogOutUserCommand,
+  boolean
+> {
   constructor(
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    private readonly devicesRepository: DevicesRepository,
-    private readonly invalidRefreshTokensRepository: InvalidRefreshTokensRepository,
-  ) {}
+    private readonly devicesTransactionsRepository: DevicesTransactionsRepository,
+    private readonly invalidRefreshTokensTransactionsRepository: InvalidRefreshTokensTransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: LogOutUserCommand): Promise<boolean> {
+  async mainLogic(
+    command: LogOutUserCommand,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const { req } = command;
 
     if (!req.cookies?.refreshToken) return false;
@@ -28,8 +41,9 @@ export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
       if (!result?.userId) return false;
 
       const invalidRefreshTokens =
-        await this.invalidRefreshTokensRepository.getAllInvalidRefreshTokens(
+        await this.invalidRefreshTokensTransactionsRepository.getAllInvalidRefreshTokens(
           result?.userId,
+          manager,
         );
 
       const index = invalidRefreshTokens?.findIndex(
@@ -40,17 +54,23 @@ export class LogOutUserUseCase implements ICommandHandler<LogOutUserCommand> {
         return false;
       }
 
-      const session = await this.devicesRepository.findDeviceById(
+      const session = await this.devicesTransactionsRepository.findDeviceById(
         result?.deviceId,
+        manager,
       );
       if (!session) return false;
 
-      return await this.devicesRepository.removeSpecifiedSession(
+      return await this.devicesTransactionsRepository.removeSpecifiedSession(
         result.userId,
         result.deviceId,
+        manager,
       );
     } catch (error) {
       return false;
     }
+  }
+
+  async execute(command: LogOutUserCommand) {
+    return super.execute(command);
   }
 }

@@ -1,7 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
-import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { HttpStatus } from '@nestjs/common';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
 
 export class DeleteBlogCommand {
   constructor(
@@ -11,18 +14,40 @@ export class DeleteBlogCommand {
 }
 
 @CommandHandler(DeleteBlogCommand)
-export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+export class DeleteBlogUseCase extends TransactionUseCase<
+  DeleteBlogCommand,
+  number
+> {
+  constructor(
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: DeleteBlogCommand): Promise<number> {
+  async mainLogic(
+    command: DeleteBlogCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsRepository.findBlogById(command.id);
+    const blog = await this.blogsTransactionsRepository.findBlogById(
+      command.id,
+      manager,
+    );
     if (blog && blog.user && blog.user.id !== command.userId)
       return HttpStatus.FORBIDDEN;
 
-    const result = await this.blogsRepository.deleteBlog(command.id);
+    const result = await this.blogsTransactionsRepository.deleteBlog(
+      command.id,
+      manager,
+    );
 
     return result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+  }
+
+  async execute(command: DeleteBlogCommand) {
+    return super.execute(command);
   }
 }

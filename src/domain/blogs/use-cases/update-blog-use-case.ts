@@ -1,10 +1,13 @@
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { BlogInputDto } from '../../../application/dto/blogs/blog.input.dto';
 import { isUUID } from '../../../utils/utils';
-import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { HttpStatus } from '@nestjs/common';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Blog } from '../../../entities/blogs/Blog.entity';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
 
 export class UpdateBlogCommand {
   constructor(
@@ -15,25 +18,42 @@ export class UpdateBlogCommand {
 }
 
 @CommandHandler(UpdateBlogCommand)
-export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
+export class UpdateBlogUseCase extends TransactionUseCase<
+  UpdateBlogCommand,
+  number
+> {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
+    private readonly transactionsRepository: TransactionsRepository,
     private eventBus: EventBus,
-  ) {}
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: UpdateBlogCommand): Promise<number> {
+  async mainLogic(
+    command: UpdateBlogCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     const { name, websiteUrl, description } = command.body;
 
     if (!isUUID(command.id)) return HttpStatus.NOT_FOUND;
 
-    const blog = await this.blogsRepository.findBlogById(command.id);
+    const blog = await this.blogsTransactionsRepository.findBlogById(
+      command.id,
+      manager,
+    );
     Blog.update(blog, description, websiteUrl, name, command.userId);
 
-    await this.dataSourceRepository.save(blog);
+    await this.transactionsRepository.save(blog, manager);
 
     blog.getUncommittedEvents().forEach((e) => this.eventBus.publish(e));
 
     return HttpStatus.NO_CONTENT;
+  }
+
+  async execute(command: UpdateBlogCommand) {
+    return super.execute(command);
   }
 }
