@@ -27,6 +27,27 @@ export class GamesQueryRepository {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  async findCurrentGame(id): Promise<Game | null> {
+    return await this.gamesRepository
+      .createQueryBuilder('g')
+      .leftJoinAndSelect('g.firstPlayer', 'frp')
+      .leftJoinAndSelect('frp.answers', 'fra')
+      .leftJoinAndSelect('fra.question', 'fraq')
+      .leftJoinAndSelect('frp.user', 'fru')
+      .leftJoinAndSelect('g.secondPlayer', 'scp')
+      .leftJoinAndSelect('scp.answers', 'sca')
+      .leftJoinAndSelect('sca.question', 'scaq')
+      .leftJoinAndSelect('scp.user', 'scu')
+      .leftJoinAndSelect('g.questions', 'q')
+      .where('g.id = :id', {
+        id,
+      })
+      .orderBy('q.createdAt', 'DESC')
+      .addOrderBy('fra.addedAt')
+      .addOrderBy('sca.addedAt')
+      .getOne();
+  }
+
   async findGameForSpecifiedUser(userId: string): Promise<GameViewType | null> {
     const game = await this.gamesRepository
       .createQueryBuilder('g')

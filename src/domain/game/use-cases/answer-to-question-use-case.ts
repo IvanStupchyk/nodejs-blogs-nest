@@ -1,13 +1,16 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { AnswerType } from '../../../types/game.types';
-import { GamesRepository } from '../../../infrastructure/repositories/game/games.repository';
 import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../../exception.handler';
 import { GameStatus } from '../../../types/general.types';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
 import { Answer } from '../../../entities/game/Answer.entity';
 import { Game } from '../../../entities/game/Game.entity';
 import add from 'date-fns/add';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { DataSource, EntityManager } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { GamesTransactionRepository } from '../../../infrastructure/repositories/game/games-transaction.repository';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 
 export class AnswerToQuestionCommand {
   constructor(
@@ -17,19 +20,27 @@ export class AnswerToQuestionCommand {
 }
 
 @CommandHandler(AnswerToQuestionCommand)
-export class AnswerToQuestionUseCase
-  implements ICommandHandler<AnswerToQuestionCommand>
-{
+export class AnswerToQuestionUseCase extends TransactionUseCase<
+  AnswerToQuestionCommand,
+  AnswerType | null
+> {
   constructor(
-    private readonly gamesRepository: GamesRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly gamesTransactionRepository: GamesTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: AnswerToQuestionCommand): Promise<AnswerType | null> {
+  async mainLogic(command: AnswerToQuestionCommand, manager: EntityManager) {
     const { userId, answer } = command;
 
     const activeGame =
-      await this.gamesRepository.findGameInActiveStatusByUserId(userId);
+      await this.gamesTransactionRepository.findGameInActiveStatusByUserId(
+        userId,
+        manager,
+      );
 
     if (!activeGame) {
       exceptionHandler(HttpStatus.FORBIDDEN);
@@ -51,7 +62,7 @@ export class AnswerToQuestionUseCase
 
     const newAnswer = Answer.create(player, currentQuestion);
 
-    await this._addAdditionalPoint(activeGame);
+    await this._addAdditionalPoint(activeGame, manager);
 
     if (currentQuestion.correctAnswers.includes(answer)) {
       Answer.correctAnswer(newAnswer, player);
@@ -76,13 +87,13 @@ export class AnswerToQuestionUseCase
       activeGame.finishGameDate = new Date();
       activeGame.firstPlayer.finished = true;
       activeGame.secondPlayer.finished = true;
-      await this.dataSourceRepository.save(activeGame.firstPlayer);
-      await this.dataSourceRepository.save(activeGame.secondPlayer);
+      await this.transactionsRepository.save(activeGame.firstPlayer, manager);
+      await this.transactionsRepository.save(activeGame.secondPlayer, manager);
     }
 
-    await this.dataSourceRepository.save(player);
-    await this.dataSourceRepository.save(newAnswer);
-    await this.dataSourceRepository.save(activeGame);
+    await this.transactionsRepository.save(player, manager);
+    await this.transactionsRepository.save(newAnswer, manager);
+    await this.transactionsRepository.save(activeGame, manager);
 
     return {
       questionId: newAnswer.question.id,
@@ -91,7 +102,10 @@ export class AnswerToQuestionUseCase
     };
   }
 
-  async _addAdditionalPoint(activeGame: Game) {
+  async execute(command: AnswerToQuestionCommand) {
+    return super.execute(command);
+  }
+  async _addAdditionalPoint(activeGame: Game, manager: EntityManager) {
     if (
       (activeGame.firstPlayer.answers.length === 5 &&
         activeGame.secondPlayer.answers.length === 4) ||
@@ -107,7 +121,7 @@ export class AnswerToQuestionUseCase
         fasterPlayer.score = ++fasterPlayer.score;
       }
 
-      await this.dataSourceRepository.save(fasterPlayer);
+      await this.transactionsRepository.save(fasterPlayer, manager);
     }
   }
 }

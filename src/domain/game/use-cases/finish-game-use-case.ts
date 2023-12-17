@@ -1,24 +1,38 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { GamesRepository } from '../../../infrastructure/repositories/game/games.repository';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { CommandHandler } from '@nestjs/cqrs';
 import { Interval } from '@nestjs/schedule';
 import { GameStatus } from '../../../types/general.types';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { GamesTransactionRepository } from '../../../infrastructure/repositories/game/games-transaction.repository';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 
 export class FinishGameCommand {
   constructor() {}
 }
 
 @CommandHandler(FinishGameCommand)
-export class FinishGameUseCase implements ICommandHandler<FinishGameCommand> {
+export class FinishGameUseCase extends TransactionUseCase<
+  FinishGameCommand,
+  void | null
+> {
   constructor(
-    private readonly gamesRepository: GamesRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly gamesTransactionRepository: GamesTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  @Interval(1000)
-  async execute(): Promise<void | null> {
+  async mainLogic(
+    command: FinishGameCommand,
+    manager: EntityManager,
+  ): Promise<void | null> {
     const gamesToFinish =
-      await this.gamesRepository.findGamesInActiveStatusToFinish();
+      await this.gamesTransactionRepository.findGamesInActiveStatusToFinish(
+        manager,
+      );
 
     if (!gamesToFinish.length) return null;
 
@@ -42,9 +56,14 @@ export class FinishGameUseCase implements ICommandHandler<FinishGameCommand> {
       game.firstPlayer.finished = true;
       game.secondPlayer.finished = true;
 
-      await this.dataSourceRepository.save(game.firstPlayer);
-      await this.dataSourceRepository.save(game.secondPlayer);
-      await this.dataSourceRepository.save(game);
+      await this.transactionsRepository.save(game.firstPlayer, manager);
+      await this.transactionsRepository.save(game.secondPlayer, manager);
+      await this.transactionsRepository.save(game, manager);
     }
+  }
+
+  @Interval(1000)
+  async execute(command: FinishGameCommand) {
+    return super.execute(command);
   }
 }

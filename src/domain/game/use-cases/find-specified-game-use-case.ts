@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { GameViewType } from '../../../types/game.types';
-import { GamesRepository } from '../../../infrastructure/repositories/game/games.repository';
 import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../../exception.handler';
 import { isUUID } from '../../../utils/utils';
 import { GameStatus } from '../../../types/general.types';
+import { GamesQueryRepository } from '../../../infrastructure/repositories/game/games-query.repository';
 
 export class FindSpecifiedGameCommand {
   constructor(
@@ -17,7 +17,7 @@ export class FindSpecifiedGameCommand {
 export class FindSpecifiedGameUseCase
   implements ICommandHandler<FindSpecifiedGameCommand>
 {
-  constructor(private readonly gamesRepository: GamesRepository) {}
+  constructor(private readonly gamesQueryRepository: GamesQueryRepository) {}
 
   async execute(
     command: FindSpecifiedGameCommand,
@@ -27,7 +27,7 @@ export class FindSpecifiedGameUseCase
       exceptionHandler(HttpStatus.BAD_REQUEST);
     }
 
-    const game = await this.gamesRepository.findCurrentGame(gameId);
+    const game = await this.gamesQueryRepository.findCurrentGame(gameId);
 
     if (!game) {
       exceptionHandler(HttpStatus.NOT_FOUND);

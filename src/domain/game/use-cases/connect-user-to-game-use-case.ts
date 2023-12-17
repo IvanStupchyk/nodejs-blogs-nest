@@ -1,59 +1,76 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { CommandHandler } from '@nestjs/cqrs';
 import { GameViewType } from '../../../types/game.types';
 import { Player } from '../../../entities/game/Player.entity';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { Game } from '../../../entities/game/Game.entity';
-import { QuestionsRepository } from '../../../infrastructure/repositories/questions/questions.repository';
 import { GameStatus } from '../../../types/general.types';
-import { GamesRepository } from '../../../infrastructure/repositories/game/games.repository';
 import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../../exception.handler';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { GamesTransactionRepository } from '../../../infrastructure/repositories/game/games-transaction.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { QuestionsTransactionRepository } from '../../../infrastructure/repositories/questions/questions-transaction.repository';
 
 export class ConnectUserToGameCommand {
   constructor(public userId: string) {}
 }
 
 @CommandHandler(ConnectUserToGameCommand)
-export class ConnectUserToGameUseCase
-  implements ICommandHandler<ConnectUserToGameCommand>
-{
+export class ConnectUserToGameUseCase extends TransactionUseCase<
+  ConnectUserToGameCommand,
+  GameViewType | null
+> {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly gamesRepository: GamesRepository,
-    private readonly questionsRepository: QuestionsRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly gamesTransactionRepository: GamesTransactionRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly questionsTransactionRepository: QuestionsTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(
+  async mainLogic(
     command: ConnectUserToGameCommand,
+    manager: EntityManager,
   ): Promise<GameViewType | null> {
     const { userId } = command;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
-
-    const isActiveGameExist = await this.gamesRepository.findActiveGameByUserId(
-      user.id,
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
     );
+
+    const isActiveGameExist =
+      await this.gamesTransactionRepository.findActiveGameByUserId(
+        user.id,
+        manager,
+      );
 
     if (isActiveGameExist) {
       exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
-    let game = await this.gamesRepository.findPendingGame();
+    let game = await this.gamesTransactionRepository.findPendingGame(manager);
     const player = Player.create(user);
 
     if (game) {
       Game.connectSecondPlayer(game, player);
     } else {
       const questions =
-        await this.questionsRepository.takeBunchRandomQuestions(5);
+        await this.questionsTransactionRepository.takeBunchRandomQuestions(
+          5,
+          manager,
+        );
 
       game = Game.create(player, questions);
     }
 
-    await this.dataSourceRepository.save(player);
-    const savedGame = await this.dataSourceRepository.save(game);
+    await this.transactionsRepository.save(player, manager);
+    const savedGame = await this.transactionsRepository.save(game, manager);
 
     return {
       id: savedGame.id,
@@ -84,5 +101,9 @@ export class ConnectUserToGameUseCase
       startGameDate: savedGame.startGameDate ?? null,
       finishGameDate: null,
     };
+  }
+
+  async execute(command: ConnectUserToGameCommand) {
+    return super.execute(command);
   }
 }
