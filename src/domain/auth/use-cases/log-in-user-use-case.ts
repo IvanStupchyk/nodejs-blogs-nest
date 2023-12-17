@@ -1,9 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { Device } from '../../../entities/devices/Device.entity';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class LogInUserCommand {
   constructor(
@@ -14,19 +17,30 @@ export class LogInUserCommand {
 }
 
 @CommandHandler(LogInUserCommand)
-export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
+export class LogInUserUseCase extends TransactionUseCase<
+  LogInUserCommand,
+  { accessToken: string; refreshToken: string }
+> {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
     private readonly jwtService: JwtService,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(
+  async mainLogic(
     command: LogInUserCommand,
+    manager: EntityManager,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { userId, userAgent, ip } = command;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
+    );
     if (!user.isConfirmed) return null;
 
     const deviceId = uuidv4();
@@ -44,8 +58,12 @@ export class LogInUserUseCase implements ICommandHandler<LogInUserCommand> {
       ip,
     );
 
-    await this.dataSourceRepository.save(newDevice);
+    await this.transactionsRepository.save(newDevice, manager);
     return { accessToken, refreshToken };
+  }
+
+  async execute(command: LogInUserCommand) {
+    return super.execute(command);
   }
 
   private async _createDevice(

@@ -48,7 +48,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersQueryRepository } from './infrastructure/repositories/users/users-query.repository';
 import { UsersRepository } from './infrastructure/repositories/users/users.repository';
 import { DevicesRepository } from './infrastructure/repositories/devices/devices.repository';
-import { InvalidRefreshTokensRepository } from './infrastructure/repositories/users/invalid-refresh-tokens.repository';
 import { DevicesQueryRepository } from './infrastructure/repositories/devices/devices-query.repository';
 import { BlogsRepository } from './infrastructure/repositories/blogs/blogs.repository';
 import { BlogsQueryRepository } from './infrastructure/repositories/blogs/blogs-query.repository';
@@ -100,6 +99,9 @@ import { BlogUpdateHandler } from './application/events-handlers/update-blog.eve
 import { GamesTransactionRepository } from './infrastructure/repositories/game/games-transaction.repository';
 import { UsersTransactionRepository } from './infrastructure/repositories/users/users.transaction.repository';
 import { QuestionsTransactionRepository } from './infrastructure/repositories/questions/questions-transaction.repository';
+import { InvalidRefreshTokensTransactionsRepository } from './infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
+import { DevicesTransactionsRepository } from './infrastructure/repositories/devices/devices-transactions.repository';
+import { BlogsTransactionsRepository } from './infrastructure/repositories/blogs/blogs-transactions.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -189,7 +191,6 @@ const entities = [
     UsersQueryRepository,
     UsersRepository,
     DevicesRepository,
-    InvalidRefreshTokensRepository,
     DevicesQueryRepository,
     BlogsRepository,
     BlogsQueryRepository,
@@ -205,6 +206,9 @@ const entities = [
     GamesTransactionRepository,
     UsersTransactionRepository,
     QuestionsTransactionRepository,
+    InvalidRefreshTokensTransactionsRepository,
+    DevicesTransactionsRepository,
+    BlogsTransactionsRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

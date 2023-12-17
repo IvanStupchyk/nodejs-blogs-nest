@@ -1,26 +1,39 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class ConfirmEmailCommand {
   constructor(public code: string) {}
 }
 
 @CommandHandler(ConfirmEmailCommand)
-export class ConfirmEmailUseCase
-  implements ICommandHandler<ConfirmEmailCommand>
-{
+export class ConfirmEmailUseCase extends TransactionUseCase<
+  ConfirmEmailCommand,
+  boolean
+> {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: ConfirmEmailCommand): Promise<boolean> {
-    const user = await this.usersRepository.findUserByConfirmationCode(
-      command.code,
-    );
+  async mainLogic(
+    command: ConfirmEmailCommand,
+    manager: EntityManager,
+  ): Promise<boolean> {
+    const user =
+      await this.usersTransactionRepository.findUserByConfirmationCode(
+        command.code,
+        manager,
+      );
 
     if (!user) {
       errorMessageGenerator([
@@ -40,7 +53,11 @@ export class ConfirmEmailUseCase
       }
 
       user.isConfirmed = true;
-      return !!(await this.dataSourceRepository.save(user));
+      return !!(await this.transactionsRepository.save(user, manager));
     }
+  }
+
+  async execute(command: ConfirmEmailCommand) {
+    return super.execute(command);
   }
 }

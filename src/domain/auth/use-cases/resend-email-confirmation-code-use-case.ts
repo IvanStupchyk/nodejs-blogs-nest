@@ -1,28 +1,40 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class ResendEmailConfirmationCodeCommand {
   constructor(public email: string) {}
 }
 
 @CommandHandler(ResendEmailConfirmationCodeCommand)
-export class ResendEmailConfirmationCodeUseCase
-  implements ICommandHandler<ResendEmailConfirmationCodeCommand>
-{
+export class ResendEmailConfirmationCodeUseCase extends TransactionUseCase<
+  ResendEmailConfirmationCodeCommand,
+  boolean
+> {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: ResendEmailConfirmationCodeCommand): Promise<boolean> {
-    const user = await this.usersRepository.findUserByLoginOrEmail(
+  async mainLogic(
+    command: ResendEmailConfirmationCodeCommand,
+    manager: EntityManager,
+  ): Promise<boolean> {
+    const user = await this.usersTransactionRepository.findUserByLoginOrEmail(
       command.email,
+      manager,
     );
     if (!user || user.isConfirmed) {
       errorMessageGenerator([
@@ -37,7 +49,7 @@ export class ResendEmailConfirmationCodeUseCase
       minutes: 30,
     });
     user.confirmationCode = newCode;
-    await this.dataSourceRepository.save(user);
+    await this.transactionsRepository.save(user, manager);
 
     try {
       await emailTemplatesManager.resendEmailConfirmationMessage(
@@ -49,5 +61,9 @@ export class ResendEmailConfirmationCodeUseCase
     }
 
     return true;
+  }
+
+  async execute(command: ResendEmailConfirmationCodeCommand) {
+    return super.execute(command);
   }
 }

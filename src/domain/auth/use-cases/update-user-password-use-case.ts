@@ -1,27 +1,38 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import bcrypt from 'bcrypt';
 import { JwtService } from '../../../infrastructure/jwt.service';
 import { NewPasswordInputDto } from '../../../application/dto/auth/new-password.input.dto';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 
 export class UpdateUserPasswordCommand {
   constructor(public body: NewPasswordInputDto) {}
 }
 
 @CommandHandler(UpdateUserPasswordCommand)
-export class UpdateUserPasswordUseCase
-  implements ICommandHandler<UpdateUserPasswordCommand>
-{
+export class UpdateUserPasswordUseCase extends TransactionUseCase<
+  UpdateUserPasswordCommand,
+  boolean
+> {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: UpdateUserPasswordCommand): Promise<boolean> {
+  async mainLogic(
+    command: UpdateUserPasswordCommand,
+    manager: EntityManager,
+  ): Promise<boolean> {
     const { newPassword, recoveryCode } = command.body;
 
     const result: any =
@@ -35,7 +46,10 @@ export class UpdateUserPasswordUseCase
       ]);
     }
 
-    const user = await this.usersRepository.fetchAllUserDataById(result.userId);
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      result.userId,
+      manager,
+    );
     if (!user) {
       errorMessageGenerator([
         {
@@ -47,6 +61,10 @@ export class UpdateUserPasswordUseCase
 
     user.passwordHash = await bcrypt.hash(newPassword, 10);
 
-    return !!(await this.dataSourceRepository.save(user));
+    return !!(await this.transactionsRepository.save(user, manager));
+  }
+
+  async execute(command: UpdateUserPasswordCommand) {
+    return super.execute(command);
   }
 }
