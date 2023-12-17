@@ -1,14 +1,17 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { likeStatus } from '../../../types/general.types';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
 import { HttpStatus } from '@nestjs/common';
-import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
-import { CommentLikesRepository } from '../../../infrastructure/repositories/comments/comment-likes.repository';
 import { CommentLike } from '../../../entities/comments/Comment-like.entity';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { CommentsTransactionsRepository } from '../../../infrastructure/repositories/comments/comments-transactions.repository';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { CommentLikesTransactionsRepository } from '../../../infrastructure/repositories/comments/comment-likes-transactions.repository';
 
 export class ChangeCommentLikesCountCommand {
   constructor(
@@ -19,17 +22,25 @@ export class ChangeCommentLikesCountCommand {
 }
 
 @CommandHandler(ChangeCommentLikesCountCommand)
-export class ChangeCommentLikesCountUseCase
-  implements ICommandHandler<ChangeCommentLikesCountCommand>
-{
+export class ChangeCommentLikesCountUseCase extends TransactionUseCase<
+  ChangeCommentLikesCountCommand,
+  number
+> {
   constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly commentLikesRepository: CommentLikesRepository,
-    private readonly usersRepository: UsersRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly commentsTransactionsRepository: CommentsTransactionsRepository,
+    private readonly commentLikesTransactionsRepository: CommentLikesTransactionsRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: ChangeCommentLikesCountCommand): Promise<number> {
+  async mainLogic(
+    command: ChangeCommentLikesCountCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     const { id, userId, myStatus } = command;
 
     if (!likeStatus[myStatus]) {
@@ -40,17 +51,24 @@ export class ChangeCommentLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
+    );
     if (!user) return HttpStatus.NOT_FOUND;
 
     const foundComment =
-      await this.commentsRepository.fetchAllCommentDataById(id);
+      await this.commentsTransactionsRepository.fetchAllCommentDataById(
+        id,
+        manager,
+      );
     if (!foundComment) return HttpStatus.NOT_FOUND;
 
     const userCommentLike =
-      await this.commentLikesRepository.findCommentLikesByUserIdAndCommentId(
+      await this.commentLikesTransactionsRepository.findCommentLikesByUserIdAndCommentId(
         userId,
         id,
+        manager,
       );
 
     if (
@@ -70,8 +88,12 @@ export class ChangeCommentLikesCountUseCase
 
     CommentLike.update(likeStatement, myStatus, user, foundComment);
 
-    await this.dataSourceRepository.save(likeStatement);
+    await this.transactionsRepository.save(likeStatement, manager);
 
     return HttpStatus.NO_CONTENT;
+  }
+
+  async execute(command: ChangeCommentLikesCountCommand) {
+    return super.execute(command);
   }
 }

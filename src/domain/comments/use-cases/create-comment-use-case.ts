@@ -1,11 +1,14 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
-import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { CommentViewType } from '../../../types/comments.types';
 import { Comment } from '../../../entities/comments/Comment.entity';
 import { likeStatus } from '../../../types/general.types';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { PostsTransactionsRepository } from '../../../infrastructure/repositories/posts/posts-transactions.repository';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -16,30 +19,45 @@ export class CreateCommentCommand {
 }
 
 @CommandHandler(CreateCommentCommand)
-export class CreateCommentUseCase
-  implements ICommandHandler<CreateCommentCommand>
-{
+export class CreateCommentUseCase extends TransactionUseCase<
+  CreateCommentCommand,
+  CommentViewType | null
+> {
   constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly usersRepository: UsersRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly postsTransactionsRepository: PostsTransactionsRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(
+  async mainLogic(
     command: CreateCommentCommand,
+    manager: EntityManager,
   ): Promise<CommentViewType | null> {
     const { id, userId, content } = command;
     if (!isUUID(id)) return null;
 
-    const foundPost = await this.postsRepository.findPostById(id);
+    const foundPost = await this.postsTransactionsRepository.findPostById(
+      id,
+      manager,
+    );
     if (!foundPost) return null;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
+    );
     if (!user) return null;
 
     const newComment = Comment.create(content, user, foundPost);
 
-    const savedComment = await this.dataSourceRepository.save(newComment);
+    const savedComment = await this.transactionsRepository.save(
+      newComment,
+      manager,
+    );
 
     return {
       id: savedComment.id,
@@ -55,5 +73,9 @@ export class CreateCommentUseCase
         myStatus: likeStatus.None,
       },
     };
+  }
+
+  async execute(command: CreateCommentCommand) {
+    return super.execute(command);
   }
 }

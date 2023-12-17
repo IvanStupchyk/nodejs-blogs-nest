@@ -53,11 +53,9 @@ import { BlogsRepository } from './infrastructure/repositories/blogs/blogs.repos
 import { BlogsQueryRepository } from './infrastructure/repositories/blogs/blogs-query.repository';
 import { PostsRepository } from './infrastructure/repositories/posts/posts.repository';
 import { GetPostsForSpecifiedBlogUseCase } from './domain/posts/use-cases/get-posts-for-specified-blog-use-case';
-import { UpdatePostWithCheckingUseCase } from './domain/blogs/use-cases/update-post-with-checking-use-case';
-import { DeletePostWithCheckingUseCase } from './domain/blogs/use-cases/delete-post-with-checking-use-case';
-import { PostLikesRepository } from './infrastructure/repositories/posts/post-likes.repository';
+import { UpdatePostUseCase } from './domain/posts/use-cases/update-post-use-case';
+import { DeletePostUseCase } from './domain/posts/use-cases/delete-post-use-case';
 import { CommentsRepository } from './infrastructure/repositories/comments/comments.repository';
-import { CommentLikesRepository } from './infrastructure/repositories/comments/comment-likes.repository';
 import { Device } from './entities/devices/Device.entity';
 import { InvalidRefreshToken } from './entities/users/Invalid-refresh-tokens.entity';
 import { User } from './entities/users/User.entity';
@@ -102,6 +100,10 @@ import { QuestionsTransactionRepository } from './infrastructure/repositories/qu
 import { InvalidRefreshTokensTransactionsRepository } from './infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
 import { DevicesTransactionsRepository } from './infrastructure/repositories/devices/devices-transactions.repository';
 import { BlogsTransactionsRepository } from './infrastructure/repositories/blogs/blogs-transactions.repository';
+import { PostsTransactionsRepository } from './infrastructure/repositories/posts/posts-transactions.repository';
+import { PostLikesTransactionsRepository } from './infrastructure/repositories/posts/post-likes-transactions.repository';
+import { CommentsTransactionsRepository } from './infrastructure/repositories/comments/comments-transactions.repository';
+import { CommentLikesTransactionsRepository } from './infrastructure/repositories/comments/comment-likes-transactions.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -132,8 +134,8 @@ const useCases = [
   CreateCommonUserUseCase,
   ValidateUserUseCase,
   GetPostsForSpecifiedBlogUseCase,
-  UpdatePostWithCheckingUseCase,
-  DeletePostWithCheckingUseCase,
+  UpdatePostUseCase,
+  DeletePostUseCase,
   CreateQuestionUseCase,
   UpdateQuestionUseCase,
   PublishQuestionUseCase,
@@ -195,9 +197,7 @@ const entities = [
     BlogsRepository,
     BlogsQueryRepository,
     PostsRepository,
-    PostLikesRepository,
     CommentsRepository,
-    CommentLikesRepository,
     TransactionsRepository,
     DataSourceRepository,
     QuestionsRepository,
@@ -209,6 +209,10 @@ const entities = [
     InvalidRefreshTokensTransactionsRepository,
     DevicesTransactionsRepository,
     BlogsTransactionsRepository,
+    PostsTransactionsRepository,
+    PostLikesTransactionsRepository,
+    CommentsTransactionsRepository,
+    CommentLikesTransactionsRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

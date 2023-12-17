@@ -1,14 +1,17 @@
 import { HttpStatus } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
 import { likeStatus } from '../../../types/general.types';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
-import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';
-import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
-import { PostLikesRepository } from '../../../infrastructure/repositories/posts/post-likes.repository';
 import { PostLike } from '../../../entities/posts/Post-like.entity';
-import { DataSourceRepository } from '../../../infrastructure/repositories/transactions/data-source.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { PostsTransactionsRepository } from '../../../infrastructure/repositories/posts/posts-transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { PostLikesTransactionsRepository } from '../../../infrastructure/repositories/posts/post-likes-transactions.repository';
 
 export class ChangePostLikesCountCommand {
   constructor(
@@ -19,17 +22,25 @@ export class ChangePostLikesCountCommand {
 }
 
 @CommandHandler(ChangePostLikesCountCommand)
-export class ChangePostLikesCountUseCase
-  implements ICommandHandler<ChangePostLikesCountCommand>
-{
+export class ChangePostLikesCountUseCase extends TransactionUseCase<
+  ChangePostLikesCountCommand,
+  number
+> {
   constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly usersRepository: UsersRepository,
-    private readonly postLikesRepository: PostLikesRepository,
-    private readonly dataSourceRepository: DataSourceRepository,
-  ) {}
+    @InjectDataSource()
+    protected readonly dataSource: DataSource,
+    private readonly postsTransactionsRepository: PostsTransactionsRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly postLikesTransactionsRepository: PostLikesTransactionsRepository,
+    private readonly transactionsRepository: TransactionsRepository,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: ChangePostLikesCountCommand): Promise<number> {
+  async mainLogic(
+    command: ChangePostLikesCountCommand,
+    manager: EntityManager,
+  ): Promise<number> {
     const { id, myStatus, userId } = command;
 
     if (!likeStatus[myStatus]) {
@@ -40,14 +51,24 @@ export class ChangePostLikesCountUseCase
 
     if (!isUUID(id)) return HttpStatus.NOT_FOUND;
 
-    const foundPost = await this.postsRepository.findPostById(id);
+    const foundPost = await this.postsTransactionsRepository.findPostById(
+      id,
+      manager,
+    );
     if (!foundPost) return HttpStatus.NOT_FOUND;
 
-    const user = await this.usersRepository.fetchAllUserDataById(userId);
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
+    );
     if (!user) return HttpStatus.NOT_FOUND;
 
     const userPostLike =
-      await this.postLikesRepository.findPostLikesByUserIdAndPostId(userId, id);
+      await this.postLikesTransactionsRepository.findPostLikesByUserIdAndPostId(
+        userId,
+        id,
+        manager,
+      );
 
     if (
       userPostLike?.likeStatus === myStatus ||
@@ -66,8 +87,12 @@ export class ChangePostLikesCountUseCase
 
     PostLike.update(likeStatement, myStatus, foundPost, user);
 
-    await this.dataSourceRepository.save(likeStatement);
+    await this.transactionsRepository.save(likeStatement, manager);
 
     return HttpStatus.NO_CONTENT;
+  }
+
+  async execute(command: ChangePostLikesCountCommand) {
+    return super.execute(command);
   }
 }

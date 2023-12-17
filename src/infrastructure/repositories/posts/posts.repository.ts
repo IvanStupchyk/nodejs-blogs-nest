@@ -270,17 +270,6 @@ export class PostsRepository {
       .getOne();
   }
 
-  async deletePost(id: string): Promise<boolean> {
-    const result = await this.postsRepository
-      .createQueryBuilder('p')
-      .delete()
-      .from(Post)
-      .where('id = :id', { id })
-      .execute();
-
-    return !!result.affected;
-  }
-
   private _postsMapper(posts: Array<any>): Array<PostViewType> {
     return posts.length
       ? posts.map((p) => {
