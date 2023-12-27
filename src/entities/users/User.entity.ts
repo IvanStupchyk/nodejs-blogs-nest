@@ -2,7 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Device } from '../devices/Device.entity';
@@ -14,6 +16,8 @@ import { Player } from '../game/Player.entity';
 import { Blog } from '../blogs/Blog.entity';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
+import { UserBanInfo } from './User-ban-info.entity';
+import { Post } from '../posts/Post.entity';
 
 @Entity('users')
 export class User {
@@ -38,6 +42,9 @@ export class User {
   @Column({ nullable: true, type: 'timestamp with time zone' })
   expirationDate: Date | null;
 
+  @OneToOne(() => UserBanInfo, (userBanInfo) => userBanInfo.user)
+  userBanInfo: UserBanInfo;
+
   @OneToMany(() => Device, (device) => device.user)
   device: Device[];
 
@@ -47,8 +54,8 @@ export class User {
   @OneToMany(() => Blog, (blog) => blog.user)
   blog: Blog[];
 
-  // @OneToMany(() => Post, (post) => post.user)
-  // post: Post[];
+  @OneToMany(() => Post, (post) => post.user)
+  post: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comment: Comment[];

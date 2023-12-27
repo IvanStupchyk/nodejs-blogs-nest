@@ -31,4 +31,18 @@ export class DevicesTransactionsRepository {
 
     return !!isDeleted.affected;
   }
+
+  async removeAllUserSessions(
+    id: string,
+    manager: EntityManager,
+  ): Promise<boolean> {
+    const isDeleted = await manager
+      .createQueryBuilder(Device, 'd')
+      .delete()
+      .from(Device)
+      .where('userId = :id', { id })
+      .execute();
+
+    return !!isDeleted.affected;
+  }
 }

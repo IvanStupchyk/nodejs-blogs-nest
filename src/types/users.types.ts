@@ -15,11 +15,17 @@ export type UserType = {
   isConfirmed: boolean;
 };
 
+type BanInfoType = {
+  isBanned: boolean;
+  banDate?: Date;
+  banReason?: string;
+};
 export class UserViewType {
   id: string;
   login: string;
   email: string;
   createdAt: Date;
+  banInfo: BanInfoType;
 }
 
 export type UsersViewType = {

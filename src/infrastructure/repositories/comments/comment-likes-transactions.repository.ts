@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { Post } from '../../../entities/posts/Post.entity';
 import { CommentLike } from '../../../entities/comments/Comment-like.entity';
 
 @Injectable()
@@ -12,18 +11,11 @@ export class CommentLikesTransactionsRepository {
   ): Promise<CommentLike | null> {
     return await manager
       .createQueryBuilder(CommentLike, 'c')
+      .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('c.commentId = :commentId', { commentId })
       .andWhere('c.userId = :userId', { userId })
+      .andWhere('ubi.isBanned is not true')
       .getOne();
-  }
-
-  async deleteAllCommentLikes(manager: EntityManager): Promise<boolean> {
-    const result = await manager
-      .createQueryBuilder(CommentLike, 'c')
-      .delete()
-      .from(Post)
-      .execute();
-
-    return !!result.affected;
   }
 }

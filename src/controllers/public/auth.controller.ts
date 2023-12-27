@@ -46,7 +46,6 @@ export class AuthController {
   @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post('login')
   async login(
-    @Body() body: LoginUserInputDto,
     @Ip() ip: string,
     @Headers() headers: any,
     @CurrentUserId() currentUserId,

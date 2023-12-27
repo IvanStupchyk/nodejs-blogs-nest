@@ -8,6 +8,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { UserBanInfo } from '../../../entities/users/User-ban-info.entity';
 
 export class CreateCommonUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -36,9 +37,10 @@ export class CreateCommonUserUseCase extends TransactionUseCase<
     const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = User.createCommonUser(login, email, passwordHash);
+    const userBanInfo = UserBanInfo.create(newUser);
 
     const savedUser = await this.transactionsRepository.save(newUser, manager);
-
+    await this.transactionsRepository.save(userBanInfo, manager);
     try {
       await emailTemplatesManager.sendEmailConfirmationMessage(newUser);
     } catch (error) {

@@ -11,6 +11,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class CreatePostCommand {
   constructor(
@@ -29,6 +30,7 @@ export class CreatePostUseCase extends TransactionUseCase<
     @InjectDataSource()
     protected readonly dataSource: DataSource,
     private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -53,12 +55,18 @@ export class CreatePostUseCase extends TransactionUseCase<
       return exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      command.userId,
+      manager,
+    );
+
     const newPost = Post.create(
       title,
       content,
       shortDescription,
       foundBlog.name,
       foundBlog,
+      user,
     );
 
     const savedPost = await this.transactionsRepository.save(newPost, manager);

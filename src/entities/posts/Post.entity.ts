@@ -12,6 +12,7 @@ import { PostLike } from './Post-like.entity';
 import { Comment } from '../comments/Comment.entity';
 import { exceptionHandler } from '../../exception.handler';
 import { HttpStatus } from '@nestjs/common';
+import { User } from '../users/User.entity';
 
 @Entity('posts')
 export class Post {
@@ -27,11 +28,11 @@ export class Post {
   @Column({ type: 'varchar', width: 1000 })
   content: string;
 
-  // @ManyToOne(() => User, (user) => user.post, {
-  //   onDelete: 'CASCADE',
-  // })
-  // @JoinColumn()
-  // user: User;
+  @ManyToOne(() => User, (user) => user.post, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  user: User;
 
   @ManyToOne(() => Blog, (blog) => blog.post, {
     onDelete: 'CASCADE',
@@ -57,6 +58,7 @@ export class Post {
     shortDescription: string,
     blogName: string,
     blog: Blog,
+    user: User,
   ): Post {
     const post = new Post();
     post.title = title;
@@ -64,6 +66,7 @@ export class Post {
     post.shortDescription = shortDescription;
     post.blogName = blogName;
     post.blog = blog;
+    post.user = user;
 
     return post;
   }

@@ -3,9 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Post,
+  Put,
   Query,
   Res,
   UseGuards,
@@ -20,6 +22,9 @@ import { CreateSuperUserCommand } from '../../domain/users/use-cases/create-supe
 import { DeleteUserCommand } from '../../domain/users/use-cases/delete-user-use-case';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
 import { SAUserInputDto } from '../../application/dto/users/sa-user.input.dto';
+import { UserBanDto } from '../../application/dto/users/user-ban.input.dto';
+import { BanUserParamsDto } from '../../application/dto/users/ban-user.params.dto';
+import { BanUserCommand } from '../../domain/users/use-cases/ban-user-use-case';
 
 @Controller(RouterPaths.users)
 export class UsersSaController {
@@ -38,6 +43,13 @@ export class UsersSaController {
   @Post()
   async createUser(@Body() body: SAUserInputDto) {
     return await this.commandBus.execute(new CreateSuperUserCommand(body));
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Put(':id/ban')
+  @HttpCode(204)
+  async banUser(@Param() params: BanUserParamsDto, @Body() body: UserBanDto) {
+    return await this.commandBus.execute(new BanUserCommand(params.id, body));
   }
 
   @UseGuards(BasicAuthGuard)

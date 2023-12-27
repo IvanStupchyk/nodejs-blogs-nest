@@ -26,6 +26,9 @@ export const usersTestManager = {
         login: data.login,
         email: data.email,
         createdAt: expect.any(String),
+        banInfo: {
+          isBanned: false,
+        },
       });
     }
 

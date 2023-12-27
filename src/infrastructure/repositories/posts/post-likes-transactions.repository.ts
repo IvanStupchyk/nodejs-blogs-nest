@@ -12,12 +12,15 @@ export class PostLikesTransactionsRepository {
   ): Promise<PostLike | null> {
     return await manager
       .createQueryBuilder(PostLike, 'l')
+      .leftJoinAndSelect('l.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('l.userId = :userId', {
         userId,
       })
       .andWhere('l.postId = :postId', {
         postId,
       })
+      .andWhere('ubi.isBanned is not true')
       .getOne();
   }
 

@@ -58,3 +58,12 @@ export const validQuestionData: QuestionInputDto = {
   body: 'what is the main goal in the live?',
   correctAnswers: ['joy'],
 };
+
+export const deviceMock = {
+  ip: expect.any(String),
+  title: expect.any(String),
+  lastActiveDate: expect.stringMatching(
+    /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+  ),
+  deviceId: expect.any(String),
+};

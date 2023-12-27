@@ -4,7 +4,7 @@ import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
 import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -17,6 +17,7 @@ import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts.types';
 import { BlogViewType } from '../../src/types/blogs.types';
 import { userCreator } from '../utils/user-creator';
+import { User } from '../../src/entities/users/User.entity';
 
 describe('tests for /posts', () => {
   let validPostData: PostInputDto = {
@@ -28,6 +29,7 @@ describe('tests for /posts', () => {
 
   let app: INestApplication;
   let httpServer;
+  let user2: User;
   let accessTokenUser1: string;
   let refreshTokenUser1: string;
   let accessTokenUser2: string;
@@ -49,6 +51,7 @@ describe('tests for /posts', () => {
     refreshTokenUser1 = resp.refreshToken;
 
     const resp2 = await userCreator(httpServer, userData2);
+    user2 = resp2.user;
     accessTokenUser2 = resp2.accessToken;
     refreshTokenUser2 = resp2.refreshToken;
   });
@@ -71,6 +74,7 @@ describe('tests for /posts', () => {
   });
 
   let newBlog: BlogViewType;
+  let blogUser2: BlogViewType;
   it("shouldn't create a post if the user is not logged in", async () => {
     await postsTestManager.createPostForSpecifiedBlog(
       httpServer,
@@ -93,6 +97,23 @@ describe('tests for /posts', () => {
       .expect(createdBlog);
 
     newBlog = createdBlog;
+
+    const secondBlog = await blogsTestManager.createBlog(
+      httpServer,
+      {
+        name: 'second user',
+        description: 'aaaaa aaaaa',
+        websiteUrl: 'https://www.aaaaa.com',
+      },
+      accessTokenUser2,
+      refreshTokenUser2,
+    );
+
+    await getRequest()
+      .get(`${RouterPaths.blogs}/${secondBlog.createdBlog.id}`)
+      .expect(secondBlog.createdBlog);
+
+    blogUser2 = secondBlog.createdBlog;
   });
 
   it("shouldn't create a post if the user sends invalid data", async () => {
@@ -205,10 +226,11 @@ describe('tests for /posts', () => {
       {
         ...validPostData,
         title: 'fourth',
+        blogId: blogUser2.id,
       },
-      newBlog.id,
-      accessTokenUser1,
-      refreshTokenUser1,
+      blogUser2.id,
+      accessTokenUser2,
+      refreshTokenUser2,
     );
 
     newPosts.unshift(secondPost.createdPost);
@@ -241,6 +263,38 @@ describe('tests for /posts', () => {
         totalCount: newPosts.length,
         items: sortedPosts,
       });
+  });
+
+  it('should bun a user and block its posts', async () => {
+    const correctBody = {
+      isBanned: true,
+      banReason: 'because',
+    };
+
+    await request(httpServer)
+      .put(`${RouterPaths.users}/${user2.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send(correctBody)
+      .expect(HttpStatus.NO_CONTENT);
+
+    await getRequest()
+      .get(RouterPaths.posts)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 3,
+        items: newPosts.slice(1),
+      });
+
+    await request(httpServer)
+      .put(`${RouterPaths.users}/${user2.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: false,
+        banReason: 'h',
+      })
+      .expect(HttpStatus.NO_CONTENT);
   });
 
   it("shouldn't update post if the post doesn't exist", async () => {
@@ -335,8 +389,8 @@ describe('tests for /posts', () => {
         pagesCount: 1,
         page: 1,
         pageSize: 10,
-        totalCount: 1,
-        items: [newBlog],
+        totalCount: 2,
+        items: [blogUser2, newBlog],
       });
   });
 });

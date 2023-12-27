@@ -22,7 +22,7 @@ export class ValidateUserUseCase
     const user =
       await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
-    if (user) {
+    if (user && !user.userBanInfo.isBanned) {
       const isCredentialsCorrect = await bcrypt.compare(
         password,
         user.passwordHash,
