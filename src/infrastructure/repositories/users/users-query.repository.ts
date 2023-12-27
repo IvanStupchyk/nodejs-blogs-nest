@@ -80,8 +80,8 @@ export class UsersQueryRepository {
             createdAt: u.createdAt,
             banInfo: {
               isBanned: u.userBanInfo.isBanned,
-              banDate: u.userBanInfo.banDate ?? undefined,
-              banReason: u.userBanInfo.banReason ?? undefined,
+              banDate: u.userBanInfo.banDate,
+              banReason: u.userBanInfo.banReason,
             },
           };
         })

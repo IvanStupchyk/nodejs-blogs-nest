@@ -9,9 +9,6 @@ import { exceptionHandler } from '../../../exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 import { errorMessageGenerator } from '../../../utils/error-message-generator';
-import { UserBanInfo } from '../../../entities/users/User-ban-info.entity';
-import { use } from 'passport';
-import { el } from 'date-fns/locale';
 import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
 
 export class BanUserCommand {
@@ -38,7 +35,7 @@ export class BanUserUseCase extends TransactionUseCase<BanUserCommand, void> {
     manager: EntityManager,
   ): Promise<void> {
     const { id, banInfo } = command;
-    // console.log('banInfo', banInfo);
+
     if (!isUUID(id)) {
       exceptionHandler(HttpStatus.BAD_REQUEST);
     }
@@ -47,7 +44,7 @@ export class BanUserUseCase extends TransactionUseCase<BanUserCommand, void> {
       id,
       manager,
     );
-    // console.log('user', user);
+
     if (!user) {
       errorMessageGenerator([{ field: 'id', message: 'user not found' }]);
     }
