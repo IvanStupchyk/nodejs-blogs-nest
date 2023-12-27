@@ -2,17 +2,20 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { usersTestManager } from '../utils/users-test-manager';
 import { LoginUserInputDto } from '../../src/application/dto/auth/login-user.input.dto';
 import { UserViewType } from '../../src/types/users.types';
-import { invalidUserData, userData1 } from '../mockData/mock-data';
+import { deviceMock, invalidUserData, userData1 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
+import { userCreator } from '../utils/user-creator';
 
 describe('tests for /users and /auth', () => {
   let app: INestApplication;
   let httpServer;
+  let accessTokenUser1;
+  let refreshTokenUser1;
 
   beforeAll(async () => {
     const serverConfig = await serverStarter();
@@ -23,7 +26,7 @@ describe('tests for /users and /auth', () => {
   });
 
   afterAll(async () => {
-    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+    // await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
@@ -83,13 +86,13 @@ describe('tests for /users and /auth', () => {
 
   let newUser: UserViewType;
   it('should create a user if the user sends the valid data', async () => {
-    const { createdUser } = await usersTestManager.createUser(
-      httpServer,
-      userData1,
-    );
+    const resp = await userCreator(httpServer, userData1);
 
-    newUser = createdUser;
-    newUsers.push(createdUser);
+    newUser = resp.user;
+    accessTokenUser1 = resp.accessToken;
+    refreshTokenUser1 = resp.refreshToken;
+
+    newUsers.push(newUser);
 
     await request(httpServer)
       .get(RouterPaths.users)
@@ -99,7 +102,7 @@ describe('tests for /users and /auth', () => {
         page: 1,
         pageSize: 10,
         totalCount: 1,
-        items: [createdUser],
+        items: [newUser],
       });
   });
 
@@ -230,6 +233,114 @@ describe('tests for /users and /auth', () => {
       .post(`${RouterPaths.auth}/login`)
       .send(userWithCorrectData)
       .expect(HTTP_STATUSES.OK_200);
+  });
+
+  describe('ban user', () => {
+    it('should not ban a user if body is incorrect or user does not exist', async () => {
+      const body = {
+        isBanned: '',
+        banDate: false,
+        banReason: [1, 2],
+      };
+
+      const rest = await request(httpServer)
+        .put(`${RouterPaths.users}/asfaf/ban`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(body)
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(rest.body).toEqual({
+        errorsMessages: [
+          {
+            field: 'isBanned',
+            message: 'isBanned must be a boolean value',
+          },
+          {
+            field: 'banReason',
+            message: 'banReason must be longer than or equal to 1 characters',
+          },
+        ],
+      });
+
+      const correctBody = {
+        isBanned: true,
+        banDate: new Date(),
+        banReason: 'because',
+      };
+
+      await request(httpServer)
+        .put(`${RouterPaths.users}/asfaf/ban`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(correctBody)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('should ban, unban and bun a user', async () => {
+      const correctBody = {
+        isBanned: true,
+        banReason: 'because',
+      };
+
+      const userDevicesBeforeBan = await request(httpServer)
+        .get(`${RouterPaths.security}/devices`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(userDevicesBeforeBan.body.length).toBe(2);
+
+      await request(httpServer)
+        .put(`${RouterPaths.users}/${newUser.id}/ban`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(correctBody)
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(httpServer)
+        .get(`${RouterPaths.security}/devices`)
+        .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+        .expect(HttpStatus.UNAUTHORIZED);
+
+      await request(httpServer)
+        .post(`${RouterPaths.auth}/login`)
+        .send({
+          loginOrEmail: newUser.login,
+          password: userData1.password,
+        })
+        .expect(HttpStatus.UNAUTHORIZED);
+
+      await request(httpServer)
+        .put(`${RouterPaths.users}/${newUser.id}/ban`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send({
+          isBanned: false,
+          banReason: 'aa',
+        })
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(httpServer)
+        .post(`${RouterPaths.auth}/login`)
+        .send({
+          loginOrEmail: newUser.login,
+          password: userData1.password,
+        })
+        .expect(HttpStatus.OK);
+
+      await request(httpServer)
+        .put(`${RouterPaths.users}/${newUser.id}/ban`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send({
+          isBanned: true,
+          banReason: 'again',
+        })
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(httpServer)
+        .post(`${RouterPaths.auth}/login`)
+        .send({
+          loginOrEmail: newUser.login,
+          password: userData1.password,
+        })
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
   });
 
   it("shouldn't delete user if the user doesn't exist", async () => {

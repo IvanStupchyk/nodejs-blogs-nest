@@ -10,6 +10,7 @@ import { Question } from '../entities/game/Question.entity';
 import { Answer } from '../entities/game/Answer.entity';
 import { Player } from '../entities/game/Player.entity';
 import { Game } from '../entities/game/Game.entity';
+import { UserBanInfo } from '../entities/users/User-ban-info.entity';
 
 export type EntitiesType =
   | User
@@ -23,4 +24,5 @@ export type EntitiesType =
   | Question
   | Answer
   | Player
-  | Game;
+  | Game
+  | UserBanInfo;

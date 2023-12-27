@@ -3,8 +3,7 @@ import { HTTP_STATUSES } from '../../src/utils/utils';
 import { usersTestManager } from '../utils/users-test-manager';
 import { INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
-import { UserViewType } from '../../src/types/users.types';
-import { userData1, userData2 } from '../mockData/mock-data';
+import { deviceMock, userData1, userData2 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 const { parse } = require('cookie');
 
@@ -12,15 +11,6 @@ const sleep = (seconds: number) =>
   new Promise((r) => setTimeout(r, seconds * 1000));
 
 describe('tests for /devices and /auth', () => {
-  const deviceMock = {
-    ip: expect.any(String),
-    title: expect.any(String),
-    lastActiveDate: expect.stringMatching(
-      /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
-    ),
-    deviceId: expect.any(String),
-  };
-
   let app: INestApplication;
   let httpServer;
 
@@ -42,13 +32,11 @@ describe('tests for /devices and /auth', () => {
   });
 
   let simpleUser;
-  let superAdminUser: UserViewType;
   it('should create two users for next test cases', async () => {
     const { createdUser } = await usersTestManager.createUser(
       httpServer,
       userData1,
     );
-    superAdminUser = createdUser;
 
     const secondUser = await usersTestManager.createUser(httpServer, userData2);
     simpleUser = secondUser.createdUser;
@@ -66,11 +54,7 @@ describe('tests for /devices and /auth', () => {
   });
 
   let firstRefreshToken: string;
-  let secondRefreshToken: string;
-  let thirdRefreshToken: string;
-  let fourthRefreshToken: string;
   let fifthRefreshToken: string;
-  let thirdSession: any;
   let firstUserSessions: any;
   let secondUserSessions: any;
   it('should create five sessions', async () => {
@@ -89,7 +73,7 @@ describe('tests for /devices and /auth', () => {
     );
     firstRefreshToken = firstExampleCookie?.refreshToken;
 
-    const secondLogin = await getRequest()
+    await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
         loginOrEmail: userData2.login,
@@ -97,14 +81,7 @@ describe('tests for /devices and /auth', () => {
       })
       .expect(HTTP_STATUSES.OK_200);
 
-    const secondCookies = secondLogin.headers['set-cookie'];
-    const secondParsedCookies: Array<any> = secondCookies.map(parse);
-    const secondExampleCookie = secondParsedCookies.find(
-      (cookie) => cookie?.refreshToken,
-    );
-    secondRefreshToken = secondExampleCookie?.refreshToken;
-
-    const thirdLogin = await getRequest()
+    await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
         loginOrEmail: userData1.login,
@@ -112,27 +89,13 @@ describe('tests for /devices and /auth', () => {
       })
       .expect(HTTP_STATUSES.OK_200);
 
-    const thirdCookies = thirdLogin.headers['set-cookie'];
-    const thirdParsedCookies: Array<any> = thirdCookies.map(parse);
-    const thirdExampleCookie = thirdParsedCookies.find(
-      (cookie) => cookie?.refreshToken,
-    );
-    thirdRefreshToken = thirdExampleCookie?.refreshToken;
-
-    const fourthLogin = await getRequest()
+    await getRequest()
       .post(`${RouterPaths.auth}/login`)
       .send({
         loginOrEmail: userData1.login,
         password: userData1.password,
       })
       .expect(HTTP_STATUSES.OK_200);
-
-    const fourthCookies = fourthLogin.headers['set-cookie'];
-    const fourthParsedCookies: Array<any> = fourthCookies.map(parse);
-    const fourthExampleCookie = fourthParsedCookies.find(
-      (cookie) => cookie?.refreshToken,
-    );
-    fourthRefreshToken = fourthExampleCookie?.refreshToken;
 
     const fifthLogin = await getRequest()
       .post(`${RouterPaths.auth}/login`)
@@ -161,7 +124,6 @@ describe('tests for /devices and /auth', () => {
     ]);
     expect(secondUserDevices.body.length).toEqual(3);
 
-    thirdSession = secondUserDevices.body[2];
     secondUserSessions = secondUserDevices.body;
     const firstUserDevices = await getRequest()
       .get(`${RouterPaths.security}/devices`)

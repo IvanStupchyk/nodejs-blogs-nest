@@ -21,6 +21,7 @@ export class UsersRepository {
   async findUserByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
     return await this.usersRepository
       .createQueryBuilder('u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where(
         `${
           loginOrEmail

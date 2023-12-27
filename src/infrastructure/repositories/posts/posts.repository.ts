@@ -33,6 +33,8 @@ export class PostsRepository {
     const posts = await this.postsRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .addSelect(
         (l) =>
           l
@@ -82,6 +84,7 @@ export class PostsRepository {
 
         'newest_likes',
       )
+      .where('ubi.isBanned is not true')
       .orderBy(`p.${sortBy}`, sortDirection)
       .offset(skipSize)
       .limit(pageSize)
@@ -89,6 +92,9 @@ export class PostsRepository {
 
     const postsCount = await this.postsRepository
       .createQueryBuilder('p')
+      .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
+      .where('ubi.isBanned is not true')
       .getCount();
 
     const pagesCount = getPagesCount(postsCount, pageSize);
@@ -106,6 +112,8 @@ export class PostsRepository {
     const post = await this.postsRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .addSelect(
         (l) =>
           l
@@ -158,6 +166,7 @@ export class PostsRepository {
       .where('p.id = :id', {
         id,
       })
+      .andWhere('ubi.isBanned is not true')
       .getRawMany();
 
     if (!post.length) {
@@ -185,6 +194,8 @@ export class PostsRepository {
     const posts = await this.postsRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .addSelect(
         (l) =>
           l
@@ -237,6 +248,7 @@ export class PostsRepository {
       .where('b.id = :id', {
         id,
       })
+      .andWhere('ubi.isBanned is not true')
       .orderBy(`p.${sortBy}`, sortDirection)
       .offset(skipSize)
       .limit(pageSize)
@@ -245,9 +257,12 @@ export class PostsRepository {
     const postsCount = await this.postsRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('b.id = :id', {
         id,
       })
+      .andWhere('ubi.isBanned is not true')
       .getCount();
 
     if (!postsCount) return null;

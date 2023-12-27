@@ -7,6 +7,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UserBanInfo } from '../../../entities/users/User-ban-info.entity';
 
 export class CreateSuperUserCommand {
   constructor(public userData: SAUserInputDto) {}
@@ -34,14 +35,19 @@ export class CreateSuperUserUseCase extends TransactionUseCase<
     const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = User.createAdminUser(login, email, passwordHash);
+    const userBanInfo = UserBanInfo.create(newUser);
 
     const savedUser = await this.transactionsRepository.save(newUser, manager);
+    await this.transactionsRepository.save(userBanInfo, manager);
 
     return {
       id: savedUser.id,
       login: savedUser.login,
       email: savedUser.email,
       createdAt: savedUser.createdAt,
+      banInfo: {
+        isBanned: userBanInfo.isBanned,
+      },
     };
   }
 

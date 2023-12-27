@@ -27,6 +27,7 @@ export class UsersQueryRepository {
 
     const users = await this.usersRepository
       .createQueryBuilder('u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where(
         `${
           searchLoginTerm || searchEmailTerm
@@ -77,6 +78,11 @@ export class UsersQueryRepository {
             login: u.login,
             email: u.email,
             createdAt: u.createdAt,
+            banInfo: {
+              isBanned: u.userBanInfo.isBanned,
+              banDate: u.userBanInfo.banDate ?? undefined,
+              banReason: u.userBanInfo.banReason ?? undefined,
+            },
           };
         })
       : [];

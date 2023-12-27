@@ -25,5 +25,6 @@ export class ResetDbController {
     await this.dataSource.query('DELETE from "gamePlayers"');
     await this.dataSource.query('DELETE from "questions_games_games"');
     await this.dataSource.query('DELETE from "users"');
+    await this.dataSource.query('DELETE from "users_ban_info"');
   }
 }

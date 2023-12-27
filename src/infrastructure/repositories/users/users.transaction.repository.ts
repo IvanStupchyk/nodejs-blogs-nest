@@ -10,6 +10,20 @@ export class UsersTransactionRepository {
   ): Promise<User | null> {
     return await manager
       .createQueryBuilder(User, 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
+      .where('u.id = :id', {
+        id,
+      })
+      .getOne();
+  }
+
+  async findUserToBanById(
+    id: string,
+    manager: EntityManager,
+  ): Promise<User | null> {
+    return await manager
+      .createQueryBuilder(User, 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('u.id = :id', {
         id,
       })

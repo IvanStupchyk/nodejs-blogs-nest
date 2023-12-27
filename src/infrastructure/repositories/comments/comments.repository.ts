@@ -54,8 +54,10 @@ export class CommentsRepository {
         'my_status',
       )
       .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .leftJoinAndSelect('c.post', 'p')
       .where('c.id = :id', { id })
+      .andWhere('ubi.isBanned is not true')
       .getRawOne();
 
     return comment
@@ -120,8 +122,10 @@ export class CommentsRepository {
         'my_status',
       )
       .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .leftJoinAndSelect('c.post', 'p')
       .where('p.id = :postId', { postId })
+      .andWhere('ubi.isBanned is not true')
       .orderBy(`c.${sortBy}`, sortDirection)
       .limit(pageSize)
       .offset(skipSize)
@@ -130,7 +134,10 @@ export class CommentsRepository {
     const commentsCount = await this.commentsRepository
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.post', 'p')
+      .leftJoinAndSelect('c.user', 'u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('p.id = :postId', { postId })
+      .andWhere('ubi.isBanned is not true')
       .getCount();
 
     if (!commentsCount) return null;
