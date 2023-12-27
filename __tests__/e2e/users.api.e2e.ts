@@ -26,7 +26,7 @@ describe('tests for /users and /auth', () => {
   });
 
   afterAll(async () => {
-    // await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
@@ -257,7 +257,7 @@ describe('tests for /users and /auth', () => {
           },
           {
             field: 'banReason',
-            message: 'banReason must be longer than or equal to 1 characters',
+            message: 'banReason must be longer than or equal to 20 characters',
           },
         ],
       });
@@ -265,7 +265,7 @@ describe('tests for /users and /auth', () => {
       const correctBody = {
         isBanned: true,
         banDate: new Date(),
-        banReason: 'because',
+        banReason: 'because because because because because because',
       };
 
       await request(httpServer)
@@ -278,7 +278,7 @@ describe('tests for /users and /auth', () => {
     it('should ban, unban and bun a user', async () => {
       const correctBody = {
         isBanned: true,
-        banReason: 'because',
+        banReason: 'because because because because because because',
       };
 
       const userDevicesBeforeBan = await request(httpServer)
@@ -312,7 +312,7 @@ describe('tests for /users and /auth', () => {
         .auth('admin', 'qwerty', { type: 'basic' })
         .send({
           isBanned: false,
-          banReason: 'aa',
+          banReason: 'aa because because because because because because',
         })
         .expect(HttpStatus.NO_CONTENT);
 
@@ -329,7 +329,7 @@ describe('tests for /users and /auth', () => {
         .auth('admin', 'qwerty', { type: 'basic' })
         .send({
           isBanned: true,
-          banReason: 'again',
+          banReason: 'again because because because because because',
         })
         .expect(HttpStatus.NO_CONTENT);
 

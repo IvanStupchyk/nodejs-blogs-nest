@@ -17,7 +17,7 @@ export type UserType = {
 
 type BanInfoType = {
   isBanned: boolean;
-  banDate?: Date;
+  banDate: Date;
   banReason?: string;
 };
 export class UserViewType {

@@ -4,6 +4,6 @@ export class UserBanDto {
   @IsBoolean()
   isBanned: boolean;
 
-  @MinLength(1)
+  @MinLength(20)
   banReason: string;
 }

@@ -47,6 +47,8 @@ export class CreateSuperUserUseCase extends TransactionUseCase<
       createdAt: savedUser.createdAt,
       banInfo: {
         isBanned: userBanInfo.isBanned,
+        banDate: null,
+        banReason: null,
       },
     };
   }

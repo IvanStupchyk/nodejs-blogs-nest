@@ -268,7 +268,7 @@ describe('tests for /posts', () => {
   it('should bun a user and block its posts', async () => {
     const correctBody = {
       isBanned: true,
-      banReason: 'because',
+      banReason: 'because because because because because',
     };
 
     await request(httpServer)

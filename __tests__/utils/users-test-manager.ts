@@ -28,6 +28,8 @@ export const usersTestManager = {
         createdAt: expect.any(String),
         banInfo: {
           isBanned: false,
+          banDate: null,
+          banReason: null,
         },
       });
     }
