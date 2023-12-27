@@ -14,7 +14,7 @@ export class UsersQueryRepository {
   ) {}
 
   async getSortedUsers(params: UsersQueryDto): Promise<UsersViewType> {
-    const { searchLoginTerm, searchEmailTerm } = params;
+    const { searchLoginTerm, searchEmailTerm, banStatus } = params;
 
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
       createDefaultSortedParams({
@@ -39,6 +39,14 @@ export class UsersQueryRepository {
           email: `%${searchEmailTerm}%`,
         },
       )
+      .andWhere(
+        `${
+          typeof banStatus !== 'undefined'
+            ? 'ubi.isBanned = :banStatus'
+            : 'ubi.isBanned is not null'
+        }`,
+        { banStatus },
+      )
       .orderBy(`u.${sortBy}`, sortDirection)
       .skip(skipSize)
       .take(pageSize)
@@ -46,6 +54,7 @@ export class UsersQueryRepository {
 
     const usersCount = await this.usersRepository
       .createQueryBuilder('u')
+      .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where(
         `${
           searchLoginTerm || searchEmailTerm
@@ -56,6 +65,14 @@ export class UsersQueryRepository {
           login: `%${searchLoginTerm}%`,
           email: `%${searchEmailTerm}%`,
         },
+      )
+      .andWhere(
+        `${
+          typeof banStatus !== 'undefined'
+            ? 'ubi.isBanned = :banStatus'
+            : 'ubi.isBanned is not null'
+        }`,
+        { banStatus },
       )
       .getCount();
 
