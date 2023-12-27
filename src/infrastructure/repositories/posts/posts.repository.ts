@@ -82,8 +82,10 @@ export class PostsRepository {
                 .select(`added_at, u.id, u.login`)
                 .from(PostLike, 'pl')
                 .leftJoin('pl.user', 'u')
+                .leftJoin('u.userBanInfo', 'ubi')
                 .where('pl.postId = p.id')
                 .andWhere(`pl.like_status = 'Like'`)
+                .andWhere('ubi.isBanned is not true')
                 .orderBy('added_at', 'DESC')
                 .limit(3);
             }, 'agg'),
@@ -167,8 +169,10 @@ export class PostsRepository {
                 .select(`added_at, u.id, u.login`)
                 .from(PostLike, 'pl')
                 .leftJoin('pl.user', 'u')
+                .leftJoin('u.userBanInfo', 'ubi')
                 .where('pl.postId = p.id')
                 .andWhere(`pl.like_status = 'Like'`)
+                .andWhere('ubi.isBanned is not true')
                 .orderBy('added_at', 'DESC')
                 .limit(3);
             }, 'agg'),
