@@ -275,7 +275,7 @@ describe('tests for /users and /auth', () => {
         .expect(HttpStatus.BAD_REQUEST);
     });
 
-    it('should ban, unban and bun a user', async () => {
+    it('should ban, unban and ban a user', async () => {
       const correctBody = {
         isBanned: true,
         banReason: 'because because because because because because',
@@ -340,6 +340,34 @@ describe('tests for /users and /auth', () => {
           password: userData1.password,
         })
         .expect(HttpStatus.UNAUTHORIZED);
+
+      const res = await request(httpServer)
+        .get(RouterPaths.users)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(res.body.totalCount).toBe(4);
+
+      const res2 = await request(httpServer)
+        .get(`${RouterPaths.users}?banStatus=true`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(res2.body.totalCount).toBe(4);
+
+      const res3 = await request(httpServer)
+        .get(`${RouterPaths.users}?banStatus=banned`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(res3.body.totalCount).toBe(1);
+
+      const res4 = await request(httpServer)
+        .get(`${RouterPaths.users}?banStatus=notBanned`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .expect(HTTP_STATUSES.OK_200);
+
+      expect(res4.body.totalCount).toBe(3);
     });
   });
 
