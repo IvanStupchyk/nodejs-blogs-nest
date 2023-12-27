@@ -31,8 +31,11 @@ export class CommentsRepository {
           lk
             .select('count(*)')
             .from(CommentLike, 'cl')
+            .leftJoin('cl.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('c.id = cl.commentId')
-            .andWhere("cl.likeStatus = 'Like'"),
+            .andWhere("cl.likeStatus = 'Like'")
+            .andWhere('ubi.isBanned is not true'),
         'likes_count',
       )
       .addSelect(
@@ -40,8 +43,11 @@ export class CommentsRepository {
           lk
             .select('count(*)')
             .from(CommentLike, 'cl')
+            .leftJoin('cl.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('c.id = cl.commentId')
-            .andWhere("cl.likeStatus = 'Dislike'"),
+            .andWhere("cl.likeStatus = 'Dislike'")
+            .andWhere('ubi.isBanned is not true'),
         'dislikes_count',
       )
       .addSelect(
@@ -99,8 +105,11 @@ export class CommentsRepository {
           lk
             .select('count(*)')
             .from(CommentLike, 'cl')
+            .leftJoin('cl.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('c.id = cl.commentId')
-            .andWhere("cl.likeStatus = 'Like'"),
+            .andWhere("cl.likeStatus = 'Like'")
+            .andWhere('ubi.isBanned is not true'),
         'likes_count',
       )
       .addSelect(
@@ -108,8 +117,11 @@ export class CommentsRepository {
           lk
             .select('count(*)')
             .from(CommentLike, 'cl')
+            .leftJoin('cl.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('c.id = cl.commentId')
-            .andWhere("cl.likeStatus = 'Dislike'"),
+            .andWhere("cl.likeStatus = 'Dislike'")
+            .andWhere('ubi.isBanned is not true'),
         'dislikes_count',
       )
       .addSelect(

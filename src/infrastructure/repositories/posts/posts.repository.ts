@@ -40,8 +40,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = p.id')
-            .andWhere("lk.likeStatus = 'Like'"),
+            .andWhere("lk.likeStatus = 'Like'")
+            .andWhere('ubi.isBanned is not true'),
         'likes_count',
       )
       .addSelect(
@@ -49,8 +52,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = p.id')
-            .andWhere("lk.likeStatus = 'Dislike'"),
+            .andWhere("lk.likeStatus = 'Dislike'")
+            .andWhere('ubi.isBanned is not true'),
         'dislikes_count',
       )
       .addSelect(
@@ -119,8 +125,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = :id', { id })
-            .andWhere("lk.likeStatus = 'Like'"),
+            .andWhere("lk.likeStatus = 'Like'")
+            .andWhere('ubi.isBanned is not true'),
         'likes_count',
       )
       .addSelect(
@@ -128,8 +137,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = :id', { id })
-            .andWhere("lk.likeStatus = 'Dislike'"),
+            .andWhere("lk.likeStatus = 'Dislike'")
+            .andWhere('ubi.isBanned is not true'),
         'dislikes_count',
       )
       .addSelect(
@@ -201,8 +213,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = p.id')
-            .andWhere("lk.likeStatus = 'Like'"),
+            .andWhere("lk.likeStatus = 'Like'")
+            .andWhere('ubi.isBanned is not true'),
         'likes_count',
       )
       .addSelect(
@@ -210,8 +225,11 @@ export class PostsRepository {
           l
             .select('count(*)')
             .from(PostLike, 'lk')
+            .leftJoin('lk.user', 'u')
+            .leftJoin('u.userBanInfo', 'ubi')
             .where('lk.postId = p.id')
-            .andWhere("lk.likeStatus = 'Dislike'"),
+            .andWhere("lk.likeStatus = 'Dislike'")
+            .andWhere('ubi.isBanned is not true'),
         'dislikes_count',
       )
       .addSelect(
@@ -237,8 +255,10 @@ export class PostsRepository {
                 .select(`added_at, u.id, u.login`)
                 .from(PostLike, 'pl')
                 .leftJoin('pl.user', 'u')
+                .leftJoin('u.userBanInfo', 'ubi')
                 .where('pl.postId = p.id')
                 .andWhere(`pl.like_status = 'Like'`)
+                .andWhere('ubi.isBanned is not true')
                 .orderBy('added_at', 'DESC')
                 .limit(3);
             }, 'agg'),
