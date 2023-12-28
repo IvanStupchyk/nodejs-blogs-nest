@@ -1,15 +1,15 @@
-import request from "supertest";
-import { HTTP_STATUSES } from "../../src/utils/utils";
-import { mockGetItems } from "../../src/constants/blanks";
-import { RouterPaths } from "../../src/constants/router.paths";
-import { INestApplication } from "@nestjs/common";
-import { validQuestionData } from "../mockData/mock-data";
-import { serverStarter } from "../utils/server-starter";
-import { QuestionViewType } from "../../src/types/question.types";
-import { questionsTestManager } from "../utils/qestions-test-manager";
-import { Test, TestingModule } from "@nestjs/testing";
-import { AppModule } from "../../src/app.module";
-import { QuestionsRepository } from "../../src/infrastructure/repositories/questions/questions.repository";
+import request from 'supertest';
+import { HTTP_STATUSES } from '../../src/utils/utils';
+import { mockGetItems } from '../../src/constants/blanks';
+import { RouterPaths } from '../../src/constants/router.paths';
+import { INestApplication } from '@nestjs/common';
+import { validQuestionData } from '../mockData/mock-data';
+import { serverStarter } from '../utils/server-starter';
+import { QuestionViewType } from '../../src/types/question.types';
+import { questionsTestManager } from '../utils/qestions-test-manager';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../../src/app.module';
+import { QuestionsRepository } from '../../src/infrastructure/repositories/questions/questions.repository';
 
 describe('tests for /sa/quiz/questions', () => {
   let app: INestApplication;
