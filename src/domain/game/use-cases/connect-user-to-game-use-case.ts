@@ -1,19 +1,17 @@
-import { CommandHandler } from "@nestjs/cqrs";
-import { GameViewType } from "../../../types/game.types";
-import { Player } from "../../../entities/game/Player.entity";
-import { Game } from "../../../entities/game/Game.entity";
-import { GameStatus } from "../../../types/general.types";
-import { HttpStatus } from "@nestjs/common";
-import { exceptionHandler } from "../../../utils/errors/exception.handler";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, EntityManager } from "typeorm";
-import { TransactionsRepository } from "../../../infrastructure/repositories/transactions/transactions.repository";
-import { GamesTransactionRepository } from "../../../infrastructure/repositories/game/games-transaction.repository";
-import { TransactionUseCase } from "../../transaction/use-case/transaction-use-case";
-import { UsersTransactionRepository } from "../../../infrastructure/repositories/users/users.transaction.repository";
-import {
-  QuestionsTransactionRepository
-} from "../../../infrastructure/repositories/questions/questions-transaction.repository";
+import { CommandHandler } from '@nestjs/cqrs';
+import { GameViewType } from '../../../types/game.types';
+import { Player } from '../../../entities/game/Player.entity';
+import { Game } from '../../../entities/game/Game.entity';
+import { GameStatus } from '../../../types/general.types';
+import { HttpStatus } from '@nestjs/common';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { GamesTransactionRepository } from '../../../infrastructure/repositories/game/games-transaction.repository';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { QuestionsTransactionRepository } from '../../../infrastructure/repositories/questions/questions-transaction.repository';
 
 export class ConnectUserToGameCommand {
   constructor(public userId: string) {}

@@ -1,14 +1,14 @@
-import { CommandHandler } from "@nestjs/cqrs";
-import { errorMessageGenerator } from "../../../utils/errors/error-message-generator";
-import { errorsConstants } from "../../../constants/errors.contants";
-import { v4 as uuidv4 } from "uuid";
-import add from "date-fns/add";
-import { emailTemplatesManager } from "../../../infrastructure/email-templates-manager";
-import { TransactionUseCase } from "../../transaction/use-case/transaction-use-case";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, EntityManager } from "typeorm";
-import { TransactionsRepository } from "../../../infrastructure/repositories/transactions/transactions.repository";
-import { UsersTransactionRepository } from "../../../infrastructure/repositories/users/users.transaction.repository";
+import { CommandHandler } from '@nestjs/cqrs';
+import { errorMessageGenerator } from '../../../utils/errors/error-message-generator';
+import { errorsConstants } from '../../../constants/errors.contants';
+import { v4 as uuidv4 } from 'uuid';
+import add from 'date-fns/add';
+import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
+import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 
 export class ResendEmailConfirmationCodeCommand {
   constructor(public email: string) {}
