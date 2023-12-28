@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, HttpStatus, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
 
 export const exceptionHandler = (
   code: HttpStatus,
