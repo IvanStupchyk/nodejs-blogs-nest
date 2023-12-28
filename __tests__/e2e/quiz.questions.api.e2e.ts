@@ -114,7 +114,7 @@ describe('tests for /sa/quiz/questions', () => {
         .expect(HTTP_STATUSES.NOT_FOUND_404);
 
       await request(httpServer)
-        .put(`${RouterPaths.questions}/1233`)
+        .put(`${RouterPaths.questions}/${newQuestion.id}`)
         .auth('admin', 'qwerty', { type: 'basic' })
         .send({
           body: '',

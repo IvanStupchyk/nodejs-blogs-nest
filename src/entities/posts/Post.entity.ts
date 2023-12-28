@@ -10,7 +10,7 @@ import {
 import { Blog } from '../blogs/Blog.entity';
 import { PostLike } from './Post-like.entity';
 import { Comment } from '../comments/Comment.entity';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { User } from '../users/User.entity';
 

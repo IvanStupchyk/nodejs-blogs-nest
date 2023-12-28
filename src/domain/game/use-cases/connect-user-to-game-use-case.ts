@@ -4,7 +4,7 @@ import { Player } from '../../../entities/game/Player.entity';
 import { Game } from '../../../entities/game/Game.entity';
 import { GameStatus } from '../../../types/general.types';
 import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../../exception.handler';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';

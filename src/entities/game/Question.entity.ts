@@ -1,14 +1,7 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Answer } from './Answer.entity';
-import { Game } from './Game.entity';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Answer } from "./Answer.entity";
+import { Game } from "./Game.entity";
+import { dtoExceptionsValidation } from "../../utils/errors/DtoExceptionsValidation";
 
 @Entity('questions')
 export class Question {
@@ -38,6 +31,11 @@ export class Question {
   createdAt: Date;
 
   static create(body: string, correctAnswers: string[]): Question {
+    dtoExceptionsValidation('questionDtoValidation', {
+      body,
+      correctAnswers,
+    });
+
     const question = new Question();
 
     question.body = body;
@@ -51,6 +49,11 @@ export class Question {
     body: string,
     correctAnswers: string[],
   ): Question {
+    dtoExceptionsValidation('questionDtoValidation', {
+      body,
+      correctAnswers,
+    });
+
     question.body = body;
     question.correctAnswers = correctAnswers;
     question.updatedAt = new Date();

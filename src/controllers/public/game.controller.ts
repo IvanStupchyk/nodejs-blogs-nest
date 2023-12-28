@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { GamesQueryRepository } from '../../infrastructure/repositories/game/games-query.repository';

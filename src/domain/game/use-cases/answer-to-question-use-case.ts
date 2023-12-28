@@ -1,7 +1,7 @@
 import { CommandHandler } from '@nestjs/cqrs';
 import { AnswerType } from '../../../types/game.types';
 import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../../exception.handler';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { GameStatus } from '../../../types/general.types';
 import { Answer } from '../../../entities/game/Answer.entity';
 import { Game } from '../../../entities/game/Game.entity';

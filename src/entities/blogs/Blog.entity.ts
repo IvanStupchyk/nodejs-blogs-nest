@@ -13,7 +13,7 @@ import { AggregateRoot } from '@nestjs/cqrs';
 import { BlogCreatedEvent } from './events/blog-created.event';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { BlogUpdatedEvent } from './events/blog-updated.event';
 
 @Entity('blogs')

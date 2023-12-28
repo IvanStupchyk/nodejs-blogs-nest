@@ -1,5 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
+import { errorMessageGenerator } from '../../../utils/errors/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';

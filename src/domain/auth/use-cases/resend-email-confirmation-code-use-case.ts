@@ -1,5 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
+import { errorMessageGenerator } from '../../../utils/errors/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';

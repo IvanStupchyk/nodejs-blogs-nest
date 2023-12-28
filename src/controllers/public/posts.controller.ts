@@ -27,7 +27,7 @@ import { GetSortedPostsCommand } from '../../domain/posts/use-cases/get-sorted-p
 import { GetPostByIdCommand } from '../../domain/posts/use-cases/get-post-by-id-use-case';
 import { CreateCommentCommand } from '../../domain/comments/use-cases/create-comment-use-case';
 import { GetSortedCommentsCommand } from '../../domain/comments/use-cases/get-sorted-comments-use-case';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 
 @Controller(RouterPaths.posts)
 export class PostsController {

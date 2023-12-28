@@ -10,7 +10,7 @@ import {
 import { Post } from '../posts/Post.entity';
 import { User } from '../users/User.entity';
 import { CommentLike } from './Comment-like.entity';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 
 @Entity('comments')

@@ -5,7 +5,7 @@ import { isUUID } from '../../../utils/utils';
 import { PostViewType } from '../../../types/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { likeStatus } from '../../../types/general.types';
-import { exceptionHandler } from '../../../exception.handler';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';

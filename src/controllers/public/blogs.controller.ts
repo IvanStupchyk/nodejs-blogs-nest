@@ -17,7 +17,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs/blogs-query.repository';
 import { GetPostsForSpecifiedBlogCommand } from '../../domain/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { GetBlogParamsDto } from '../../application/dto/blogs/get-blog.params.dto';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 
 @Controller(RouterPaths.blogs)
 export class BlogController {

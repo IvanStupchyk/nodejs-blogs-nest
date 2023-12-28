@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { errorMessageGenerator } from '../../utils/error-message-generator';
+import { errorMessageGenerator } from '../../utils/errors/error-message-generator';
 import { ObjectId } from 'mongodb';
 import { errorsConstants } from '../../constants/errors.contants';
 import { CommandBus } from '@nestjs/cqrs';

@@ -24,7 +24,7 @@ import { UpdateCommentCommand } from '../../domain/comments/use-cases/update-com
 import { GetCommentByIdCommand } from '../../domain/comments/use-cases/get-comment-by-id-use-case';
 import { ChangeCommentLikesCountCommand } from '../../domain/comments/use-cases/change-comment-likes-count-use-case';
 import { DeleteCommentCommand } from '../../domain/comments/use-cases/delete-comment-use-case';
-import { exceptionHandler } from '../../exception.handler';
+import { exceptionHandler } from '../../utils/errors/exception.handler';
 
 @Controller(RouterPaths.comments)
 export class CommentsController {

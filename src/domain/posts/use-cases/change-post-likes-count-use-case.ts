@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler } from '@nestjs/cqrs';
 import { likeStatus } from '../../../types/general.types';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
+import { errorMessageGenerator } from '../../../utils/errors/error-message-generator';
 import { errorsConstants } from '../../../constants/errors.contants';
 import { isUUID } from '../../../utils/utils';
 import { PostLike } from '../../../entities/posts/Post-like.entity';

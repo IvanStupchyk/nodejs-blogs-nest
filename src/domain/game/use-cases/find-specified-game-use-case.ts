@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { GameViewType } from '../../../types/game.types';
 import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../../exception.handler';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { isUUID } from '../../../utils/utils';
 import { GameStatus } from '../../../types/general.types';
 import { GamesQueryRepository } from '../../../infrastructure/repositories/game/games-query.repository';

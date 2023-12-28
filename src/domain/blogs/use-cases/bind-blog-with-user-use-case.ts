@@ -1,6 +1,6 @@
 import { CommandHandler } from '@nestjs/cqrs';
 import { BindBlogParamsDto } from '../../../application/dto/blogs/bind-blog.params.dto';
-import { exceptionHandler } from '../../../exception.handler';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
