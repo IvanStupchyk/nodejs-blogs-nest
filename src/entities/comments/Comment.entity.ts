@@ -1,17 +1,9 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Post } from '../posts/Post.entity';
-import { User } from '../users/User.entity';
-import { CommentLike } from './Comment-like.entity';
-import { exceptionHandler } from '../../exception.handler';
-import { HttpStatus } from '@nestjs/common';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Post } from "../posts/Post.entity";
+import { User } from "../users/User.entity";
+import { CommentLike } from "./Comment-like.entity";
+import { exceptionHandler } from "../../utils/errors/exception.handler";
+import { HttpStatus } from "@nestjs/common";
 
 @Entity('comments')
 export class Comment {

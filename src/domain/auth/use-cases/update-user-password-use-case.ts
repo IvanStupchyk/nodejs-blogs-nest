@@ -1,14 +1,14 @@
-import { CommandHandler } from '@nestjs/cqrs';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
-import { errorsConstants } from '../../../constants/errors.contants';
-import bcrypt from 'bcrypt';
-import { JwtService } from '../../../infrastructure/jwt.service';
-import { NewPasswordInputDto } from '../../../application/dto/auth/new-password.input.dto';
-import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
-import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
-import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { CommandHandler } from "@nestjs/cqrs";
+import { errorMessageGenerator } from "../../../utils/errors/error-message-generator";
+import { errorsConstants } from "../../../constants/errors.contants";
+import bcrypt from "bcrypt";
+import { JwtService } from "../../../infrastructure/jwt.service";
+import { NewPasswordInputDto } from "../../../application/dto/auth/new-password.input.dto";
+import { TransactionUseCase } from "../../transaction/use-case/transaction-use-case";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource, EntityManager } from "typeorm";
+import { UsersTransactionRepository } from "../../../infrastructure/repositories/users/users.transaction.repository";
+import { TransactionsRepository } from "../../../infrastructure/repositories/transactions/transactions.repository";
 
 export class UpdateUserPasswordCommand {
   constructor(public body: NewPasswordInputDto) {}

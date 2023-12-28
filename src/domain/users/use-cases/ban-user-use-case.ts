@@ -1,15 +1,17 @@
-import { CommandHandler } from '@nestjs/cqrs';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
-import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
-import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
-import { UserBanDto } from '../../../application/dto/users/user-ban.input.dto';
-import { isUUID } from '../../../utils/utils';
-import { exceptionHandler } from '../../../exception.handler';
-import { HttpStatus } from '@nestjs/common';
-import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
-import { errorMessageGenerator } from '../../../utils/error-message-generator';
-import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
+import { CommandHandler } from "@nestjs/cqrs";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource, EntityManager } from "typeorm";
+import { TransactionUseCase } from "../../transaction/use-case/transaction-use-case";
+import { TransactionsRepository } from "../../../infrastructure/repositories/transactions/transactions.repository";
+import { UserBanDto } from "../../../application/dto/users/user-ban.input.dto";
+import { isUUID } from "../../../utils/utils";
+import { exceptionHandler } from "../../../utils/errors/exception.handler";
+import { HttpStatus } from "@nestjs/common";
+import { UsersTransactionRepository } from "../../../infrastructure/repositories/users/users.transaction.repository";
+import { errorMessageGenerator } from "../../../utils/errors/error-message-generator";
+import {
+  DevicesTransactionsRepository
+} from "../../../infrastructure/repositories/devices/devices-transactions.repository";
 
 export class BanUserCommand {
   constructor(

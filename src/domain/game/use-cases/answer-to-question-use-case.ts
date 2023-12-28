@@ -1,16 +1,16 @@
-import { CommandHandler } from '@nestjs/cqrs';
-import { AnswerType } from '../../../types/game.types';
-import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../../exception.handler';
-import { GameStatus } from '../../../types/general.types';
-import { Answer } from '../../../entities/game/Answer.entity';
-import { Game } from '../../../entities/game/Game.entity';
-import add from 'date-fns/add';
-import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
-import { DataSource, EntityManager } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { GamesTransactionRepository } from '../../../infrastructure/repositories/game/games-transaction.repository';
-import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
+import { CommandHandler } from "@nestjs/cqrs";
+import { AnswerType } from "../../../types/game.types";
+import { HttpStatus } from "@nestjs/common";
+import { exceptionHandler } from "../../../utils/errors/exception.handler";
+import { GameStatus } from "../../../types/general.types";
+import { Answer } from "../../../entities/game/Answer.entity";
+import { Game } from "../../../entities/game/Game.entity";
+import add from "date-fns/add";
+import { TransactionUseCase } from "../../transaction/use-case/transaction-use-case";
+import { DataSource, EntityManager } from "typeorm";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { GamesTransactionRepository } from "../../../infrastructure/repositories/game/games-transaction.repository";
+import { TransactionsRepository } from "../../../infrastructure/repositories/transactions/transactions.repository";
 
 export class AnswerToQuestionCommand {
   constructor(

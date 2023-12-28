@@ -1,23 +1,15 @@
-import {
-  Controller,
-  Get,
-  Headers,
-  HttpStatus,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { BlogsQueryDto } from '../../application/dto/blogs/blogs.query.dto';
-import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
-import { JwtService } from '../../infrastructure/jwt.service';
-import { RouterPaths } from '../../constants/router.paths';
-import { CommandBus } from '@nestjs/cqrs';
-import { FindBlogByIdCommand } from '../../domain/blogs/use-cases/find-blog-by-id-use-case';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs/blogs-query.repository';
-import { GetPostsForSpecifiedBlogCommand } from '../../domain/posts/use-cases/get-posts-for-specified-blog-use-case';
-import { GetBlogParamsDto } from '../../application/dto/blogs/get-blog.params.dto';
-import { exceptionHandler } from '../../exception.handler';
+import { Controller, Get, Headers, HttpStatus, Param, Query, UseGuards } from "@nestjs/common";
+import { BlogsQueryDto } from "../../application/dto/blogs/blogs.query.dto";
+import { PostsQueryDto } from "../../application/dto/posts/posts.query.dto";
+import { JwtService } from "../../infrastructure/jwt.service";
+import { RouterPaths } from "../../constants/router.paths";
+import { CommandBus } from "@nestjs/cqrs";
+import { FindBlogByIdCommand } from "../../domain/blogs/use-cases/find-blog-by-id-use-case";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import { BlogsQueryRepository } from "../../infrastructure/repositories/blogs/blogs-query.repository";
+import { GetPostsForSpecifiedBlogCommand } from "../../domain/posts/use-cases/get-posts-for-specified-blog-use-case";
+import { GetBlogParamsDto } from "../../application/dto/blogs/get-blog.params.dto";
+import { exceptionHandler } from "../../utils/errors/exception.handler";
 
 @Controller(RouterPaths.blogs)
 export class BlogController {

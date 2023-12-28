@@ -1,27 +1,17 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { RouterPaths } from '../../constants/router.paths';
-import { CommandBus } from '@nestjs/cqrs';
-import { exceptionHandler } from '../../exception.handler';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../auth/current-user-param.decorator';
-import { GamesQueryRepository } from '../../infrastructure/repositories/game/games-query.repository';
-import { GetGameParamsDto } from '../../application/dto/game/get-game.params.dto';
-import { ConnectUserToGameCommand } from '../../domain/game/use-cases/connect-user-to-game-use-case';
-import { AnswerToQuestionInputDto } from '../../application/dto/game/answer-to-question.input.dto';
-import { FindSpecifiedGameCommand } from '../../domain/game/use-cases/find-specified-game-use-case';
-import { AnswerToQuestionCommand } from '../../domain/game/use-cases/answer-to-question-use-case';
-import { GamesQueryDto } from '../../application/dto/game/games.query.dto';
-import { TopPlayersQueryDto } from '../../application/dto/game/top-players.query.dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { RouterPaths } from "../../constants/router.paths";
+import { CommandBus } from "@nestjs/cqrs";
+import { exceptionHandler } from "../../utils/errors/exception.handler";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { CurrentUserId } from "../../auth/current-user-param.decorator";
+import { GamesQueryRepository } from "../../infrastructure/repositories/game/games-query.repository";
+import { GetGameParamsDto } from "../../application/dto/game/get-game.params.dto";
+import { ConnectUserToGameCommand } from "../../domain/game/use-cases/connect-user-to-game-use-case";
+import { AnswerToQuestionInputDto } from "../../application/dto/game/answer-to-question.input.dto";
+import { FindSpecifiedGameCommand } from "../../domain/game/use-cases/find-specified-game-use-case";
+import { AnswerToQuestionCommand } from "../../domain/game/use-cases/answer-to-question-use-case";
+import { GamesQueryDto } from "../../application/dto/game/games.query.dto";
+import { TopPlayersQueryDto } from "../../application/dto/game/top-players.query.dto";
 
 @Controller(RouterPaths.game)
 export class GameController {

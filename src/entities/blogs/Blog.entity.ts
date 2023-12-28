@@ -1,20 +1,12 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Post } from '../posts/Post.entity';
-import { User } from '../users/User.entity';
-import { AggregateRoot } from '@nestjs/cqrs';
-import { BlogCreatedEvent } from './events/blog-created.event';
-import { v4 as uuidv4 } from 'uuid';
-import { HttpStatus } from '@nestjs/common';
-import { exceptionHandler } from '../../exception.handler';
-import { BlogUpdatedEvent } from './events/blog-updated.event';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Post } from "../posts/Post.entity";
+import { User } from "../users/User.entity";
+import { AggregateRoot } from "@nestjs/cqrs";
+import { BlogCreatedEvent } from "./events/blog-created.event";
+import { v4 as uuidv4 } from "uuid";
+import { HttpStatus } from "@nestjs/common";
+import { exceptionHandler } from "../../utils/errors/exception.handler";
+import { BlogUpdatedEvent } from "./events/blog-updated.event";
 
 @Entity('blogs')
 export class Blog extends AggregateRoot {
