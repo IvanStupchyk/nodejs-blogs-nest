@@ -567,6 +567,18 @@ describe('tests for /blogs', () => {
         .send(correctBody)
         .expect(HttpStatus.NO_CONTENT);
 
+      await request(httpServer)
+        .get(`${RouterPaths.blogger}/users/blog/${newBlog.id}`)
+        .set('Authorization', `Bearer ${accessTokenUser2}`)
+        .expect(HttpStatus.FORBIDDEN);
+
+      await request(httpServer)
+        .get(
+          `${RouterPaths.blogger}/users/blog/800d41a3-eb8f-40d9-b6e5-eb2a57a98778`,
+        )
+        .set('Authorization', `Bearer ${accessTokenUser2}`)
+        .expect(HttpStatus.NOT_FOUND);
+
       const resp = await request(httpServer)
         .get(`${RouterPaths.blogger}/users/blog/${newBlog.id}`)
         .set('Authorization', `Bearer ${accessTokenUser1}`)
@@ -601,7 +613,7 @@ describe('tests for /blogs', () => {
 
       const resp2 = await request(httpServer)
         .get(
-          `${RouterPaths.blogger}/users/blog/${newBlog.id}?searchLoginTerm=iva&pageSize=1`,
+          `${RouterPaths.blogger}/users/blog/${newBlog.id}?searchLoginTerm=iva`,
         )
         .set('Authorization', `Bearer ${accessTokenUser1}`)
         .expect(HttpStatus.OK);
@@ -609,7 +621,7 @@ describe('tests for /blogs', () => {
       expect(resp2.body).toEqual({
         pagesCount: 1,
         page: 1,
-        pageSize: 1,
+        pageSize: 10,
         totalCount: 1,
         items: [
           {
@@ -619,6 +631,29 @@ describe('tests for /blogs', () => {
               isBanned: true,
               banDate: expect.any(String),
               banReason: secondBanReason,
+            },
+          },
+        ],
+      });
+
+      const resp3 = await request(httpServer)
+        .get(`${RouterPaths.blogger}/users/blog/${newBlog.id}?pageSize=1`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .expect(HttpStatus.OK);
+
+      expect(resp3.body).toEqual({
+        pagesCount: 2,
+        page: 1,
+        pageSize: 1,
+        totalCount: 2,
+        items: [
+          {
+            id: user2.id,
+            login: user2.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: correctBody.banReason,
             },
           },
         ],
@@ -647,29 +682,29 @@ describe('tests for /blogs', () => {
       .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
-  // it('should delete a blog with exiting id', async () => {
-  //   await getRequest()
-  //     .delete(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
-  //     .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-  //     .set({
-  //       Authorization: `Bearer ${accessTokenUser1}`,
-  //     })
-  //     .expect(HTTP_STATUSES.NO_CONTENT_204);
-  //
-  //   const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
-  //
-  //   await getRequest()
-  //     .get(RouterPaths.blogs)
-  //     .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-  //     .set({
-  //       Authorization: `Bearer ${accessTokenUser1}`,
-  //     })
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: filteredBlogs.length,
-  //       items: filteredBlogs,
-  //     });
-  // });
+  it('should delete a blog with exiting id', async () => {
+    await getRequest()
+      .delete(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
+      .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+    const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
+
+    await getRequest()
+      .get(RouterPaths.blogs)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: filteredBlogs.length,
+        items: filteredBlogs,
+      });
+  });
 });

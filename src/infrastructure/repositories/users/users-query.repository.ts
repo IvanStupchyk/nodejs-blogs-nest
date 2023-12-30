@@ -120,7 +120,7 @@ export class UsersQueryRepository {
       .orderBy(`u.${sortBy}`, sortDirection)
       .skip(skipSize)
       .take(pageSize)
-      .getRawMany();
+      .getMany();
 
     const usersCount = await this.usersRepository
       .createQueryBuilder('u')
@@ -146,12 +146,12 @@ export class UsersQueryRepository {
       items: users.length
         ? users.map((u) => {
             return {
-              id: u.u_id,
-              login: u.u_login,
+              id: u.id,
+              login: u.login,
               banInfo: {
-                isBanned: u.ubbl_isBanned,
-                banDate: u.ubbl_banDate,
-                banReason: u.ubbl_banReason,
+                isBanned: u.userBanByBlogger.isBanned,
+                banDate: u.userBanByBlogger.banDate,
+                banReason: u.userBanByBlogger.banReason,
               },
             };
           })

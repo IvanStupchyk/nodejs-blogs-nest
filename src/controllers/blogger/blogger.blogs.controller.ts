@@ -43,6 +43,7 @@ import { BanUserByBloggerCommand } from '../../domain/users/use-cases/ban-user-b
 import { UserBanByBloggerInputDto } from '../../application/dto/blogs/user-ban-by-blogger.input.dto';
 import { BanUsersQueryDto } from '../../application/dto/blogs/ban-users.query.dto';
 import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
+import { FindBanUsersByBloggerCommand } from '../../domain/users/use-cases/find-ban-users-by-blogger-use-case';
 
 @Controller(RouterPaths.blogger)
 export class BloggerBlogsController {
@@ -94,10 +95,10 @@ export class BloggerBlogsController {
   async getBanUsersForSpecifiedBlog(
     @Param() params: BanUserByBloggerParamsDto,
     @Query() query: BanUsersQueryDto,
+    @CurrentUserId() userId,
   ) {
-    return await this.usersQueryRepository.getSortedBannedUserForSpecifiedBlog(
-      params.id,
-      query,
+    return await this.commandBus.execute(
+      new FindBanUsersByBloggerCommand(params.id, query, userId),
     );
   }
 
