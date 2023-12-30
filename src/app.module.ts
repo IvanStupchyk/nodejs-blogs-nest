@@ -108,6 +108,7 @@ import { UserBanInfo } from './entities/users/User-ban-info.entity';
 import { BanUserUseCase } from './domain/users/use-cases/ban-user-use-case';
 import { UserBanByBlogger } from './entities/users/User-ban-by-blogger.entity';
 import { BanUserByBloggerUseCase } from './domain/users/use-cases/ban-user-by-blogger-use-case';
+import { FindBanUsersByBloggerUseCase } from './domain/users/use-cases/find-ban-users-by-blogger-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -151,6 +152,7 @@ const useCases = [
   BindBlogWithUserCase,
   BanUserUseCase,
   BanUserByBloggerUseCase,
+  FindBanUsersByBloggerUseCase,
 ];
 
 const entities = [
