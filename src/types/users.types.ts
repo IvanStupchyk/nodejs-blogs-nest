@@ -35,3 +35,17 @@ export type UsersViewType = {
   totalCount: number;
   items: Array<UserViewType>;
 };
+
+type BannedUsersForBlog = {
+  id: string;
+  login: string;
+  banInfo: BanInfoType;
+};
+
+export type BannedUsersForBlogViewType = {
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: Array<BannedUsersForBlog>;
+};

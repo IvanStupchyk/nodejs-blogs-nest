@@ -9,6 +9,8 @@ import { DataSource, EntityManager } from 'typeorm';
 import { PostsTransactionsRepository } from '../../../infrastructure/repositories/posts/posts-transactions.repository';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
+import { HttpStatus } from '@nestjs/common';
 
 export class CreateCommentCommand {
   constructor(
@@ -51,6 +53,14 @@ export class CreateCommentUseCase extends TransactionUseCase<
       manager,
     );
     if (!user) return null;
+
+    if (
+      user.userBanByBlogger.isBanned &&
+      foundPost.blog &&
+      foundPost.blog.id === user.userBanByBlogger.blog?.id
+    ) {
+      exceptionHandler(HttpStatus.FORBIDDEN);
+    }
 
     const newComment = Comment.create(content, user, foundPost);
 

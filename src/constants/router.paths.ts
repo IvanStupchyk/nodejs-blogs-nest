@@ -1,6 +1,6 @@
 export const RouterPaths = {
   saBlogs: '/sa/blogs',
-  blogger: '/blogger/blogs',
+  blogger: '/blogger',
   blogs: '/blogs',
   game: '/pair-game-quiz',
   posts: '/posts',

@@ -3,7 +3,7 @@ import { HTTP_STATUSES } from '../../src/utils/utils';
 import { likeStatus } from '../../src/types/general.types';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { commentsTestManager } from '../utils/comments-test-manager';
 import { LoginUserInputDto } from '../../src/application/dto/auth/login-user.input.dto';
@@ -60,11 +60,12 @@ describe('tests for /comments and posts/:id/comments', () => {
   });
 
   afterAll(async () => {
-    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+    // await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
   let newPost: PostType;
+  let newBlog: PostType;
   let comment1: CommentViewType;
   const newComments: Array<CommentViewType> = [];
 
@@ -79,6 +80,7 @@ describe('tests for /comments and posts/:id/comments', () => {
       accessTokenUser1,
       refreshTokenUser1,
     );
+    newBlog = createdBlog;
 
     await getRequest()
       .get(`${RouterPaths.blogs}/${createdBlog.id}`)
@@ -234,6 +236,31 @@ describe('tests for /comments and posts/:id/comments', () => {
         items: sortedComments,
       });
   }, 10000);
+
+  it('should ban a user and do not allow user to stay a comment for baned blog', async () => {
+    const correctBody = {
+      isBanned: true,
+      banDate: new Date(),
+      banReason: 'because because because because because because',
+      blogId: newBlog.id,
+    };
+
+    await request(httpServer)
+      .put(`${RouterPaths.blogger}/users/${user1.id}/ban`)
+      .set('Authorization', `Bearer ${accessTokenUser1}`)
+      .send(correctBody)
+      .expect(HttpStatus.NO_CONTENT);
+
+    await commentsTestManager.createComment(
+      httpServer,
+      validCommentData,
+      newPost.id,
+      accessTokenUser1,
+      HttpStatus.FORBIDDEN,
+      user1.id,
+      user1.login,
+    );
+  });
 
   it("should return 404 status code if comment doesn't exist", async () => {
     await getRequest()

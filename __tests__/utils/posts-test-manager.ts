@@ -18,7 +18,7 @@ export const postsTestManager = {
     };
 
     const response = await request(httpServer)
-      .post(`${RouterPaths.blogger}/${blogId}/posts`)
+      .post(`${RouterPaths.blogger}/blogs/${blogId}/posts`)
       .set('Cookie', `refreshToken=${refreshToken}`)
       .set(headers)
       .send(data)

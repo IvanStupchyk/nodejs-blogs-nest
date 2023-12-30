@@ -1,5 +1,6 @@
 import { SortOrder } from '../constants/sort.order';
 import {
+  mockBanUserModel,
   mockBlogModel,
   mockCommentModel,
   mockGameModel,
@@ -47,6 +48,7 @@ export type SortConditionsType = {
     | typeof mockUserModel
     | typeof mockCommentModel
     | typeof mockQuestionModel
-    | typeof mockGameModel;
+    | typeof mockGameModel
+    | typeof mockBanUserModel;
   sortDirection?: SortOrder.asc | SortOrder.desc;
 };

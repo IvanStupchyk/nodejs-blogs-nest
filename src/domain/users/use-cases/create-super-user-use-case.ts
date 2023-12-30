@@ -8,6 +8,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UserBanInfo } from '../../../entities/users/User-ban-info.entity';
+import { UserBanByBlogger } from '../../../entities/users/User-ban-by-blogger.entity';
 
 export class CreateSuperUserCommand {
   constructor(public userData: SAUserInputDto) {}
@@ -36,9 +37,11 @@ export class CreateSuperUserUseCase extends TransactionUseCase<
 
     const newUser = User.createAdminUser(login, email, passwordHash);
     const userBanInfo = UserBanInfo.create(newUser);
+    const userBanByBlogger = UserBanByBlogger.create(newUser);
 
     const savedUser = await this.transactionsRepository.save(newUser, manager);
     await this.transactionsRepository.save(userBanInfo, manager);
+    await this.transactionsRepository.save(userBanByBlogger, manager);
 
     return {
       id: savedUser.id,

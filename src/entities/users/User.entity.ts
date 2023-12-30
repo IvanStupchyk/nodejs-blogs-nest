@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -18,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { UserBanInfo } from './User-ban-info.entity';
 import { Post } from '../posts/Post.entity';
+import { UserBanByBlogger } from './User-ban-by-blogger.entity';
 
 @Entity('users')
 export class User {
@@ -44,6 +44,9 @@ export class User {
 
   @OneToOne(() => UserBanInfo, (userBanInfo) => userBanInfo.user)
   userBanInfo: UserBanInfo;
+
+  @OneToOne(() => UserBanByBlogger, (userBanByBlogger) => userBanByBlogger.user)
+  userBanByBlogger: UserBanByBlogger;
 
   @OneToMany(() => Device, (device) => device.user)
   device: Device[];

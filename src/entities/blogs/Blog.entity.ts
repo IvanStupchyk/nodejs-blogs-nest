@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { BlogUpdatedEvent } from './events/blog-updated.event';
+import { UserBanByBlogger } from '../users/User-ban-by-blogger.entity';
 
 @Entity('blogs')
 export class Blog extends AggregateRoot {
@@ -38,6 +39,12 @@ export class Blog extends AggregateRoot {
   })
   @JoinColumn()
   user: User;
+
+  @OneToMany(
+    () => UserBanByBlogger,
+    (userBanByBlogger) => userBanByBlogger.blog,
+  )
+  userBanByBlogger: UserBanByBlogger[];
 
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];
