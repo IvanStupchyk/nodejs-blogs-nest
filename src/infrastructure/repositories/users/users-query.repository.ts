@@ -110,30 +110,25 @@ export class UsersQueryRepository {
     const users = await this.usersRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.userBanByBlogger', 'ubbl')
-      .where(
-        `${searchLoginTerm ? `(u.login ilike :login)` : 'u.login is not null'}`,
-        {
-          login: `%${searchLoginTerm}%`,
-        },
-      )
+      .where(`${searchLoginTerm ? `(u.login ilike :login)` : ''}`, {
+        login: `%${searchLoginTerm}%`,
+      })
+      .andWhere('ubbl.isBanned = true')
       .andWhere('ubbl.blogId = :blogId', {
         blogId,
       })
-      .orderBy(`ubbl.${sortBy}`, sortDirection)
+      .orderBy(`u.${sortBy}`, sortDirection)
       .skip(skipSize)
       .take(pageSize)
       .getRawMany();
-    // console.log('users', users);
 
     const usersCount = await this.usersRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.userBanByBlogger', 'ubbl')
-      .where(
-        `${searchLoginTerm ? `(u.login ilike :login)` : 'u.login is not null'}`,
-        {
-          login: `%${searchLoginTerm}%`,
-        },
-      )
+      .where(`${searchLoginTerm ? `(u.login ilike :login)` : ''}`, {
+        login: `%${searchLoginTerm}%`,
+      })
+      .andWhere('ubbl.isBanned = true')
       .andWhere('ubbl.blogId = :blogId', {
         blogId,
       })

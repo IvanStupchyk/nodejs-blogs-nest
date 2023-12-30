@@ -485,11 +485,7 @@ describe('tests for /blogs', () => {
         )
         .set('Authorization', `Bearer ${accessTokenUser1}`)
         .send(correctBody)
-        .expect(HttpStatus.BAD_REQUEST);
-
-      expect(resp2.body).toEqual({
-        errorsMessages: [{ field: 'id', message: 'user not found' }],
-      });
+        .expect(HttpStatus.NOT_FOUND);
     });
 
     const secondBanReason =
@@ -562,6 +558,12 @@ describe('tests for /blogs', () => {
       await request(httpServer)
         .put(`${RouterPaths.blogger}/users/${user2.id}/ban`)
         .set('Authorization', `Bearer ${accessTokenUser2}`)
+        .send(correctBody)
+        .expect(HttpStatus.FORBIDDEN);
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/${user2.id}/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
         .send(correctBody)
         .expect(HttpStatus.NO_CONTENT);
 
