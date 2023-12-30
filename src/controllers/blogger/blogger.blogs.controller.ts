@@ -82,9 +82,10 @@ export class BloggerBlogsController {
   async banUser(
     @Param() params: BanUserByBloggerParamsDto,
     @Body() body: UserBanByBloggerInputDto,
+    @CurrentUserId() userId,
   ) {
     return await this.commandBus.execute(
-      new BanUserByBloggerCommand(params.id, body),
+      new BanUserByBloggerCommand(params.id, body, userId),
     );
   }
 

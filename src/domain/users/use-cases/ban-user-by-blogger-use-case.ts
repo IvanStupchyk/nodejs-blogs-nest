@@ -7,7 +7,6 @@ import { isUUID } from '../../../utils/utils';
 import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
-import { errorMessageGenerator } from '../../../utils/errors/error-message-generator';
 import { UserBanByBloggerInputDto } from '../../../application/dto/blogs/user-ban-by-blogger.input.dto';
 import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
 
@@ -15,6 +14,7 @@ export class BanUserByBloggerCommand {
   constructor(
     public id: string,
     public banInfo: UserBanByBloggerInputDto,
+    public userId: string,
   ) {}
 }
 
@@ -37,7 +37,7 @@ export class BanUserByBloggerUseCase extends TransactionUseCase<
     command: BanUserByBloggerCommand,
     manager: EntityManager,
   ): Promise<void> {
-    const { id, banInfo } = command;
+    const { id, banInfo, userId } = command;
 
     if (!isUUID(id)) {
       exceptionHandler(HttpStatus.BAD_REQUEST);
@@ -49,7 +49,7 @@ export class BanUserByBloggerUseCase extends TransactionUseCase<
     );
 
     if (!user) {
-      errorMessageGenerator([{ field: 'id', message: 'user not found' }]);
+      exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
     const blog = await this.blogsTransactionsRepository.findBlogById(
@@ -58,7 +58,11 @@ export class BanUserByBloggerUseCase extends TransactionUseCase<
     );
 
     if (!blog) {
-      errorMessageGenerator([{ field: 'blogId', message: 'blog not found' }]);
+      exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    if (blog.user.id !== userId) {
+      exceptionHandler(HttpStatus.FORBIDDEN);
     }
 
     if (banInfo.isBanned) {
