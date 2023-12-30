@@ -67,3 +67,8 @@ export const mockToPlayers = {
   lossesCount: '',
   drawsCount: '',
 };
+
+export const mockBanUserModel = {
+  id: '',
+  login: '',
+};

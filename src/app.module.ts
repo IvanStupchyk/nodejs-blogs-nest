@@ -106,6 +106,8 @@ import { CommentsTransactionsRepository } from './infrastructure/repositories/co
 import { CommentLikesTransactionsRepository } from './infrastructure/repositories/comments/comment-likes-transactions.repository';
 import { UserBanInfo } from './entities/users/User-ban-info.entity';
 import { BanUserUseCase } from './domain/users/use-cases/ban-user-use-case';
+import { UserBanByBlogger } from './entities/users/User-ban-by-blogger.entity';
+import { BanUserByBloggerUseCase } from './domain/users/use-cases/ban-user-by-blogger-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -148,6 +150,7 @@ const useCases = [
   FinishGameUseCase,
   BindBlogWithUserCase,
   BanUserUseCase,
+  BanUserByBloggerUseCase,
 ];
 
 const entities = [
@@ -164,6 +167,7 @@ const entities = [
   Player,
   Game,
   UserBanInfo,
+  UserBanByBlogger,
 ];
 
 @Module({

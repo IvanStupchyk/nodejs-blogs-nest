@@ -16,7 +16,7 @@ export const blogsTestManager = {
     };
 
     const response = await request(httpServer)
-      .post(RouterPaths.blogger)
+      .post(`${RouterPaths.blogger}/blogs`)
       .set('Cookie', `refreshToken=${refreshToken}`)
       .set(headers)
       .send(data)

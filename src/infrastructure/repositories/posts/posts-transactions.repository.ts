@@ -7,6 +7,7 @@ export class PostsTransactionsRepository {
   async findPostById(id: string, manager: EntityManager): Promise<Post | null> {
     return await manager
       .createQueryBuilder(Post, 'p')
+      .leftJoinAndSelect('p.blog', 'b')
       .where('p.id = :id', { id })
       .getOne();
   }

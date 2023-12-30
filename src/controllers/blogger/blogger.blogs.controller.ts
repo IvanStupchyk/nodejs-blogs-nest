@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Post,
@@ -35,20 +36,24 @@ import { CommandBus } from '@nestjs/cqrs';
 import { UpdatePostInputDto } from '../../application/dto/posts/update-post.input.dto';
 import { RouterPaths } from '../../constants/router.paths';
 import { UpdatePostWithCheckingCommand } from '../../domain/posts/use-cases/update-post-use-case';
-import { JwtService } from '../../infrastructure/jwt.service';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { BanUserByBloggerParamsDto } from '../../application/dto/blogs/ban-user-by-blogger.params.dto';
+import { BanUserByBloggerCommand } from '../../domain/users/use-cases/ban-user-by-blogger-use-case';
+import { UserBanByBloggerInputDto } from '../../application/dto/blogs/user-ban-by-blogger.input.dto';
+import { BanUsersQueryDto } from '../../application/dto/blogs/ban-users.query.dto';
+import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
 
 @Controller(RouterPaths.blogger)
 export class BloggerBlogsController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly jwtService: JwtService,
+    private readonly usersQueryRepository: UsersQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(ThrottlerGuard, JwtAuthGuard)
-  @Get()
+  @Get('blogs')
   async getBlogsForSa(
     @Query() params: BlogsQueryDto,
     @CurrentUserId() currentUserId,
@@ -60,7 +65,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('blogs')
   async createBlog(
     @Body() body: BlogInputDto,
     @Req() req: Request,
@@ -72,7 +77,31 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':id/posts')
+  @Put('users/:id/ban')
+  @HttpCode(204)
+  async banUser(
+    @Param() params: BanUserByBloggerParamsDto,
+    @Body() body: UserBanByBloggerInputDto,
+  ) {
+    return await this.commandBus.execute(
+      new BanUserByBloggerCommand(params.id, body),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('users/blog/:id')
+  async getBanUsersForSpecifiedBlog(
+    @Param() params: BanUserByBloggerParamsDto,
+    @Query() query: BanUsersQueryDto,
+  ) {
+    return await this.usersQueryRepository.getSortedBannedUserForSpecifiedBlog(
+      params.id,
+      query,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('blogs/:id/posts')
   async createPost(
     @Param() params: BlogParamsDto,
     @Body() body: PostForSpecifiedBlogInputDto,
@@ -90,7 +119,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/posts')
+  @Get('blogs/:id/posts')
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
@@ -112,7 +141,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':blogId/posts/:postId')
+  @Put('blogs/:blogId/posts/:postId')
   async updateSpecifiedPost(
     @Param() params: UpdatePostParamsDto,
     @Body() body: UpdatePostInputDto,
@@ -133,7 +162,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':blogId/posts/:postId')
+  @Delete('blogs/:blogId/posts/:postId')
   async deleteSpecifiedPost(
     @Param() params: DeletePostParamsDto,
     @CurrentUserId() userId,
@@ -148,7 +177,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Put('blogs/:id')
   async updateBlog(
     @Param() params: BlogParamsDto,
     @Body() body: BlogInputDto,
@@ -163,7 +192,7 @@ export class BloggerBlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Delete('blogs/:id')
   async deleteBlog(
     @Param() params: DeleteBlogParamsDto,
     @Res() res: Response,

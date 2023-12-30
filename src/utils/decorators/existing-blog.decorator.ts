@@ -13,6 +13,7 @@ import { BlogsRepository } from '../../infrastructure/repositories/blogs/blogs.r
 export class IsBlogExistConstraint implements ValidatorConstraintInterface {
   constructor(private readonly blogsRepository: BlogsRepository) {}
   async validate(blogId: any) {
+    if (!blogId) return false;
     if (!isUUID(blogId)) return false;
 
     return !!(await this.blogsRepository.findBlogById(blogId));

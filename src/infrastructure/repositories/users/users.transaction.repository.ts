@@ -11,6 +11,8 @@ export class UsersTransactionRepository {
     return await manager
       .createQueryBuilder(User, 'u')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
+      .leftJoinAndSelect('u.userBanByBlogger', 'ubbl')
+      .leftJoinAndSelect('ubbl.blog', 'b')
       .where('u.id = :id', {
         id,
       })
@@ -24,6 +26,7 @@ export class UsersTransactionRepository {
     return await manager
       .createQueryBuilder(User, 'u')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
+      .leftJoinAndSelect('u.userBanByBlogger', 'ubbl')
       .where('u.id = :id', {
         id,
       })

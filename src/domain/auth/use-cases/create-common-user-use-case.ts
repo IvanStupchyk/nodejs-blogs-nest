@@ -9,6 +9,7 @@ import { TransactionUseCase } from '../../transaction/use-case/transaction-use-c
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
 import { UserBanInfo } from '../../../entities/users/User-ban-info.entity';
+import { UserBanByBlogger } from '../../../entities/users/User-ban-by-blogger.entity';
 
 export class CreateCommonUserCommand {
   constructor(public userData: UserInputDto) {}
@@ -38,9 +39,11 @@ export class CreateCommonUserUseCase extends TransactionUseCase<
 
     const newUser = User.createCommonUser(login, email, passwordHash);
     const userBanInfo = UserBanInfo.create(newUser);
+    const userBanByBlogger = UserBanByBlogger.create(newUser);
 
     const savedUser = await this.transactionsRepository.save(newUser, manager);
     await this.transactionsRepository.save(userBanInfo, manager);
+    await this.transactionsRepository.save(userBanByBlogger, manager);
     try {
       await emailTemplatesManager.sendEmailConfirmationMessage(newUser);
     } catch (error) {

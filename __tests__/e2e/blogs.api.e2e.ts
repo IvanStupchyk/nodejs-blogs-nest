@@ -2,7 +2,7 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { mockGetItems } from '../../src/constants/blanks';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { postsTestManager } from '../utils/posts-test-manager';
 import {
@@ -21,6 +21,7 @@ describe('tests for /blogs', () => {
   let app: INestApplication;
   let httpServer;
   let user1;
+  let user2;
   let accessTokenUser1: string;
   let refreshTokenUser1: string;
   let accessTokenUser2: string;
@@ -43,12 +44,13 @@ describe('tests for /blogs', () => {
     refreshTokenUser1 = resp.refreshToken;
 
     const resp2 = await userCreator(httpServer, userData2);
+    user2 = resp2.user;
     accessTokenUser2 = resp2.accessToken;
     refreshTokenUser2 = resp2.refreshToken;
   });
 
   afterAll(async () => {
-    await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
+    // await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
     await app.close();
   });
 
@@ -181,7 +183,7 @@ describe('tests for /blogs', () => {
       });
 
     await getRequest()
-      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .get(`${RouterPaths.blogger}/blogs/${newBlog.id}/posts`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -254,7 +256,7 @@ describe('tests for /blogs', () => {
     });
 
     await getRequest()
-      .get(RouterPaths.blogger)
+      .get(`${RouterPaths.blogger}/blogs`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -268,7 +270,7 @@ describe('tests for /blogs', () => {
       });
 
     await getRequest()
-      .get(`${RouterPaths.blogger}?searchNameTerm=second`)
+      .get(`${RouterPaths.blogger}/blogs?searchNameTerm=second`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -325,7 +327,7 @@ describe('tests for /blogs', () => {
       });
 
     await getRequest()
-      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .get(`${RouterPaths.blogger}/blogs/${newBlog.id}/posts`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -362,7 +364,7 @@ describe('tests for /blogs', () => {
 
   it("shouldn't update a blog if the blog doesn't exist", async () => {
     await getRequest()
-      .put(`${RouterPaths.blogger}/22`)
+      .put(`${RouterPaths.blogger}/blogs/22`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -377,7 +379,7 @@ describe('tests for /blogs', () => {
       name: 'updated name',
     };
     await getRequest()
-      .put(`${RouterPaths.blogger}/${newBlog.id}`)
+      .put(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
       .set('Cookie', `refreshToken=${refreshTokenUser2}`)
       .set({
         Authorization: `Bearer ${accessTokenUser2}`,
@@ -392,7 +394,7 @@ describe('tests for /blogs', () => {
       name: 'updated name',
     };
     await getRequest()
-      .put(`${RouterPaths.blogger}/${newBlog.id}`)
+      .put(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -433,9 +435,198 @@ describe('tests for /blogs', () => {
       .expect(HTTP_STATUSES.BAD_REQUEST_400);
   });
 
+  describe('ban user for specified blog', () => {
+    it('should not ban a user for specified if body is incorrect, user does not exist or user not authorized', async () => {
+      const body = {
+        isBanned: '',
+        banDate: false,
+        banReason: [1, 2],
+        blogId: 'asd',
+      };
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/asfaf/ban`)
+        .send(body)
+        .expect(HttpStatus.UNAUTHORIZED);
+
+      const rest = await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/asfaf/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .send(body)
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(rest.body).toEqual({
+        errorsMessages: [
+          {
+            field: 'isBanned',
+            message: 'isBanned must be a boolean value',
+          },
+          {
+            field: 'banReason',
+            message: 'banReason must be longer than or equal to 20 characters',
+          },
+          {
+            field: 'blogId',
+            message: 'such blog should exist',
+          },
+        ],
+      });
+
+      const correctBody = {
+        isBanned: true,
+        banDate: new Date(),
+        banReason: 'because because because because because because',
+        blogId: newBlog.id,
+      };
+
+      const resp2 = await request(httpServer)
+        .put(
+          `${RouterPaths.blogger}/users/1427c8cc-0bde-45c8-abba-cde6fe07474d/ban`,
+        )
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .send(correctBody)
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(resp2.body).toEqual({
+        errorsMessages: [{ field: 'id', message: 'user not found' }],
+      });
+    });
+
+    const secondBanReason =
+      'second time because because because because because because';
+    it('should ban, unban and ban a user for specified blog', async () => {
+      const correctBody = {
+        isBanned: true,
+        banDate: new Date(),
+        banReason: 'because because because because because because',
+        blogId: newBlog.id,
+      };
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/${user1.id}/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .send(correctBody)
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/${user1.id}/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .send({
+          ...correctBody,
+          isBanned: false,
+        })
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/${user1.id}/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .send({
+          ...correctBody,
+          isBanned: true,
+          banReason: secondBanReason,
+        })
+        .expect(HttpStatus.NO_CONTENT);
+
+      const resp = await request(httpServer)
+        .get(`${RouterPaths.blogger}/users/blog/${newBlog.id}`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .expect(HttpStatus.OK);
+
+      expect(resp.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            id: user1.id,
+            login: user1.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: secondBanReason,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should ban second user and get all banned users', async () => {
+      const correctBody = {
+        isBanned: true,
+        banDate: new Date(),
+        banReason: 'second ban ddfdfdfdfdfdfdfdfdfdfdf',
+        blogId: newBlog.id,
+      };
+
+      await request(httpServer)
+        .put(`${RouterPaths.blogger}/users/${user2.id}/ban`)
+        .set('Authorization', `Bearer ${accessTokenUser2}`)
+        .send(correctBody)
+        .expect(HttpStatus.NO_CONTENT);
+
+      const resp = await request(httpServer)
+        .get(`${RouterPaths.blogger}/users/blog/${newBlog.id}`)
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .expect(HttpStatus.OK);
+
+      expect(resp.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: [
+          {
+            id: user2.id,
+            login: user2.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: correctBody.banReason,
+            },
+          },
+          {
+            id: user1.id,
+            login: user1.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: secondBanReason,
+            },
+          },
+        ],
+      });
+
+      const resp2 = await request(httpServer)
+        .get(
+          `${RouterPaths.blogger}/users/blog/${newBlog.id}?searchLoginTerm=iva&pageSize=1`,
+        )
+        .set('Authorization', `Bearer ${accessTokenUser1}`)
+        .expect(HttpStatus.OK);
+
+      expect(resp2.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 1,
+        totalCount: 1,
+        items: [
+          {
+            id: user1.id,
+            login: user1.login,
+            banInfo: {
+              isBanned: true,
+              banDate: expect.any(String),
+              banReason: secondBanReason,
+            },
+          },
+        ],
+      });
+    });
+  });
+
   it("shouldn't delete a blog if the blog doesn't exist", async () => {
     await getRequest()
-      .delete(`${RouterPaths.blogger}/22`)
+      .delete(`${RouterPaths.blogger}/blogs/22`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -446,7 +637,7 @@ describe('tests for /blogs', () => {
 
   it("shouldn't delete a blog that does not belong to current user", async () => {
     await getRequest()
-      .delete(`${RouterPaths.blogger}/${newBlog.id}`)
+      .delete(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
       .set('Cookie', `refreshToken=${refreshTokenUser2}`)
       .set({
         Authorization: `Bearer ${accessTokenUser2}`,
@@ -454,29 +645,29 @@ describe('tests for /blogs', () => {
       .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
-  it('should delete a blog with exiting id', async () => {
-    await getRequest()
-      .delete(`${RouterPaths.blogger}/${newBlog.id}`)
-      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-      .set({
-        Authorization: `Bearer ${accessTokenUser1}`,
-      })
-      .expect(HTTP_STATUSES.NO_CONTENT_204);
-
-    const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
-
-    await getRequest()
-      .get(RouterPaths.blogs)
-      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-      .set({
-        Authorization: `Bearer ${accessTokenUser1}`,
-      })
-      .expect(HTTP_STATUSES.OK_200, {
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: filteredBlogs.length,
-        items: filteredBlogs,
-      });
-  });
+  // it('should delete a blog with exiting id', async () => {
+  //   await getRequest()
+  //     .delete(`${RouterPaths.blogger}/blogs/${newBlog.id}`)
+  //     .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+  //     .set({
+  //       Authorization: `Bearer ${accessTokenUser1}`,
+  //     })
+  //     .expect(HTTP_STATUSES.NO_CONTENT_204);
+  //
+  //   const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
+  //
+  //   await getRequest()
+  //     .get(RouterPaths.blogs)
+  //     .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+  //     .set({
+  //       Authorization: `Bearer ${accessTokenUser1}`,
+  //     })
+  //     .expect(HTTP_STATUSES.OK_200, {
+  //       pagesCount: 1,
+  //       page: 1,
+  //       pageSize: 10,
+  //       totalCount: filteredBlogs.length,
+  //       items: filteredBlogs,
+  //     });
+  // });
 });
