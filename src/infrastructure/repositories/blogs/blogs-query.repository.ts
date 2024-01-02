@@ -34,6 +34,7 @@ export class BlogsQueryRepository {
           name: `%${searchNameTerm}%`,
         },
       )
+      .andWhere('b.isBanned = false')
       .orderBy(`b.${sortBy}`, sortDirection)
       .skip(skipSize)
       .take(pageSize)
@@ -47,6 +48,7 @@ export class BlogsQueryRepository {
           name: `%${searchNameTerm}%`,
         },
       )
+      .andWhere('b.isBanned = false')
       .getCount();
 
     const pagesCount = getPagesCount(blogsCount, pageSize);

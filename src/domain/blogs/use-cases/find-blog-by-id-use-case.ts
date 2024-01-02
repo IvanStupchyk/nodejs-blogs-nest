@@ -2,6 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
 import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blogs.repository';
 import { BlogViewType } from '../../../types/blogs.types';
+import { exceptionHandler } from '../../../utils/errors/exception.handler';
+import { HttpStatus } from '@nestjs/common';
 
 export class FindBlogByIdCommand {
   constructor(public id: string) {}
@@ -16,6 +18,10 @@ export class FindBlogByIdUseCase
   async execute(command: FindBlogByIdCommand): Promise<BlogViewType | null> {
     if (!isUUID(command.id)) return null;
     const blog = await this.blogsRepository.findBlogById(command.id);
+
+    if (blog.isBanned) {
+      exceptionHandler(HttpStatus.NOT_FOUND);
+    }
 
     return blog
       ? {
