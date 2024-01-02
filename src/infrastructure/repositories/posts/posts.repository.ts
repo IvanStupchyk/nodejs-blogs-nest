@@ -93,6 +93,7 @@ export class PostsRepository {
         'newest_likes',
       )
       .where('ubi.isBanned is not true')
+      .andWhere('b.isBanned is not true')
       .orderBy(`p.${sortBy}`, sortDirection)
       .offset(skipSize)
       .limit(pageSize)
@@ -101,8 +102,10 @@ export class PostsRepository {
     const postsCount = await this.postsRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'u')
+      .leftJoinAndSelect('p.blog', 'b')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .where('ubi.isBanned is not true')
+      .andWhere('b.isBanned is not true')
       .getCount();
 
     const pagesCount = getPagesCount(postsCount, pageSize);
@@ -183,6 +186,7 @@ export class PostsRepository {
         id,
       })
       .andWhere('ubi.isBanned is not true')
+      .andWhere('b.isBanned is not true')
       .getRawMany();
 
     if (!post.length) {
@@ -273,6 +277,7 @@ export class PostsRepository {
         id,
       })
       .andWhere('ubi.isBanned is not true')
+      .andWhere('b.isBanned is not true')
       .orderBy(`p.${sortBy}`, sortDirection)
       .offset(skipSize)
       .limit(pageSize)
@@ -287,6 +292,7 @@ export class PostsRepository {
         id,
       })
       .andWhere('ubi.isBanned is not true')
+      .andWhere('b.isBanned is not true')
       .getCount();
 
     if (!postsCount) return null;

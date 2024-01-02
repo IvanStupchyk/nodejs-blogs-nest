@@ -151,9 +151,130 @@ describe('tests for /blogs', () => {
               userId: user1.id,
               userLogin: user1.login,
             },
+            banInfo: {
+              isBanned: false,
+              banDate: null,
+            },
           },
         ],
       });
+  });
+
+  it('should not ban blog if body is incorrect or blog does not exist', async () => {
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/sddf/ban`)
+      .expect(HttpStatus.UNAUTHORIZED);
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/073cae38-5e01-46de-8463-69cb8775097d/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .set({
+        isBanned: 'ad',
+      })
+      .expect(HttpStatus.BAD_REQUEST, {
+        errorsMessages: [
+          { message: 'isBanned must be a boolean value', field: 'isBanned' },
+        ],
+      });
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/073cae38-5e01-46de-8463-69cb8775097d/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: true,
+      })
+      .expect(HttpStatus.NOT_FOUND);
+
+    await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            ...newBlog,
+            blogOwnerInfo: {
+              userId: user1.id,
+              userLogin: user1.login,
+            },
+            banInfo: {
+              isBanned: false,
+              banDate: null,
+            },
+          },
+        ],
+      });
+  });
+
+  it('should ban, unban blog', async () => {
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/${newBlog.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: true,
+      })
+      .expect(HttpStatus.NO_CONTENT);
+
+    const resp = await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200);
+
+    expect(resp.body).toEqual({
+      pagesCount: 1,
+      page: 1,
+      pageSize: 10,
+      totalCount: 1,
+      items: [
+        {
+          ...newBlog,
+          blogOwnerInfo: {
+            userId: user1.id,
+            userLogin: user1.login,
+          },
+          banInfo: {
+            isBanned: true,
+            banDate: expect.any(String),
+          },
+        },
+      ],
+    });
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/${newBlog.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: false,
+      })
+      .expect(HttpStatus.NO_CONTENT);
+
+    const resp2 = await getRequest()
+      .get(RouterPaths.saBlogs)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .expect(HTTP_STATUSES.OK_200);
+
+    expect(resp2.body).toEqual({
+      pagesCount: 1,
+      page: 1,
+      pageSize: 10,
+      totalCount: 1,
+      items: [
+        {
+          ...newBlog,
+          blogOwnerInfo: {
+            userId: user1.id,
+            userLogin: user1.login,
+          },
+          banInfo: {
+            isBanned: false,
+            banDate: null,
+          },
+        },
+      ],
+    });
   });
 
   it('should return all posts for specified blog', async () => {
@@ -171,6 +292,40 @@ describe('tests for /blogs', () => {
     );
 
     newPost = createdPost;
+
+    await getRequest()
+      .get(RouterPaths.posts)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [createdPost],
+      });
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/${newBlog.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: true,
+      })
+      .expect(HttpStatus.NO_CONTENT);
+
+    await getRequest().get(RouterPaths.posts).expect(HTTP_STATUSES.OK_200, {
+      pagesCount: 0,
+      page: 1,
+      pageSize: 10,
+      totalCount: 0,
+      items: [],
+    });
+
+    await getRequest()
+      .put(`${RouterPaths.saBlogs}/${newBlog.id}/ban`)
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send({
+        isBanned: false,
+      })
+      .expect(HttpStatus.NO_CONTENT);
 
     await getRequest()
       .get(RouterPaths.posts)

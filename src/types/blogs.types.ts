@@ -1,7 +1,11 @@
+type BanInfoType = {
+  isBanned: boolean;
+  banDate: Date | null;
+};
+
 export type BlogViewType = {
   id: string;
   name: string;
-  // userId: string;
   description: string;
   websiteUrl: string;
   createdAt: Date;
@@ -28,6 +32,7 @@ type BlogViewSAType = {
   websiteUrl: string;
   createdAt: Date;
   isMembership: boolean;
+  banInfo: BanInfoType;
   blogOwnerInfo: UserViewType;
 };
 

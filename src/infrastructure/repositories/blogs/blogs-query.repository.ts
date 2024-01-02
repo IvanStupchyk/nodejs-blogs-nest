@@ -199,6 +199,10 @@ export class BlogsQueryRepository {
                 userId: b.user ? b.user.id : null,
                 userLogin: b.user ? b.user.login : null,
               },
+              banInfo: {
+                isBanned: b.isBanned,
+                banDate: b.banDate,
+              },
             };
           })
         : [],

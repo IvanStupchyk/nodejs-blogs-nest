@@ -265,7 +265,7 @@ describe('tests for /posts', () => {
       });
   });
 
-  it('should bun a user and block its posts', async () => {
+  it('should ban a user and block its posts', async () => {
     const correctBody = {
       isBanned: true,
       banReason: 'because because because because because',
@@ -292,7 +292,7 @@ describe('tests for /posts', () => {
       .auth('admin', 'qwerty', { type: 'basic' })
       .send({
         isBanned: false,
-        banReason: 'h',
+        banReason: 'hasdas asdasda  asdasdas asasdasd asdasd',
       })
       .expect(HttpStatus.NO_CONTENT);
   });
@@ -310,7 +310,7 @@ describe('tests for /posts', () => {
 
   it("shouldn't update post if the post belongs to other user", async () => {
     await getRequest()
-      .put(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .put(`${RouterPaths.blogger}/blogs/${newPost.blogId}/posts/${newPost.id}`)
       .set('Cookie', `refreshToken=${refreshTokenUser2}`)
       .set({
         Authorization: `Bearer ${accessTokenUser2}`,
@@ -325,7 +325,7 @@ describe('tests for /posts', () => {
       title: 'updated title',
     };
     await getRequest()
-      .put(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .put(`${RouterPaths.blogger}/blogs/${newPost.blogId}/posts/${newPost.id}`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -354,7 +354,9 @@ describe('tests for /posts', () => {
 
   it("shouldn't delete post if the post belongs to other user", async () => {
     await getRequest()
-      .delete(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .delete(
+        `${RouterPaths.blogger}/blogs/${newPost.blogId}/posts/${newPost.id}`,
+      )
       .set('Cookie', `refreshToken=${refreshTokenUser2}`)
       .set({
         Authorization: `Bearer ${accessTokenUser2}`,
@@ -365,7 +367,9 @@ describe('tests for /posts', () => {
 
   it('should delete a post with exiting id', async () => {
     await getRequest()
-      .delete(`${RouterPaths.blogger}/${newPost.blogId}/posts/${newPost.id}`)
+      .delete(
+        `${RouterPaths.blogger}/blogs/${newPost.blogId}/posts/${newPost.id}`,
+      )
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
