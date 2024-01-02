@@ -42,26 +42,39 @@ import { BanUserByBloggerParamsDto } from '../../application/dto/blogs/ban-user-
 import { BanUserByBloggerCommand } from '../../domain/users/use-cases/ban-user-by-blogger-use-case';
 import { UserBanByBloggerInputDto } from '../../application/dto/blogs/user-ban-by-blogger.input.dto';
 import { BanUsersQueryDto } from '../../application/dto/blogs/ban-users.query.dto';
-import { UsersQueryRepository } from '../../infrastructure/repositories/users/users-query.repository';
 import { FindBanUsersByBloggerCommand } from '../../domain/users/use-cases/find-ban-users-by-blogger-use-case';
+import { CommentsQueryDto } from '../../application/dto/comments/comments.query.dto';
+import { CommentsQueryRepository } from '../../infrastructure/repositories/comments/comments-query.repository';
 
 @Controller(RouterPaths.blogger)
 export class BloggerBlogsController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(ThrottlerGuard, JwtAuthGuard)
   @Get('blogs')
   async getBlogsForSa(
-    @Query() params: BlogsQueryDto,
+    @Query() query: BlogsQueryDto,
     @CurrentUserId() currentUserId,
   ) {
     return await this.blogsQueryRepository.getSortedBlogsForSpecifiedUser(
-      params,
+      query,
       currentUserId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('blogs/comments')
+  async getCommentsForBlogger(
+    @Query() query: CommentsQueryDto,
+    @CurrentUserId() userId,
+  ) {
+    return await this.commentsQueryRepository.getSortedBloggerComments(
+      query,
+      userId,
     );
   }
 

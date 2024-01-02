@@ -49,6 +49,12 @@ export class Blog extends AggregateRoot {
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];
 
+  @Column({ type: 'boolean', default: false })
+  isBanned: boolean;
+
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  banDate: Date;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
@@ -64,6 +70,7 @@ export class Blog extends AggregateRoot {
     blog.description = description;
     blog.websiteUrl = websiteUrl;
     blog.user = user;
+    blog.isBanned = false;
     blog.createdAt = new Date();
 
     const event = new BlogCreatedEvent(name, blog.id, blog.createdAt);
@@ -94,5 +101,16 @@ export class Blog extends AggregateRoot {
 
       return blog;
     }
+  }
+
+  static ban(blog: Blog | null, isBanned: boolean) {
+    if (!blog) {
+      return exceptionHandler(HttpStatus.NOT_FOUND);
+    }
+
+    blog.isBanned = isBanned;
+    blog.banDate = isBanned ? new Date() : null;
+
+    return blog;
   }
 }

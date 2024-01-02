@@ -109,6 +109,8 @@ import { BanUserUseCase } from './domain/users/use-cases/ban-user-use-case';
 import { UserBanByBlogger } from './entities/users/User-ban-by-blogger.entity';
 import { BanUserByBloggerUseCase } from './domain/users/use-cases/ban-user-by-blogger-use-case';
 import { FindBanUsersByBloggerUseCase } from './domain/users/use-cases/find-ban-users-by-blogger-use-case';
+import { BanBlogBySaUserCase } from './domain/blogs/use-cases/ban-blog-by-sa-use-case';
+import { CommentsQueryRepository } from './infrastructure/repositories/comments/comments-query.repository';
 
 const useCases = [
   CreatePostUseCase,
@@ -153,6 +155,7 @@ const useCases = [
   BanUserUseCase,
   BanUserByBloggerUseCase,
   FindBanUsersByBloggerUseCase,
+  BanBlogBySaUserCase,
 ];
 
 const entities = [
@@ -223,6 +226,7 @@ const entities = [
     PostLikesTransactionsRepository,
     CommentsTransactionsRepository,
     CommentLikesTransactionsRepository,
+    CommentsQueryRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

@@ -474,6 +474,40 @@ describe('tests for /comments and posts/:id/comments', () => {
       });
   }, 10000);
 
+  it('should return all comments for specified blogger', async () => {
+    await getRequest()
+      .get(`${RouterPaths.blogger}/blogs/comments`)
+      .set('Authorization', `Bearer ${accessTokenUser2}`)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 0,
+        page: 1,
+        pageSize: 10,
+        totalCount: 0,
+        items: [],
+      });
+
+    await getRequest()
+      .get(`${RouterPaths.blogger}/blogs/comments`)
+      .set('Authorization', `Bearer ${accessTokenUser1}`)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: newComments.length,
+        items: newComments.map((c) => {
+          return {
+            ...c,
+            postInfo: {
+              id: newPost.id,
+              title: newPost.title,
+              blogId: newPost.blogId,
+              blogName: newPost.blogName,
+            },
+          };
+        }),
+      });
+  });
+
   it('should update current comment', async () => {
     const newCommentContent: CommentInputDto = {
       content: 'new content for updated comment',
