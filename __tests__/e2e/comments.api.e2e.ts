@@ -544,33 +544,33 @@ describe('tests for /comments and posts/:id/comments', () => {
       .expect(HTTP_STATUSES.FORBIDDEN_403);
   });
 
-  // it('should delete certain comment', async () => {
-  //   await sleep(10);
-  //   const userWithCorrectData: LoginUserInputDto = {
-  //     loginOrEmail: userData1.login,
-  //     password: userData1.password,
-  //   };
-  //
-  //   const result = await getRequest()
-  //     .post(`${RouterPaths.auth}/login`)
-  //     .send(userWithCorrectData)
-  //     .expect(HTTP_STATUSES.OK_200);
-  //
-  //   await getRequest()
-  //     .delete(`${RouterPaths.comments}/${comment1.id}`)
-  //     .set('Authorization', `Bearer ${result.body.accessToken}`)
-  //     .expect(HTTP_STATUSES.NO_CONTENT_204);
-  //
-  //   const filteredComments = newComments.filter((c) => c.id !== comment1.id);
-  //
-  //   await getRequest()
-  //     .get(`${RouterPaths.posts}/${newPost.id}/comments`)
-  //     .expect(HTTP_STATUSES.OK_200, {
-  //       pagesCount: 1,
-  //       page: 1,
-  //       pageSize: 10,
-  //       totalCount: filteredComments.length,
-  //       items: filteredComments,
-  //     });
-  // }, 30000);
+  it('should delete certain comment', async () => {
+    await sleep(10);
+    const userWithCorrectData: LoginUserInputDto = {
+      loginOrEmail: userData1.login,
+      password: userData1.password,
+    };
+
+    const result = await getRequest()
+      .post(`${RouterPaths.auth}/login`)
+      .send(userWithCorrectData)
+      .expect(HTTP_STATUSES.OK_200);
+
+    await getRequest()
+      .delete(`${RouterPaths.comments}/${comment1.id}`)
+      .set('Authorization', `Bearer ${result.body.accessToken}`)
+      .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+    const filteredComments = newComments.filter((c) => c.id !== comment1.id);
+
+    await getRequest()
+      .get(`${RouterPaths.posts}/${newPost.id}/comments`)
+      .expect(HTTP_STATUSES.OK_200, {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: filteredComments.length,
+        items: filteredComments,
+      });
+  }, 30000);
 });
