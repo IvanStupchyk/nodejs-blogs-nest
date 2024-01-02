@@ -19,7 +19,7 @@ export class FindBlogByIdUseCase
     if (!isUUID(command.id)) return null;
     const blog = await this.blogsRepository.findBlogById(command.id);
 
-    if (blog.isBanned) {
+    if (!blog || blog.isBanned) {
       exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
