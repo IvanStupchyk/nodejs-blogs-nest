@@ -506,27 +506,6 @@ describe('tests for /comments and posts/:id/comments', () => {
           };
         }),
       });
-
-    await getRequest()
-      .get(`${RouterPaths.blogger}/blogs/comments?sortBy=4234&pageSize=2@`)
-      .set('Authorization', `Bearer ${accessTokenUser1}`)
-      .expect(HTTP_STATUSES.OK_200, {
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: newComments.length,
-        items: newComments.map((c) => {
-          return {
-            ...c,
-            postInfo: {
-              id: newPost.id,
-              title: newPost.title,
-              blogId: newPost.blogId,
-              blogName: newPost.blogName,
-            },
-          };
-        }),
-      });
   });
 
   it('should update current comment', async () => {

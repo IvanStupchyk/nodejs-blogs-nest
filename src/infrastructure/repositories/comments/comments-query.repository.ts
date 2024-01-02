@@ -67,8 +67,10 @@ export class CommentsQueryRepository {
       .leftJoinAndSelect('c.user', 'u')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
       .leftJoinAndSelect('c.post', 'p')
-      // .where('u.id = :userId', { userId })
-      .where('ubi.isBanned is not true')
+      .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('b.user', 'ub')
+      .where('ub.id = :userId', { userId })
+      .andWhere('ubi.isBanned is not true')
       .orderBy(`c.${sortBy}`, sortDirection)
       .limit(pageSize)
       .offset(skipSize)
@@ -77,10 +79,12 @@ export class CommentsQueryRepository {
     const commentsCount = await this.commentsRepository
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.post', 'p')
+      .leftJoinAndSelect('p.blog', 'b')
+      .leftJoinAndSelect('b.user', 'ub')
       .leftJoinAndSelect('c.user', 'u')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
-      // .where('u.id = :userId', { userId })
-      .where('ubi.isBanned is not true')
+      .where('ub.id = :userId', { userId })
+      .andWhere('ubi.isBanned is not true')
       .getCount();
 
     const pagesCount = getPagesCount(commentsCount, pageSize);
