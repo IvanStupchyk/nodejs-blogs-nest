@@ -79,8 +79,8 @@ export class CommentsQueryRepository {
       .leftJoinAndSelect('c.post', 'p')
       .leftJoinAndSelect('c.user', 'u')
       .leftJoinAndSelect('u.userBanInfo', 'ubi')
-      .where('u.id = :userId', { userId })
-      .andWhere('ubi.isBanned is not true')
+      // .where('u.id = :userId', { userId })
+      // .andWhere('ubi.isBanned is not true')
       .getCount();
 
     const pagesCount = getPagesCount(commentsCount, pageSize);

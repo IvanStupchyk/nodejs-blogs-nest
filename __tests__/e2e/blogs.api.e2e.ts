@@ -846,6 +846,14 @@ describe('tests for /blogs', () => {
       })
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
+    await getRequest()
+      .get(`${RouterPaths.blogs}/${newBlog.id}`)
+      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
+      .expect(HttpStatus.NOT_FOUND);
+
     const filteredBlogs = newBlogs.filter((b) => b.id !== newBlog.id);
 
     await getRequest()
