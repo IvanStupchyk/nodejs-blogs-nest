@@ -17,7 +17,8 @@
     "test:watch": "jest --watch ./__tests__/e2e/quiz.questions.api.e2e.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./__tests__/jest-e2e.config.js -i"
+    "test:e2e": "jest --config ./__tests__/jest-e2e.config.js -i",
+    "ngrok:dev": "ngrok http 3000"
   },
   "dependencies": {
     "@fastify/cookie": "^9.1.0",
@@ -39,6 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb-memory-server": "^9.0.1",
     "mongoose": "^8.0.0",
+    "ngrok": "^5.0.0-beta.2",
     "nodemailer": "^6.9.7",
     "passport": "^0.6.0",
     "passport-http": "^0.3.0",
