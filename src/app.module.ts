@@ -111,6 +111,9 @@ import { BanUserByBloggerUseCase } from './domain/users/use-cases/ban-user-by-bl
 import { FindBanUsersByBloggerUseCase } from './domain/users/use-cases/find-ban-users-by-blogger-use-case';
 import { BanBlogBySaUserCase } from './domain/blogs/use-cases/ban-blog-by-sa-use-case';
 import { CommentsQueryRepository } from './infrastructure/repositories/comments/comments-query.repository';
+import { SaveUserAvatarUseCase } from './application/useCases/saveUserAvatarUseCase';
+import { FilesSaveAdapter } from './application/useCases/filesSaveAdapter';
+import { S3Adapter } from './infrastructure/aws/s3.adapter';
 
 const useCases = [
   CreatePostUseCase,
@@ -156,6 +159,9 @@ const useCases = [
   BanUserByBloggerUseCase,
   FindBanUsersByBloggerUseCase,
   BanBlogBySaUserCase,
+  SaveUserAvatarUseCase,
+  FilesSaveAdapter,
+  S3Adapter,
 ];
 
 const entities = [

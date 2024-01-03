@@ -4,12 +4,14 @@ import {
   Headers,
   HttpStatus,
   Param,
+  Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BlogsQueryDto } from '../../application/dto/blogs/blogs.query.dto';
 import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
-import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { FindBlogByIdCommand } from '../../domain/blogs/use-cases/find-blog-by-id-use-case';
@@ -18,14 +20,50 @@ import { BlogsQueryRepository } from '../../infrastructure/repositories/blogs/bl
 import { GetPostsForSpecifiedBlogCommand } from '../../domain/posts/use-cases/get-posts-for-specified-blog-use-case';
 import { GetBlogParamsDto } from '../../application/dto/blogs/get-blog.params.dto';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
+import { join } from 'node:path';
+import {
+  ensureDirSync,
+  readTextFileAsync,
+  saveFileAsync,
+} from '../../utils/fs-utils';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { SaveUserAvatarUseCase } from '../../application/useCases/saveUserAvatarUseCase';
 
 @Controller(RouterPaths.blogs)
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly jwtService: JwtService,
+    private readonly saveUserAvatarUseCase: SaveUserAvatarUseCase,
     private commandBus: CommandBus,
   ) {}
+
+  @Get('change-page')
+  async ChangeAvatarPage() {
+    const htmlContent = await readTextFileAsync(
+      join('views', 'avatars', 'change-page.html'),
+    );
+    return htmlContent;
+  }
+
+  // for simple form
+  // @Post('avatars')
+  // async SaveAvatar() {
+  //   return 'avatar saved';
+  // }
+
+  // process form with a file
+  @Post('avatars')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async SaveAvatar(@UploadedFile() avatarFile: Express.Multer.File) {
+    const userId = '10';
+    await this.saveUserAvatarUseCase.execute(
+      userId,
+      avatarFile.originalname,
+      avatarFile.buffer,
+    );
+
+    return 'avatar saved';
+  }
 
   @UseGuards(ThrottlerGuard)
   @Get()

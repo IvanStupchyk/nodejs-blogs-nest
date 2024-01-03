@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+  <h1>Change Avatar</h1>
+<!--<form action="/blogs/avatars" method="POST">-->
+<!--  <input name="login" value="ivan"/>-->
+<!--  <input name="password" value="123" type="password"/>-->
+<!--  <button>Login</button>-->
+<!--</form>-->
+
+  <form action="/blogs/avatars" method="POST" enctype="multipart/form-data">
+    <input name="name" value="ivan hey" type="text"/>
+    <input name="avatar" value="" type="file"/>
+    <button>Send file</button>
+  </form>
+</body>
+</html>
