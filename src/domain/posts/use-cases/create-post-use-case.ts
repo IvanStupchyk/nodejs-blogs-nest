@@ -2,7 +2,7 @@ import { CommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { PostForSpecifiedBlogInputDto } from '../../../application/dto/posts/post-for-specified-blog.input.dto';
 import { isUUID } from '../../../utils/utils';
-import { PostViewType } from '../../../types/posts.types';
+import { PostViewType } from '../../../types/posts/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { likeStatus } from '../../../types/general.types';
 import { exceptionHandler } from '../../../utils/errors/exception.handler';
@@ -84,6 +84,9 @@ export class CreatePostUseCase extends TransactionUseCase<
         dislikesCount: 0,
         myStatus: likeStatus.None,
         newestLikes: [],
+      },
+      images: {
+        main: null,
       },
     };
   }

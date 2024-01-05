@@ -5,9 +5,10 @@ import { DataSource, Repository } from 'typeorm';
 import { createDefaultSortedParams, getPagesCount } from '../../../utils/utils';
 import { PostsQueryDto } from '../../../application/dto/posts/posts.query.dto';
 import { mockPostModel } from '../../../constants/blanks';
-import { PostsType, PostViewType } from '../../../types/posts.types';
+import { PostsType, PostViewType } from '../../../types/posts/posts.types';
 import { Post } from '../../../entities/posts/Post.entity';
 import { PostLike } from '../../../entities/posts/Post-like.entity';
+import { PostImage } from '../../../entities/posts/Post-image.entity';
 
 @Injectable()
 export class PostsRepository {
@@ -91,6 +92,22 @@ export class PostsRepository {
             }, 'agg'),
 
         'newest_likes',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(
+              `jsonb_agg(json_build_object('url', agg.url, 'width', agg.width, 'height', agg.height, 'fileSize', agg.file_size)
+                 )`,
+            )
+            .from((qb) => {
+              return qb
+                .select(`url, width, height, file_size`)
+                .from(PostImage, 'pi')
+                .where('pi.postId = p.id');
+            }, 'agg'),
+
+        'post_images',
       )
       .where('ubi.isBanned is not true')
       .andWhere('b.isBanned is not true')
@@ -181,6 +198,22 @@ export class PostsRepository {
             }, 'agg'),
 
         'newest_likes',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(
+              `jsonb_agg(json_build_object('url', agg.url, 'width', agg.width, 'height', agg.height, 'fileSize', agg.file_size)
+                 )`,
+            )
+            .from((qb) => {
+              return qb
+                .select(`url, width, height, file_size`)
+                .from(PostImage, 'pi')
+                .where('pi.postId = p.id');
+            }, 'agg'),
+
+        'post_images',
       )
       .where('p.id = :id', {
         id,
@@ -273,6 +306,22 @@ export class PostsRepository {
 
         'newest_likes',
       )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(
+              `jsonb_agg(json_build_object('url', agg.url, 'width', agg.width, 'height', agg.height, 'fileSize', agg.file_size)
+                 )`,
+            )
+            .from((qb) => {
+              return qb
+                .select(`url, width, height, file_size`)
+                .from(PostImage, 'pi')
+                .where('pi.postId = p.id');
+            }, 'agg'),
+
+        'post_images',
+      )
       .where('b.id = :id', {
         id,
       })
@@ -331,6 +380,18 @@ export class PostsRepository {
               dislikesCount: Number(p.dislikes_count),
               myStatus: p.my_status ?? likeStatus.None,
               newestLikes: p.newest_likes ?? [],
+            },
+            images: {
+              main: p.post_images
+                ? p.post_images.map((i) => {
+                    return {
+                      url: i.url,
+                      width: i.width,
+                      height: i.height,
+                      fileSize: i.fileSize,
+                    };
+                  })
+                : null,
             },
           };
         })

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { Post } from '../../../entities/posts/Post.entity';
+import { PostImageViewType } from '../../../types/posts/post.image.types';
 
 @Injectable()
 export class PostsTransactionsRepository {
@@ -10,6 +11,30 @@ export class PostsTransactionsRepository {
       .leftJoinAndSelect('p.blog', 'b')
       .where('p.id = :id', { id })
       .getOne();
+  }
+
+  async findPostImages(
+    id: string,
+    manager: EntityManager,
+  ): Promise<PostImageViewType> {
+    const images = await manager
+      .createQueryBuilder(Post, 'p')
+      .leftJoinAndSelect('p.postImages', 'pi')
+      .where('p.id = :id', { id })
+      .getOne();
+
+    return {
+      main: images.postImages.length
+        ? images.postImages.map((i) => {
+            return {
+              url: i.url,
+              width: i.width,
+              height: i.height,
+              fileSize: i.fileSize,
+            };
+          })
+        : null,
+    };
   }
 
   async deletePost(id: string, manager: EntityManager): Promise<boolean> {

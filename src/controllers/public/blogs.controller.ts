@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { BlogsQueryDto } from '../../application/dto/blogs/blogs.query.dto';
 import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
-import { JwtService } from '../../infrastructure/jwt.service';
 import { RouterPaths } from '../../constants/router.paths';
 import { CommandBus } from '@nestjs/cqrs';
 import { FindBlogByIdCommand } from '../../domain/blogs/use-cases/find-blog-by-id-use-case';
@@ -23,9 +22,32 @@ import { exceptionHandler } from '../../utils/errors/exception.handler';
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
+
+  // simple form
+  // @Get('change-page')
+  // async ChangeAvatarPage() {
+  //   const htmlContent = await readTextFileAsync(
+  //     join('views', 'avatars', 'change-page.html'),
+  //   );
+  //   return htmlContent;
+  // }
+
+  // process form with a file
+  // @Post('avatars')
+  // @UseInterceptors(FileInterceptor('avatar'))
+  // async SaveAvatar(@UploadedFile() avatarFile: Express.Multer.File) {
+  //   const userId = '10';
+  //   await this.saveUserAvatarUseCase.execute(
+  //     userId,
+  //     avatarFile.originalname,
+  //     avatarFile.buffer,
+  //     avatarFile.mimetype,
+  //   );
+  //
+  //   return 'avatar saved';
+  // }
 
   @UseGuards(ThrottlerGuard)
   @Get()

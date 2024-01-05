@@ -3,7 +3,7 @@ import { isUUID } from '../../../utils/utils';
 import { PostsRepository } from '../../../infrastructure/repositories/posts/posts.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '../../../infrastructure/jwt.service';
-import { PostViewType } from '../../../types/posts.types';
+import { PostViewType } from '../../../types/posts/posts.types';
 
 export class GetPostByIdCommand {
   constructor(

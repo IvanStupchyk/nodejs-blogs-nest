@@ -6,14 +6,16 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
-  Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PostsQueryDto } from '../../application/dto/posts/posts.query.dto';
 import { DeletePostWithCheckingCommand } from '../../domain/posts/use-cases/delete-post-use-case';
 import { UpdateBlogCommand } from '../../domain/blogs/use-cases/update-blog-use-case';
@@ -45,6 +47,13 @@ import { BanUsersQueryDto } from '../../application/dto/blogs/ban-users.query.dt
 import { FindBanUsersByBloggerCommand } from '../../domain/users/use-cases/find-ban-users-by-blogger-use-case';
 import { CommentsQueryDto } from '../../application/dto/comments/comments.query.dto';
 import { CommentsQueryRepository } from '../../infrastructure/repositories/comments/comments-query.repository';
+import { exceptionImagesFactory } from '../../utils/errors/exception-images.factory';
+import { PostImageParamsDto } from '../../application/dto/posts/post-image.params.dto';
+import { ImageValidator } from '../../utils/validators/image-validator';
+import { AddImagePostCommand } from '../../domain/posts/use-cases/add-image-post-use-case';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AddMainBlogImageCommand } from '../../domain/blogs/use-cases/add-main-blog-image-use-case';
+import { AddBlogWallpaperCommand } from '../../domain/blogs/use-cases/add-blog-wallpaper-use-case';
 
 @Controller(RouterPaths.blogger)
 export class BloggerBlogsController {
@@ -56,13 +65,10 @@ export class BloggerBlogsController {
 
   @UseGuards(ThrottlerGuard, JwtAuthGuard)
   @Get('blogs')
-  async getBlogsForSa(
-    @Query() query: BlogsQueryDto,
-    @CurrentUserId() currentUserId,
-  ) {
+  async getBlogsForSa(@Query() query: BlogsQueryDto, @CurrentUserId() userId) {
     return await this.blogsQueryRepository.getSortedBlogsForSpecifiedUser(
       query,
-      currentUserId,
+      userId,
     );
   }
 
@@ -80,13 +86,64 @@ export class BloggerBlogsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('blogs')
-  async createBlog(
-    @Body() body: BlogInputDto,
-    @Req() req: Request,
-    @CurrentUserId() currentUserId,
+  async createBlog(@Body() body: BlogInputDto, @CurrentUserId() userId) {
+    return await this.commandBus.execute(new CreateBlogCommand(userId, body));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('blogs/:blogId/posts/:postId/images/main')
+  async addMainPostImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new ImageValidator(940, 432, 100000)],
+        exceptionFactory: exceptionImagesFactory,
+      }),
+    )
+    file: Express.Multer.File,
+    @Param() params: PostImageParamsDto,
+    @CurrentUserId() userId,
   ) {
     return await this.commandBus.execute(
-      new CreateBlogCommand(currentUserId, body),
+      new AddImagePostCommand(userId, params.blogId, params.postId, file),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('blogs/:id/images/main')
+  async addMainBlogImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new ImageValidator(156, 156, 100000)],
+        exceptionFactory: exceptionImagesFactory,
+      }),
+    )
+    file: Express.Multer.File,
+    @Param() params: BlogParamsDto,
+    @CurrentUserId() userId,
+  ) {
+    return await this.commandBus.execute(
+      new AddMainBlogImageCommand(userId, params.id, file),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('blogs/:id/images/wallpaper')
+  async addBlogWallpaper(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new ImageValidator(1028, 312, 100000)],
+        exceptionFactory: exceptionImagesFactory,
+      }),
+    )
+    file: Express.Multer.File,
+    @Param() params: BlogParamsDto,
+    @CurrentUserId() userId,
+  ) {
+    return await this.commandBus.execute(
+      new AddBlogWallpaperCommand(userId, params.id, file),
     );
   }
 
@@ -138,14 +195,10 @@ export class BloggerBlogsController {
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
-    @Req() req: Request,
+    @CurrentUserId() userId,
   ) {
     const posts = await this.commandBus.execute(
-      new GetPostsForSpecifiedBlogCommand(
-        query,
-        params.id,
-        req.headers?.authorization,
-      ),
+      new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
     );
 
     if (!posts) {
@@ -161,7 +214,6 @@ export class BloggerBlogsController {
     @Param() params: UpdatePostParamsDto,
     @Body() body: UpdatePostInputDto,
     @CurrentUserId() userId,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
     res.sendStatus(
@@ -181,7 +233,6 @@ export class BloggerBlogsController {
   async deleteSpecifiedPost(
     @Param() params: DeletePostParamsDto,
     @CurrentUserId() userId,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
     res.sendStatus(

@@ -13,7 +13,7 @@ import { UserViewType } from '../../src/types/users.types';
 import { CommentViewType } from '../../src/types/comments.types';
 import { userData1, userData2, userData3 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { PostType } from '../../src/types/posts.types';
+import { PostType } from '../../src/types/posts/posts.types';
 import { userCreator } from '../utils/user-creator';
 
 const sleep = (seconds: number) =>

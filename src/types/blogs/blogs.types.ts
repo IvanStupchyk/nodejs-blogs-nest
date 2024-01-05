@@ -1,3 +1,5 @@
+import { BlogImagesViewType } from './blog.images.types';
+
 type BanInfoType = {
   isBanned: boolean;
   banDate: Date | null;
@@ -10,6 +12,7 @@ export type BlogViewType = {
   websiteUrl: string;
   createdAt: Date;
   isMembership: boolean;
+  images: BlogImagesViewType;
 };
 
 export type BlogsViewType = {

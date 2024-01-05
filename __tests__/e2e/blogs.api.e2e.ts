@@ -13,8 +13,8 @@ import {
   validPostData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { PostType } from '../../src/types/posts.types';
-import { BlogViewType } from '../../src/types/blogs.types';
+import { PostType } from '../../src/types/posts/posts.types';
+import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 
 describe('tests for /blogs', () => {
@@ -136,6 +136,7 @@ describe('tests for /blogs', () => {
         items: [createdBlog],
       });
 
+    delete newBlog.images;
     await getRequest()
       .get(RouterPaths.saBlogs)
       .auth('admin', 'qwerty', { type: 'basic' })
@@ -401,6 +402,13 @@ describe('tests for /blogs', () => {
         (pageNumber - 1) * pageSize,
         (pageNumber - 1) * pageSize + pageSize,
       );
+    newBlog = {
+      ...newBlog,
+      images: {
+        wallpaper: null,
+        main: null,
+      },
+    };
 
     await getRequest().get(RouterPaths.blogs).expect(HTTP_STATUSES.OK_200, {
       pagesCount: 1,
@@ -562,6 +570,10 @@ describe('tests for /blogs', () => {
       .expect({
         ...newBlog,
         name: updatedValidData.name,
+        images: {
+          wallpaper: null,
+          main: null,
+        },
       });
   });
 

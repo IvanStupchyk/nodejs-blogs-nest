@@ -19,7 +19,7 @@ export class isBlogHasOwnerDataConstraint
 
     const blog = await this.blogsRepository.findBlogById(blogId);
 
-    return !!blog.user;
+    return !!blog.user_id;
   }
 }
 

@@ -1,7 +1,7 @@
 import { CommandHandler, EventBus } from '@nestjs/cqrs';
 import { BlogInputDto } from '../../../application/dto/blogs/blog.input.dto';
 import { Blog } from '../../../entities/blogs/Blog.entity';
-import { BlogViewType } from '../../../types/blogs.types';
+import { BlogViewType } from '../../../types/blogs/blogs.types';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
@@ -52,6 +52,10 @@ export class CreateBlogUseCase extends TransactionUseCase<
       websiteUrl: savedBlog.websiteUrl,
       createdAt: savedBlog.createdAt,
       isMembership: savedBlog.isMembership,
+      images: {
+        wallpaper: null,
+        main: null,
+      },
     };
   }
 

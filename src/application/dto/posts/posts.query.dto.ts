@@ -1,5 +1,5 @@
 import { SortOrder } from '../../../constants/sort.order';
-import { PostType } from '../../../types/posts.types';
+import { PostType } from '../../../types/posts/posts.types';
 
 export class PostsQueryDto {
   sortBy: keyof PostType;

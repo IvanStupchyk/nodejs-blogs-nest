@@ -1,5 +1,5 @@
 import { SortOrder } from '../../../constants/sort.order';
-import { BlogViewType } from '../../../types/blogs.types';
+import { BlogViewType } from '../../../types/blogs/blogs.types';
 
 export class BlogsQueryDto {
   searchNameTerm: string;
