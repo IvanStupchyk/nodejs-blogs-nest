@@ -24,6 +24,7 @@ export class S3Adapter {
       Key: key,
       Body: buffer,
       ContentType: mimetype,
+      ACL: 'public-read',
     });
 
     try {
