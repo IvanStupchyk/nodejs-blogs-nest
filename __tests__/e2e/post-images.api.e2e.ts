@@ -2,24 +2,17 @@ import request from 'supertest';
 import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
 import { postsTestManager } from '../utils/posts-test-manager';
-import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  invalidPostData,
-  userData1,
-  userData2,
-  validBlogData,
-} from '../mockData/mock-data';
+import { userData1, userData2, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts/posts.types';
 import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 import { User } from '../../src/entities/users/User.entity';
 import * as path from 'path';
-import any = jasmine.any;
 
 describe('tests for post images', () => {
   let validPostData: PostInputDto = {
