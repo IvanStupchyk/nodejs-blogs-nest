@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../posts/Post.entity';
@@ -16,6 +17,8 @@ import { HttpStatus } from '@nestjs/common';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { BlogUpdatedEvent } from './events/blog-updated.event';
 import { UserBanByBlogger } from '../users/User-ban-by-blogger.entity';
+import { BlogMainImage } from './Blog-main-image.entity';
+import { BlogWallpaper } from './Blog-wallpaper.entity';
 
 @Entity('blogs')
 export class Blog extends AggregateRoot {
@@ -45,6 +48,12 @@ export class Blog extends AggregateRoot {
     (userBanByBlogger) => userBanByBlogger.blog,
   )
   userBanByBlogger: UserBanByBlogger[];
+
+  @OneToMany(() => BlogMainImage, (blogMainImage) => blogMainImage.blog)
+  blogMainImages: BlogMainImage[];
+
+  @OneToOne(() => BlogWallpaper, (blogWallpaper) => blogWallpaper.blog)
+  blogWallpaper: BlogWallpaper;
 
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];

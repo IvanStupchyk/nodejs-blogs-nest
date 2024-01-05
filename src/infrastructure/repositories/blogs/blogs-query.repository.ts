@@ -4,8 +4,12 @@ import { mockBlogModel } from '../../../constants/blanks';
 import { BlogsQueryDto } from '../../../application/dto/blogs/blogs.query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BlogsViewSAType, BlogsViewType } from '../../../types/blogs.types';
+import {
+  BlogsViewSAType,
+  BlogsViewType,
+} from '../../../types/blogs/blogs.types';
 import { Blog } from '../../../entities/blogs/Blog.entity';
+import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -28,6 +32,23 @@ export class BlogsQueryRepository {
 
     const blogs = await this.blogRepository
       .createQueryBuilder('b')
+      .leftJoinAndSelect('b.blogWallpaper', 'wp')
+      .addSelect(
+        (qb) =>
+          qb
+            .select(
+              `jsonb_agg(json_build_object('url', agg.url, 'width', agg.width, 'height', agg.height, 'fileSize', agg.file_size)
+                 )`,
+            )
+            .from((qb) => {
+              return qb
+                .select(`url, width, height, file_size`)
+                .from(BlogMainImage, 'bi')
+                .where('bi.blogId = b.id');
+            }, 'agg'),
+
+        'blog_main_images',
+      )
       .where(
         `${searchNameTerm ? `(b.name ilike :name)` : 'b.name is not null'}`,
         {
@@ -36,9 +57,9 @@ export class BlogsQueryRepository {
       )
       .andWhere('b.isBanned = false')
       .orderBy(`b.${sortBy}`, sortDirection)
-      .skip(skipSize)
-      .take(pageSize)
-      .getMany();
+      .limit(pageSize)
+      .offset(skipSize)
+      .getRawMany();
 
     const blogsCount = await this.blogRepository
       .createQueryBuilder('b')
@@ -61,12 +82,32 @@ export class BlogsQueryRepository {
       items: blogs.length
         ? blogs.map((b) => {
             return {
-              id: b.id,
-              name: b.name,
-              description: b.description,
-              websiteUrl: b.websiteUrl,
-              createdAt: b.createdAt,
-              isMembership: b.isMembership,
+              id: b.b_id,
+              name: b.b_name,
+              description: b.b_description,
+              websiteUrl: b.b_websiteUrl,
+              createdAt: b.b_createdAt,
+              isMembership: b.b_isMembership,
+              images: {
+                wallpaper: b.wp_id
+                  ? {
+                      url: b.wp_url,
+                      width: b.wp_width,
+                      height: b.wp_height,
+                      fileSize: b.wp_fileSize,
+                    }
+                  : null,
+                main: b.blog_main_images
+                  ? b.blog_main_images.map((i) => {
+                      return {
+                        url: i.url,
+                        width: i.width,
+                        height: i.height,
+                        fileSize: i.fileSize,
+                      };
+                    })
+                  : null,
+              },
             };
           })
         : [],
@@ -91,6 +132,23 @@ export class BlogsQueryRepository {
     const blogs = await this.blogRepository
       .createQueryBuilder('b')
       .leftJoinAndSelect('b.user', 'u')
+      .leftJoinAndSelect('b.blogWallpaper', 'wp')
+      .addSelect(
+        (qb) =>
+          qb
+            .select(
+              `jsonb_agg(json_build_object('url', agg.url, 'width', agg.width, 'height', agg.height, 'fileSize', agg.file_size)
+                 )`,
+            )
+            .from((qb) => {
+              return qb
+                .select(`url, width, height, file_size`)
+                .from(BlogMainImage, 'bi')
+                .where('bi.blogId = b.id');
+            }, 'agg'),
+
+        'blog_main_images',
+      )
       .where(
         `${searchNameTerm ? `(b.name ilike :name)` : 'b.name is not null'}`,
         {
@@ -102,9 +160,9 @@ export class BlogsQueryRepository {
         userId,
       })
       .orderBy(`b.${sortBy}`, sortDirection)
-      .skip(skipSize)
-      .take(pageSize)
-      .getMany();
+      .limit(pageSize)
+      .offset(skipSize)
+      .getRawMany();
 
     const blogsCount = await this.blogRepository
       .createQueryBuilder('b')
@@ -131,12 +189,32 @@ export class BlogsQueryRepository {
       items: blogs.length
         ? blogs.map((b) => {
             return {
-              id: b.id,
-              name: b.name,
-              description: b.description,
-              websiteUrl: b.websiteUrl,
-              createdAt: b.createdAt,
-              isMembership: b.isMembership,
+              id: b.b_id,
+              name: b.b_name,
+              description: b.b_description,
+              websiteUrl: b.b_websiteUrl,
+              createdAt: b.b_createdAt,
+              isMembership: b.b_isMembership,
+              images: {
+                wallpaper: b.wp_id
+                  ? {
+                      url: b.wp_url,
+                      width: b.wp_width,
+                      height: b.wp_height,
+                      fileSize: b.wp_fileSize,
+                    }
+                  : null,
+                main: b.blog_main_images
+                  ? b.blog_main_images.map((i) => {
+                      return {
+                        url: i.url,
+                        width: i.width,
+                        height: i.height,
+                        fileSize: i.fileSize,
+                      };
+                    })
+                  : null,
+              },
             };
           })
         : [],

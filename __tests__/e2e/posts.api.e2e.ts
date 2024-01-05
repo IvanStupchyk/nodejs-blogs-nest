@@ -14,8 +14,8 @@ import {
   validBlogData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { PostType } from '../../src/types/posts.types';
-import { BlogViewType } from '../../src/types/blogs.types';
+import { PostType } from '../../src/types/posts/posts.types';
+import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 import { User } from '../../src/entities/users/User.entity';
 

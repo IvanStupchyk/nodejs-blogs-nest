@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { join } from 'node:path';
-import { ensureDirSync, saveFileAsync } from '../../utils/fs-utils';
+import { ensureDirSync, saveFileAsync } from '../../../utils/fs-utils';
 import { SaveFileResultType } from './saveUserAvatarUseCase';
 import { unlink } from 'node:fs';
 @Injectable()

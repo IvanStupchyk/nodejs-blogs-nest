@@ -11,6 +11,9 @@ import { Answer } from '../entities/game/Answer.entity';
 import { Player } from '../entities/game/Player.entity';
 import { Game } from '../entities/game/Game.entity';
 import { UserBanInfo } from '../entities/users/User-ban-info.entity';
+import { PostImage } from '../entities/posts/Post-image.entity';
+import { BlogMainImage } from '../entities/blogs/Blog-main-image.entity';
+import { BlogWallpaper } from '../entities/blogs/Blog-wallpaper.entity';
 
 export type EntitiesType =
   | User
@@ -25,4 +28,7 @@ export type EntitiesType =
   | Answer
   | Player
   | Game
-  | UserBanInfo;
+  | UserBanInfo
+  | PostImage
+  | BlogMainImage
+  | BlogWallpaper;

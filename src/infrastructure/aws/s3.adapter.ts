@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import * as process from 'process';
 
 @Injectable()
@@ -24,6 +28,21 @@ export class S3Adapter {
 
     try {
       console.log(`Uploaded to S3`);
+      // const response = await this.s3Client.send(command);
+      // console.log(response);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async deleteImage(key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: 'blogger-platform',
+      Key: key,
+    });
+
+    try {
+      console.log(`Deleted to S3`);
       // const response = await this.s3Client.send(command);
       // console.log(response);
     } catch (err) {

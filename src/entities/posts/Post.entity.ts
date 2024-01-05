@@ -13,6 +13,7 @@ import { Comment } from '../comments/Comment.entity';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { User } from '../users/User.entity';
+import { PostImage } from './Post-image.entity';
 
 @Entity('posts')
 export class Post {
@@ -48,6 +49,9 @@ export class Post {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comment: Comment[];
+
+  @OneToMany(() => PostImage, (postImage) => postImage.post)
+  postImages: PostImage[];
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

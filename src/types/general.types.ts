@@ -9,9 +9,9 @@ import {
   mockUserModel,
 } from '../constants/blanks';
 import { UserViewType } from './users.types';
-import { BlogViewType } from './blogs.types';
+import { BlogViewType } from './blogs/blogs.types';
 import { CommentViewType } from './comments.types';
-import { PostType } from './posts.types';
+import { PostType } from './posts/posts.types';
 import { QuestionViewType } from './question.types';
 import { Game } from '../entities/game/Game.entity';
 
@@ -51,4 +51,11 @@ export type SortConditionsType = {
     | typeof mockGameModel
     | typeof mockBanUserModel;
   sortDirection?: SortOrder.asc | SortOrder.desc;
+};
+
+export type ImageType = {
+  url: string;
+  width: number;
+  height: number;
+  fileSize: number;
 };

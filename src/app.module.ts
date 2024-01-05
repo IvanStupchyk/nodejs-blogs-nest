@@ -111,9 +111,15 @@ import { BanUserByBloggerUseCase } from './domain/users/use-cases/ban-user-by-bl
 import { FindBanUsersByBloggerUseCase } from './domain/users/use-cases/find-ban-users-by-blogger-use-case';
 import { BanBlogBySaUserCase } from './domain/blogs/use-cases/ban-blog-by-sa-use-case';
 import { CommentsQueryRepository } from './infrastructure/repositories/comments/comments-query.repository';
-import { SaveUserAvatarUseCase } from './application/useCases/saveUserAvatarUseCase';
-import { FilesSaveAdapter } from './application/useCases/filesSaveAdapter';
+import { SaveUserAvatarUseCase } from './application/training/use-cases/saveUserAvatarUseCase';
+import { FilesSaveAdapter } from './application/training/use-cases/filesSaveAdapter';
 import { S3Adapter } from './infrastructure/aws/s3.adapter';
+import { PostImage } from './entities/posts/Post-image.entity';
+import { BlogMainImage } from './entities/blogs/Blog-main-image.entity';
+import { BlogWallpaper } from './entities/blogs/Blog-wallpaper.entity';
+import { AddImagePostUseCase } from './domain/posts/use-cases/add-image-post-use-case';
+import { AddMainBlogImageUseCase } from './domain/blogs/use-cases/add-main-blog-image-use-case';
+import { AddBlogWallpaperUseCase } from './domain/blogs/use-cases/add-blog-wallpaper-use-case';
 
 const useCases = [
   CreatePostUseCase,
@@ -160,6 +166,9 @@ const useCases = [
   FindBanUsersByBloggerUseCase,
   BanBlogBySaUserCase,
   SaveUserAvatarUseCase,
+  AddImagePostUseCase,
+  AddMainBlogImageUseCase,
+  AddBlogWallpaperUseCase,
   FilesSaveAdapter,
   S3Adapter,
 ];
@@ -179,6 +188,9 @@ const entities = [
   Game,
   UserBanInfo,
   UserBanByBlogger,
+  PostImage,
+  BlogMainImage,
+  BlogWallpaper,
 ];
 
 @Module({

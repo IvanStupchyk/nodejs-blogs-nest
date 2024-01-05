@@ -1,4 +1,5 @@
-import { likeStatus } from './general.types';
+import { likeStatus } from '../general.types';
+import { PostImageViewType } from './post.image.types';
 
 type PostLikeUserInfoType = {
   addedAt: string;
@@ -21,6 +22,7 @@ export class PostViewType {
   createdAt: Date;
   blogId: string;
   blogName: string;
+  images: PostImageViewType;
   extendedLikesInfo: ExtendedLikesInfoViewType;
 }
 

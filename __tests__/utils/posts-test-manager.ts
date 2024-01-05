@@ -43,6 +43,9 @@ export const postsTestManager = {
           myStatus: likeStatus.None,
           newestLikes: [],
         },
+        images: {
+          main: null,
+        },
       });
     }
 

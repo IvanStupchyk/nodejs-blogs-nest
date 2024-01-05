@@ -8,10 +8,10 @@ import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { v4 as uuidv4 } from 'uuid';
-import { PostViewType } from '../../src/types/posts.types';
+import { PostViewType } from '../../src/types/posts/posts.types';
 import { userData1, userData2, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { BlogViewType } from '../../src/types/blogs.types';
+import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 
 describe('tests for /posts with likes logic', () => {
@@ -426,7 +426,7 @@ describe('tests for /posts with likes logic', () => {
 
   it('should return all posts for specified blog', async () => {
     const res = await getRequest()
-      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
+      .get(`${RouterPaths.blogger}/blogs/${newBlog.id}/posts`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
       .set({
         Authorization: `Bearer ${accessTokenUser1}`,
@@ -447,45 +447,6 @@ describe('tests for /posts with likes logic', () => {
           extendedLikesInfo: {
             ...post1.extendedLikesInfo,
             myStatus: 'Like',
-            newestLikes: [
-              {
-                addedAt: expect.any(String),
-                userId: user2.id,
-                login: user2.login,
-              },
-              {
-                addedAt: expect.any(String),
-                userId: user1.id,
-                login: user1.login,
-              },
-            ],
-          },
-        },
-      ],
-    });
-
-    const res2 = await getRequest()
-      .get(`${RouterPaths.blogger}/${newBlog.id}/posts`)
-      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-      .set({
-        Authorization: `Bearer ${accessTokenUser1}`,
-      })
-      .expect(HTTP_STATUSES.OK_200);
-
-    expect(res2.body).toEqual({
-      pagesCount: 1,
-      page: 1,
-      pageSize: 10,
-      totalCount: 4,
-      items: [
-        post4,
-        post3,
-        post2,
-        {
-          ...post1,
-          extendedLikesInfo: {
-            ...post1.extendedLikesInfo,
-            myStatus: likeStatus.Like,
             newestLikes: [
               {
                 addedAt: expect.any(String),

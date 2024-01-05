@@ -34,6 +34,10 @@ export const blogsTestManager = {
         websiteUrl: data.websiteUrl,
         createdAt: expect.any(String),
         isMembership: false,
+        images: {
+          wallpaper: null,
+          main: null,
+        },
       });
     }
 
