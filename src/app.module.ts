@@ -204,7 +204,7 @@ const entities = [
     ]),
     configModule,
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot(globalBdOptions),
+    TypeOrmModule.forRoot(localBdOptions),
     TypeOrmModule.forFeature([...entities]),
   ],
   controllers: [

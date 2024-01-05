@@ -44,7 +44,7 @@ export const postsTestManager = {
           newestLikes: [],
         },
         images: {
-          main: null,
+          main: [],
         },
       });
     }

@@ -72,7 +72,7 @@ export class AddMainBlogImageUseCase extends TransactionUseCase<
       blog,
     );
 
-    await this.s3Adapter.uploadImage(imagePathS3, file.buffer, file.mimetype);
+    await this.s3Adapter.uploadFile(imagePathS3, file.buffer, file.mimetype);
 
     await this.transactionsRepository.save(blogMainImage, manager);
 

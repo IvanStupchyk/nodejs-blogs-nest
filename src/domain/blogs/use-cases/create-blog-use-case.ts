@@ -54,7 +54,7 @@ export class CreateBlogUseCase extends TransactionUseCase<
       isMembership: savedBlog.isMembership,
       images: {
         wallpaper: null,
-        main: null,
+        main: [],
       },
     };
   }

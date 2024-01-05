@@ -87,7 +87,7 @@ export class AddImagePostUseCase extends TransactionUseCase<
       post,
     );
 
-    await this.s3Adapter.uploadImage(
+    await this.s3Adapter.uploadFile(
       originalImagePathS3,
       file.buffer,
       file.mimetype,
@@ -112,7 +112,7 @@ export class AddImagePostUseCase extends TransactionUseCase<
       post,
     );
 
-    await this.s3Adapter.uploadImage(
+    await this.s3Adapter.uploadFile(
       mediumImagePathS3,
       mediumImageBuffer,
       file.mimetype,
@@ -137,7 +137,7 @@ export class AddImagePostUseCase extends TransactionUseCase<
       post,
     );
 
-    await this.s3Adapter.uploadImage(
+    await this.s3Adapter.uploadFile(
       smallImagePathS3,
       smallImageBuffer,
       file.mimetype,
