@@ -86,7 +86,7 @@ export class CreatePostUseCase extends TransactionUseCase<
         newestLikes: [],
       },
       images: {
-        main: null,
+        main: [],
       },
     };
   }

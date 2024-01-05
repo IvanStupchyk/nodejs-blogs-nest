@@ -36,7 +36,7 @@ export const blogsTestManager = {
         isMembership: false,
         images: {
           wallpaper: null,
-          main: null,
+          main: [],
         },
       });
     }

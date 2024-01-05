@@ -391,7 +391,7 @@ export class PostsRepository {
                       fileSize: i.fileSize,
                     };
                   })
-                : null,
+                : [],
             },
           };
         })

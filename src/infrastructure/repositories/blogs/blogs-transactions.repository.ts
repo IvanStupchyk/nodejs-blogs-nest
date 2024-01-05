@@ -70,7 +70,7 @@ export class BlogsTransactionsRepository {
               fileSize: i.fileSize,
             };
           })
-        : null,
+        : [],
     };
   }
 }

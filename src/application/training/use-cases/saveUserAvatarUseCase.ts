@@ -19,7 +19,7 @@ export class SaveUserAvatarUseCase {
 
     // const path = `post/img/main/${userId}/${originalname}`;
     const path = `${originalname}`;
-    await this.s3Adapter.uploadImage(path, buffer, mimetype);
+    await this.s3Adapter.uploadFile(path, buffer, mimetype);
     // await this.s3Adapter.deleteImage(path);
     // const { url, fileId } = await this.filesSaveAdapter.saveAvatar(
     //   userId,

@@ -33,7 +33,7 @@ export class PostsTransactionsRepository {
               fileSize: i.fileSize,
             };
           })
-        : null,
+        : [],
     };
   }
 

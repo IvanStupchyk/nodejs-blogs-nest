@@ -106,7 +106,7 @@ export class BlogsQueryRepository {
                         fileSize: i.fileSize,
                       };
                     })
-                  : null,
+                  : [],
               },
             };
           })
@@ -213,7 +213,7 @@ export class BlogsQueryRepository {
                         fileSize: i.fileSize,
                       };
                     })
-                  : null,
+                  : [],
               },
             };
           })

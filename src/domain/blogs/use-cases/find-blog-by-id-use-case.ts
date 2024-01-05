@@ -49,7 +49,7 @@ export class FindBlogByIdUseCase
                     fileSize: i.fileSize,
                   };
                 })
-              : null,
+              : [],
           },
         }
       : null;

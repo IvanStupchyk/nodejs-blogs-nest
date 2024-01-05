@@ -18,16 +18,17 @@ export class S3Adapter {
       },
     });
   }
-  async uploadImage(key: string, buffer: Buffer, mimetype: string) {
+  async uploadFile(key: string, buffer: Buffer, mimetype: string) {
     const command = new PutObjectCommand({
-      Bucket: 'blogger-platform',
+      Bucket: 'blogger-public',
       Key: key,
       Body: buffer,
       ContentType: mimetype,
+      ACL: 'public-read',
     });
 
     try {
-      console.log(`Uploaded to S3`);
+      console.log(`Uploaded file to S3`);
       // const response = await this.s3Client.send(command);
       // console.log(response);
     } catch (err) {
@@ -35,14 +36,14 @@ export class S3Adapter {
     }
   }
 
-  async deleteImage(key: string) {
+  async deleteFile(key: string) {
     const command = new DeleteObjectCommand({
       Bucket: 'blogger-platform',
       Key: key,
     });
 
     try {
-      console.log(`Deleted to S3`);
+      console.log(`Deleted file to S3`);
       // const response = await this.s3Client.send(command);
       // console.log(response);
     } catch (err) {
