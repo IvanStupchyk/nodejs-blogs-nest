@@ -1,42 +1,22 @@
 import request from 'supertest';
-import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
-import { postsTestManager } from '../utils/posts-test-manager';
-import { mockGetItems } from '../../src/constants/blanks';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { PostInputDto } from '../../src/application/dto/posts/post.input.dto';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  invalidPostData,
-  userData1,
-  userData2,
-  validBlogData,
-} from '../mockData/mock-data';
+import { userData1, userData2, validBlogData } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { PostType } from '../../src/types/posts/posts.types';
 import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 import { User } from '../../src/entities/users/User.entity';
 import * as path from 'path';
-import any = jasmine.any;
 
 describe('tests for blog images', () => {
-  const validPostData: PostInputDto = {
-    title: 'title',
-    content: 'content',
-    blogId: uuidv4(),
-    shortDescription: 'shortDescription',
-  };
-
   let app: INestApplication;
   let httpServer;
-  let user1: User;
-  let user2: User;
   let accessTokenUser1: string;
   let refreshTokenUser1: string;
   let accessTokenUser2: string;
-  let refreshTokenUser2: string;
 
   const getRequest = () => {
     return request(httpServer);
@@ -50,14 +30,11 @@ describe('tests for blog images', () => {
     await request(httpServer).delete(`${RouterPaths.testing}/all-data`);
 
     const resp = await userCreator(httpServer, userData1);
-    user1 = resp.user;
     accessTokenUser1 = resp.accessToken;
     refreshTokenUser1 = resp.refreshToken;
 
     const resp2 = await userCreator(httpServer, userData2);
-    user2 = resp2.user;
     accessTokenUser2 = resp2.accessToken;
-    refreshTokenUser2 = resp2.refreshToken;
   });
 
   afterAll(async () => {
