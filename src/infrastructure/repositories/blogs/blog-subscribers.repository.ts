@@ -18,7 +18,7 @@ export class BlogSubscribersRepository {
     return await this.blogTelegramSubscriber
       .createQueryBuilder('sb')
       .leftJoinAndSelect('sb.user', 'user')
-      .leftJoinAndSelect('sb.blogs', 'blogs')
+      .leftJoinAndSelect('sb.blog', 'blog')
       .where('user.id = :userId', { userId })
       .getOne();
   }
@@ -30,9 +30,9 @@ export class BlogSubscribersRepository {
     return await this.blogTelegramSubscriber
       .createQueryBuilder('sb')
       .leftJoinAndSelect('sb.user', 'user')
-      .leftJoinAndSelect('sb.blogs', 'blogs')
+      .leftJoinAndSelect('sb.blog', 'blog')
       .where('user.id = :userId', { userId })
-      .andWhere('blogs.id = :blogId', { blogId })
+      .andWhere('blog.id = :blogId', { blogId })
       .getOne();
   }
 
@@ -41,8 +41,8 @@ export class BlogSubscribersRepository {
   ): Promise<BlogTelegramSubscriber[] | null> {
     return await this.blogTelegramSubscriber
       .createQueryBuilder('sb')
-      .leftJoinAndSelect('sb.blogs', 'blogs')
-      .where('blogs.id = :blogId', { blogId })
+      .leftJoinAndSelect('sb.blog', 'blog')
+      .where('blog.id = :blogId', { blogId })
       .getMany();
   }
 

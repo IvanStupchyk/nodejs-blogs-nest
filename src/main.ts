@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { appSettings } from './app.settings';
 import * as ngrok from 'ngrok';
 import * as process from 'process';
-import axios from 'axios';
 import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
 
 const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000/';

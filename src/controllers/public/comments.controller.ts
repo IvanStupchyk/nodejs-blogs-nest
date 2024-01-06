@@ -51,12 +51,12 @@ export class CommentsController {
   async updateComment(
     @Param() params: CommentParamsDto,
     @Body() body: CommentInputDto,
-    @CurrentUserId() currentUserId,
+    @CurrentUserId() userId: string,
     @Res() res: Response,
   ) {
     res.sendStatus(
       await this.commandBus.execute(
-        new UpdateCommentCommand(body.content, params.id, currentUserId),
+        new UpdateCommentCommand(body.content, params.id, userId),
       ),
     );
   }

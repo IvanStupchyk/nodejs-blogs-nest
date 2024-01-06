@@ -24,11 +24,14 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { SubscribeBlogCommand } from '../../domain/blogs/use-cases/subscribe-blog-use-case';
 import { UnsubscribeBlogCommand } from '../../domain/blogs/use-cases/unsubscribe-blog-use-case';
+import { UserIdFromHeaders } from '../../auth/user-id-from-headers.decorator';
+import { JwtService } from '../../infrastructure/jwt.service';
 
 @Controller(RouterPaths.blogs)
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
 
@@ -58,14 +61,24 @@ export class BlogController {
 
   @UseGuards(ThrottlerGuard)
   @Get()
-  async getBlogs(@Query() params: BlogsQueryDto) {
-    return await this.blogsQueryRepository.getSortedBlogs(params);
+  async getBlogs(@Query() params: BlogsQueryDto, @Headers() headers: any) {
+    let userId;
+
+    if (headers?.authorization) {
+      const accessToken = headers?.authorization.split(' ')[1];
+      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
+    }
+
+    return await this.blogsQueryRepository.getSortedBlogs(params, userId);
   }
 
   @Get(':id')
-  async getCurrentBlog(@Param() params: GetBlogParamsDto) {
+  async getCurrentBlog(
+    @Param() params: GetBlogParamsDto,
+    @Headers() headers: any,
+  ) {
     const foundBlog = await this.commandBus.execute(
-      new FindBlogByIdCommand(params.id),
+      new FindBlogByIdCommand(params.id, headers?.authorization),
     );
 
     if (!foundBlog) {

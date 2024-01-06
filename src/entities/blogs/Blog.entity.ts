@@ -60,11 +60,11 @@ export class Blog extends AggregateRoot {
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];
 
-  @ManyToMany(
+  @OneToMany(
     () => BlogTelegramSubscriber,
-    (blogTelegramSubscriber) => blogTelegramSubscriber.blogs,
+    (blogTelegramSubscriber) => blogTelegramSubscriber.blog,
   )
-  blogTelegramSubscribers: BlogTelegramSubscriber[];
+  blogTelegramSubscriber: BlogTelegramSubscriber[];
 
   @Column({ type: 'boolean', default: false })
   isBanned: boolean;

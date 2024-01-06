@@ -11,6 +11,7 @@ import {
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
 import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
+import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -19,7 +20,10 @@ export class BlogsQueryRepository {
     private readonly blogRepository: Repository<Blog>,
   ) {}
 
-  async getSortedBlogs(params: BlogsQueryDto): Promise<BlogsViewType> {
+  async getSortedBlogs(
+    params: BlogsQueryDto,
+    userId?: string,
+  ): Promise<BlogsViewType> {
     const { searchNameTerm } = params;
 
     const { pageNumber, pageSize, skipSize, sortBy, sortDirection } =
@@ -49,6 +53,24 @@ export class BlogsQueryRepository {
             }, 'agg'),
 
         'blog_main_images',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(`count(*)`)
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
+        'subscribers_count',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('bs.subscriptionStatus')
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere('bs.userId = :userId', { userId }),
+        'subscription_status',
       )
       .where(
         `${searchNameTerm ? `(b.name ilike :name)` : 'b.name is not null'}`,
@@ -109,8 +131,10 @@ export class BlogsQueryRepository {
                     })
                   : [],
               },
-              subscribersCount: 0,
-              currentUserSubscriptionStatus: SubscriptionStatus.None,
+              subscribersCount: Number(b.subscribers_count),
+              currentUserSubscriptionStatus: b.subscription_status
+                ? b.subscription_status
+                : SubscriptionStatus.None,
             };
           })
         : [],
@@ -152,6 +176,24 @@ export class BlogsQueryRepository {
 
         'blog_main_images',
       )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(`count(*)`)
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
+        'subscribers_count',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('bs.subscriptionStatus')
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere('bs.userId = :userId', { userId }),
+        'subscription_status',
+      )
       .where(
         `${searchNameTerm ? `(b.name ilike :name)` : 'b.name is not null'}`,
         {
@@ -218,8 +260,10 @@ export class BlogsQueryRepository {
                     })
                   : [],
               },
-              subscribersCount: 0,
-              currentUserSubscriptionStatus: SubscriptionStatus.None,
+              subscribersCount: Number(b.subscribers_count),
+              currentUserSubscriptionStatus: b.subscription_status
+                ? b.subscription_status
+                : SubscriptionStatus.None,
             };
           })
         : [],

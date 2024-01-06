@@ -12,7 +12,7 @@ export class BlogsRepository {
     private readonly blogRepository: Repository<Blog>,
   ) {}
 
-  async findBlogById(id: string): Promise<any | null> {
+  async findBlogById(id: string, userId?: string): Promise<any | null> {
     return await this.blogRepository
       .createQueryBuilder('b')
       .leftJoinAndSelect('b.user', 'user')
@@ -32,6 +32,24 @@ export class BlogsRepository {
             }, 'agg'),
 
         'blog_images',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(`count(*)`)
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
+        'subscribers_count',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('bs.subscriptionStatus')
+            .from(BlogTelegramSubscriber, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere('bs.userId = :userId', { userId }),
+        'subscription_status',
       )
       .where('b.id = :id', {
         id,

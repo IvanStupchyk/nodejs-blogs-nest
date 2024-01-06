@@ -34,7 +34,7 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
       await this.blogSubscribersTransactionsRepository.findSubscriberByTelegramId(
         command.telegramId,
       );
-    console.log('te', command.telegramId);
+
     if (isUserAlreadyRegistered) {
       return null;
     }

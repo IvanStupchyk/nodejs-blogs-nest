@@ -26,11 +26,11 @@ export class BlogTelegramSubscriber {
   @Column({ type: 'varchar' })
   subscriptionStatus: string;
 
-  @ManyToMany(() => Blog, (blog) => blog.blogTelegramSubscribers, {
+  @ManyToOne(() => Blog, (blog) => blog.blogTelegramSubscriber, {
     onDelete: 'CASCADE',
   })
-  @JoinTable()
-  blogs: Blog[];
+  @JoinColumn()
+  blog: Blog;
 
   @ManyToOne(() => User, (user) => user.blogTelegramSubscriber, {
     onDelete: 'CASCADE',

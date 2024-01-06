@@ -10,6 +10,7 @@ import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { BlogSubscribersRepository } from '../../../infrastructure/repositories/blogs/blog-subscribers.repository';
 import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
+import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
 
 export class SubscribeBlogCommand {
   constructor(
@@ -59,14 +60,15 @@ export class SubscribeBlogUseCase extends TransactionUseCase<
       exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
-    const subscriber =
+    let subscriber =
       await this.blogSubscribersRepository.findSubscriberByUserId(userId);
 
     if (!subscriber) {
-      exceptionHandler(HttpStatus.NOT_FOUND);
+      subscriber = new BlogTelegramSubscriber();
+      subscriber.user = user;
     }
 
-    subscriber.blogs = [...subscriber.blogs, blog];
+    subscriber.blog = blog;
     subscriber.subscriptionStatus = SubscriptionStatus.Subscribed;
 
     await this.transactionsRepository.save(subscriber, manager);

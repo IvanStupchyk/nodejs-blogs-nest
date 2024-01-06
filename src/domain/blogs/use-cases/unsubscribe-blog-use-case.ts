@@ -69,7 +69,6 @@ export class UnsubscribeBlogUseCase extends TransactionUseCase<
       exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
-    subscriber.blogs = subscriber.blogs.filter((b) => b !== blog);
     subscriber.subscriptionStatus = SubscriptionStatus.Unsubscribed;
 
     await this.transactionsRepository.save(subscriber, manager);
