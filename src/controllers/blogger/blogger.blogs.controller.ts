@@ -65,7 +65,10 @@ export class BloggerBlogsController {
 
   @UseGuards(ThrottlerGuard, JwtAuthGuard)
   @Get('blogs')
-  async getBlogsForSa(@Query() query: BlogsQueryDto, @CurrentUserId() userId) {
+  async getBlogsForSa(
+    @Query() query: BlogsQueryDto,
+    @CurrentUserId() userId: string,
+  ) {
     return await this.blogsQueryRepository.getSortedBlogsForSpecifiedUser(
       query,
       userId,
@@ -76,7 +79,7 @@ export class BloggerBlogsController {
   @Get('blogs/comments')
   async getCommentsForBlogger(
     @Query() query: CommentsQueryDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commentsQueryRepository.getSortedBloggerComments(
       query,
@@ -86,7 +89,10 @@ export class BloggerBlogsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('blogs')
-  async createBlog(@Body() body: BlogInputDto, @CurrentUserId() userId) {
+  async createBlog(
+    @Body() body: BlogInputDto,
+    @CurrentUserId() userId: string,
+  ) {
     return await this.commandBus.execute(new CreateBlogCommand(userId, body));
   }
 
@@ -102,7 +108,7 @@ export class BloggerBlogsController {
     )
     file: Express.Multer.File,
     @Param() params: PostImageParamsDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commandBus.execute(
       new AddImagePostCommand(userId, params.blogId, params.postId, file),
@@ -121,7 +127,7 @@ export class BloggerBlogsController {
     )
     file: Express.Multer.File,
     @Param() params: BlogParamsDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commandBus.execute(
       new AddMainBlogImageCommand(userId, params.id, file),
@@ -140,7 +146,7 @@ export class BloggerBlogsController {
     )
     file: Express.Multer.File,
     @Param() params: BlogParamsDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commandBus.execute(
       new AddBlogWallpaperCommand(userId, params.id, file),
@@ -153,7 +159,7 @@ export class BloggerBlogsController {
   async banUser(
     @Param() params: BanUserByBloggerParamsDto,
     @Body() body: UserBanByBloggerInputDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commandBus.execute(
       new BanUserByBloggerCommand(params.id, body, userId),
@@ -165,7 +171,7 @@ export class BloggerBlogsController {
   async getBanUsersForSpecifiedBlog(
     @Param() params: BanUserByBloggerParamsDto,
     @Query() query: BanUsersQueryDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     return await this.commandBus.execute(
       new FindBanUsersByBloggerCommand(params.id, query, userId),
@@ -177,7 +183,7 @@ export class BloggerBlogsController {
   async createPost(
     @Param() params: BlogParamsDto,
     @Body() body: PostForSpecifiedBlogInputDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     const post = await this.commandBus.execute(
       new CreatePostCommand(body, params.id, userId),
@@ -195,7 +201,7 @@ export class BloggerBlogsController {
   async getPostsForSpecifiedBlog(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
   ) {
     const posts = await this.commandBus.execute(
       new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
@@ -213,7 +219,7 @@ export class BloggerBlogsController {
   async updateSpecifiedPost(
     @Param() params: UpdatePostParamsDto,
     @Body() body: UpdatePostInputDto,
-    @CurrentUserId() userId,
+    @CurrentUserId() userId: string,
     @Res() res: Response,
   ) {
     res.sendStatus(

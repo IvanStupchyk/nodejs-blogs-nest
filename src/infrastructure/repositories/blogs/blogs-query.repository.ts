@@ -10,6 +10,7 @@ import {
 } from '../../../types/blogs/blogs.types';
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
+import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -108,6 +109,8 @@ export class BlogsQueryRepository {
                     })
                   : [],
               },
+              subscribersCount: 0,
+              currentUserSubscriptionStatus: SubscriptionStatus.None,
             };
           })
         : [],
@@ -215,6 +218,8 @@ export class BlogsQueryRepository {
                     })
                   : [],
               },
+              subscribersCount: 0,
+              currentUserSubscriptionStatus: SubscriptionStatus.None,
             };
           })
         : [],

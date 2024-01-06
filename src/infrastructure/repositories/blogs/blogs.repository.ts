@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
+import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
 
 @Injectable()
 export class BlogsRepository {

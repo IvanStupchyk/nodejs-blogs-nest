@@ -12,6 +12,10 @@ export class ResetDbController {
   async resetDb() {
     // await this.dataSource.query(`DROP DATABASE IF EXISTS "postgres_typeorm";`);
     // await this.dataSource.query(`SELECT truncate_tables('postgres_typeorm');`);
+    await this.dataSource.query('DELETE from "blog-telegram-subscribers"');
+    await this.dataSource.query(
+      'DELETE from "blog-telegram-subscribers_blogs_blogs"',
+    );
     await this.dataSource.query('DELETE from "blogs"');
     await this.dataSource.query('DELETE from "comments"');
     await this.dataSource.query('DELETE from "commentLikes"');

@@ -4,6 +4,7 @@ import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blog
 import { BlogViewType } from '../../../types/blogs/blogs.types';
 import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
+import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
 
 export class FindBlogByIdCommand {
   constructor(public id: string) {}
@@ -18,7 +19,7 @@ export class FindBlogByIdUseCase
   async execute(command: FindBlogByIdCommand): Promise<BlogViewType | null> {
     if (!isUUID(command.id)) return null;
     const blog = await this.blogsRepository.findBlogById(command.id);
-
+    console.log('blog', blog);
     if (!blog || blog.b_isBanned) {
       exceptionHandler(HttpStatus.NOT_FOUND);
     }
@@ -51,6 +52,8 @@ export class FindBlogByIdUseCase
                 })
               : [],
           },
+          subscribersCount: 0,
+          currentUserSubscriptionStatus: SubscriptionStatus.None,
         }
       : null;
   }

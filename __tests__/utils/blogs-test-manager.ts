@@ -2,6 +2,7 @@ import request from 'supertest';
 import { HTTP_STATUSES, HttpStatusType } from '../../src/utils/utils';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { BlogInputDto } from '../../src/application/dto/blogs/blog.input.dto';
+import { SubscriptionStatus } from '../../src/constants/subscription-status.enum';
 
 export const blogsTestManager = {
   async createBlog(
@@ -38,6 +39,8 @@ export const blogsTestManager = {
           wallpaper: null,
           main: [],
         },
+        subscribersCount: 0,
+        currentUserSubscriptionStatus: SubscriptionStatus.None,
       });
     }
 

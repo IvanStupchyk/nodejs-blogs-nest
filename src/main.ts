@@ -2,15 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { appSettings } from './app.settings';
 import * as ngrok from 'ngrok';
+import * as process from 'process';
+import axios from 'axios';
+import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
 
 const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000/';
 
 async function connectToNgrok() {
   return ngrok.connect(3000);
-  // return ngrok.connect({
-  //   addr: Number(3000),
-  //   authtoken: '2aPKdrO5Lxyly5ebWFPLPYaF0YZ_2p5qiPRwZ4RDj3cfaJnyQ',
-  // });
 }
 
 async function bootstrap() {
@@ -18,9 +17,15 @@ async function bootstrap() {
   appSettings(app);
   await app.listen(3000);
 
+  const telegramAdapter = await app.resolve(TelegramAdapter);
+
   if (process.env.NODE_ENV === 'development') {
     // appBaseUrl = await connectToNgrok();
     console.log('appBaseUrl', appBaseUrl);
   }
+
+  // await telegramAdapter.setWebhook(
+  //   appBaseUrl + '/integrations/telegram/webhook',
+  // );
 }
 bootstrap();

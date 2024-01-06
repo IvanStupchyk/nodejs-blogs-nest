@@ -18,6 +18,7 @@ import add from 'date-fns/add';
 import { UserBanInfo } from './User-ban-info.entity';
 import { Post } from '../posts/Post.entity';
 import { UserBanByBlogger } from './User-ban-by-blogger.entity';
+import { BlogTelegramSubscriber } from '../blogs/Blog-telegram-subscriber.entity';
 
 @Entity('users')
 export class User {
@@ -44,6 +45,12 @@ export class User {
 
   @OneToOne(() => UserBanInfo, (userBanInfo) => userBanInfo.user)
   userBanInfo: UserBanInfo;
+
+  @OneToMany(
+    () => BlogTelegramSubscriber,
+    (blogTelegramSubscriber) => blogTelegramSubscriber.user,
+  )
+  blogTelegramSubscriber: BlogTelegramSubscriber[];
 
   @OneToOne(() => UserBanByBlogger, (userBanByBlogger) => userBanByBlogger.user)
   userBanByBlogger: UserBanByBlogger;
