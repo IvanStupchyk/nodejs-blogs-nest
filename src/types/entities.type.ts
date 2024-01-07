@@ -14,6 +14,7 @@ import { UserBanInfo } from '../entities/users/User-ban-info.entity';
 import { PostImage } from '../entities/posts/Post-image.entity';
 import { BlogMainImage } from '../entities/blogs/Blog-main-image.entity';
 import { BlogWallpaper } from '../entities/blogs/Blog-wallpaper.entity';
+import { BlogSubscription } from '../entities/blogs/Blog-subscription.entity';
 
 export type EntitiesType =
   | User
@@ -31,4 +32,5 @@ export type EntitiesType =
   | UserBanInfo
   | PostImage
   | BlogMainImage
-  | BlogWallpaper;
+  | BlogWallpaper
+  | BlogSubscription;

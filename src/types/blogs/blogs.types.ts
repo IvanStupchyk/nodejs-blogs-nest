@@ -1,4 +1,5 @@
 import { BlogImagesViewType } from './blog.images.types';
+import { SubscriptionStatus } from '../../constants/subscription-status.enum';
 
 type BanInfoType = {
   isBanned: boolean;
@@ -13,6 +14,8 @@ export type BlogViewType = {
   createdAt: Date;
   isMembership: boolean;
   images: BlogImagesViewType;
+  subscribersCount: number;
+  currentUserSubscriptionStatus: keyof typeof SubscriptionStatus;
 };
 
 export type BlogsViewType = {

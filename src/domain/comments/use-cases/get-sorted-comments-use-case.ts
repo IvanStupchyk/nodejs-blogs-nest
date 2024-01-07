@@ -10,7 +10,7 @@ export class GetSortedCommentsCommand {
   constructor(
     public id: string,
     public query: CommentsQueryDto,
-    public accessTokenHeader: string | undefined,
+    public userId: string,
   ) {}
 }
 
@@ -27,18 +27,12 @@ export class GetSortedCommentsUseCase
   async execute(
     command: GetSortedCommentsCommand,
   ): Promise<CommentsViewType | boolean> {
-    const { id, accessTokenHeader, query } = command;
+    const { id, userId, query } = command;
 
     if (!isUUID(id)) return false;
 
     const foundPost = await this.postsRepository.findPostById(id);
     if (!foundPost) return false;
-
-    let userId;
-    if (accessTokenHeader) {
-      const accessToken = accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
 
     return await this.commentsRepository.getSortedComments(query, id, userId);
   }

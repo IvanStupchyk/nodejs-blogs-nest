@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
+import { BlogSubscription } from '../../../entities/blogs/Blog-subscription.entity';
 
 @Injectable()
 export class BlogsRepository {
@@ -11,7 +12,7 @@ export class BlogsRepository {
     private readonly blogRepository: Repository<Blog>,
   ) {}
 
-  async findBlogById(id: string): Promise<any | null> {
+  async findBlogById(id: string, userId?: string): Promise<any | null> {
     return await this.blogRepository
       .createQueryBuilder('b')
       .leftJoinAndSelect('b.user', 'user')
@@ -31,6 +32,24 @@ export class BlogsRepository {
             }, 'agg'),
 
         'blog_images',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select(`count(*)`)
+            .from(BlogSubscription, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
+        'subscribers_count',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('bs.subscriptionStatus')
+            .from(BlogSubscription, 'bs')
+            .where('bs.blogId = b.id')
+            .andWhere('bs.userId = :userId', { userId }),
+        'subscription_status',
       )
       .where('b.id = :id', {
         id,

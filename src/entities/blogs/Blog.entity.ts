@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -19,6 +20,7 @@ import { BlogUpdatedEvent } from './events/blog-updated.event';
 import { UserBanByBlogger } from '../users/User-ban-by-blogger.entity';
 import { BlogMainImage } from './Blog-main-image.entity';
 import { BlogWallpaper } from './Blog-wallpaper.entity';
+import { BlogSubscription } from './Blog-subscription.entity';
 
 @Entity('blogs')
 export class Blog extends AggregateRoot {
@@ -57,6 +59,12 @@ export class Blog extends AggregateRoot {
 
   @OneToMany(() => Post, (post) => post.blog)
   post: Post[];
+
+  @OneToMany(
+    () => BlogSubscription,
+    (blogTelegramSubscriber) => blogTelegramSubscriber.blog,
+  )
+  blogTelegramSubscriber: BlogSubscription[];
 
   @Column({ type: 'boolean', default: false })
   isBanned: boolean;

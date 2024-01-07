@@ -10,4 +10,5 @@ export const RouterPaths = {
   comments: '/comments',
   security: '/security',
   testing: '/testing',
+  telegram: '/integrations/telegram',
 };

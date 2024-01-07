@@ -12,6 +12,8 @@ import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { BlogsTransactionsRepository } from '../../../infrastructure/repositories/blogs/blogs-transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { BlogSubscribersRepository } from '../../../infrastructure/repositories/blogs/blog-subscribers.repository';
+import { TelegramAdapter } from '../../../infrastructure/telegram/telegram.adapter';
 
 export class CreatePostCommand {
   constructor(
@@ -31,7 +33,9 @@ export class CreatePostUseCase extends TransactionUseCase<
     protected readonly dataSource: DataSource,
     private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
     private readonly usersTransactionRepository: UsersTransactionRepository,
+    private readonly blogSubscribersRepository: BlogSubscribersRepository,
     private readonly transactionsRepository: TransactionsRepository,
+    private readonly telegramAdapter: TelegramAdapter,
   ) {
     super(dataSource);
   }
@@ -71,6 +75,7 @@ export class CreatePostUseCase extends TransactionUseCase<
 
     const savedPost = await this.transactionsRepository.save(newPost, manager);
 
+    await this._sendMessageToTelegram(foundBlog.id, foundBlog.name);
     return {
       id: savedPost.id,
       title: savedPost.title,
@@ -93,5 +98,23 @@ export class CreatePostUseCase extends TransactionUseCase<
 
   async execute(command: CreatePostCommand) {
     return super.execute(command);
+  }
+
+  async _sendMessageToTelegram(blogId: string, blogName: string) {
+    const subscribers =
+      await this.blogSubscribersRepository.findActiveSubscribersByBlogId(
+        blogId,
+      );
+
+    if (!subscribers.length) {
+      return null;
+    }
+
+    subscribers.forEach((s) => {
+      this.telegramAdapter.sendMessage(
+        `New post published for blog ${blogName}`,
+        s.user.telegramId,
+      );
+    });
   }
 }

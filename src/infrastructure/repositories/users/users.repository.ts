@@ -18,6 +18,26 @@ export class UsersRepository {
       .getOne();
   }
 
+  async findUserByActivationBotCode(
+    activationCode: string,
+  ): Promise<User | null> {
+    return await this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.activationBotCode = :activationCode', {
+        activationCode,
+      })
+      .getOne();
+  }
+
+  async findUserByTelegramId(telegramId: number): Promise<User | null> {
+    return await this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.telegramId = :telegramId', {
+        telegramId,
+      })
+      .getOne();
+  }
+
   async findUserByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
     return await this.usersRepository
       .createQueryBuilder('u')

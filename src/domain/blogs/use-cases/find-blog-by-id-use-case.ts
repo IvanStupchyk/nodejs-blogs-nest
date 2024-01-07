@@ -4,21 +4,32 @@ import { BlogsRepository } from '../../../infrastructure/repositories/blogs/blog
 import { BlogViewType } from '../../../types/blogs/blogs.types';
 import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
+import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
+import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class FindBlogByIdCommand {
-  constructor(public id: string) {}
+  constructor(
+    public id: string,
+    public userId: string,
+  ) {}
 }
 
 @CommandHandler(FindBlogByIdCommand)
 export class FindBlogByIdUseCase
   implements ICommandHandler<FindBlogByIdCommand>
 {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(
+    private readonly blogsRepository: BlogsRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async execute(command: FindBlogByIdCommand): Promise<BlogViewType | null> {
     if (!isUUID(command.id)) return null;
-    const blog = await this.blogsRepository.findBlogById(command.id);
 
+    const blog = await this.blogsRepository.findBlogById(
+      command.id,
+      command.userId,
+    );
     if (!blog || blog.b_isBanned) {
       exceptionHandler(HttpStatus.NOT_FOUND);
     }
@@ -51,6 +62,10 @@ export class FindBlogByIdUseCase
                 })
               : [],
           },
+          subscribersCount: Number(blog.subscribers_count),
+          currentUserSubscriptionStatus: blog.subscription_status
+            ? blog.subscription_status
+            : SubscriptionStatus.None,
         }
       : null;
   }

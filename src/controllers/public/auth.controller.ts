@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { RouterPaths } from '../../constants/router.paths';
-import { LoginUserInputDto } from '../../application/dto/auth/login-user.input.dto';
 import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
 import { HTTP_STATUSES } from '../../utils/utils';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';

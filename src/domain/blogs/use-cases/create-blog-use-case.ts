@@ -7,6 +7,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
 
 export class CreateBlogCommand {
   constructor(
@@ -56,6 +57,8 @@ export class CreateBlogUseCase extends TransactionUseCase<
         wallpaper: null,
         main: [],
       },
+      subscribersCount: 0,
+      currentUserSubscriptionStatus: SubscriptionStatus.None,
     };
   }
 

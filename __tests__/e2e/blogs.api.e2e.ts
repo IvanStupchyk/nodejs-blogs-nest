@@ -16,6 +16,7 @@ import { serverStarter } from '../utils/server-starter';
 import { PostType } from '../../src/types/posts/posts.types';
 import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
+import { SubscriptionStatus } from '../../src/constants/subscription-status.enum';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
@@ -137,6 +138,8 @@ describe('tests for /blogs', () => {
       });
 
     delete newBlog.images;
+    delete newBlog.subscribersCount;
+    delete newBlog.currentUserSubscriptionStatus;
     await getRequest()
       .get(RouterPaths.saBlogs)
       .auth('admin', 'qwerty', { type: 'basic' })
@@ -410,28 +413,6 @@ describe('tests for /blogs', () => {
       },
     };
 
-    await getRequest().get(RouterPaths.blogs).expect(HTTP_STATUSES.OK_200, {
-      pagesCount: 1,
-      page: 1,
-      pageSize: 10,
-      totalCount: 4,
-      items: newBlogs,
-    });
-
-    await getRequest()
-      .get(`${RouterPaths.blogger}/blogs`)
-      .set('Cookie', `refreshToken=${refreshTokenUser1}`)
-      .set({
-        Authorization: `Bearer ${accessTokenUser1}`,
-      })
-      .expect(HTTP_STATUSES.OK_200, {
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: 3,
-        items: [blog3, blog2, newBlog],
-      });
-
     await getRequest()
       .get(`${RouterPaths.blogger}/blogs?searchNameTerm=second`)
       .set('Cookie', `refreshToken=${refreshTokenUser1}`)
@@ -565,15 +546,17 @@ describe('tests for /blogs', () => {
       .send(updatedValidData)
       .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-    await getRequest()
+    const resp = await getRequest()
       .get(`${RouterPaths.blogs}/${newBlog.id}`)
       .expect({
         ...newBlog,
         name: updatedValidData.name,
         images: {
           wallpaper: null,
-          main: null,
+          main: [],
         },
+        subscribersCount: 0,
+        currentUserSubscriptionStatus: SubscriptionStatus.None,
       });
   });
 

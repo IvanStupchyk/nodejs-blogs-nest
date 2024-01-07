@@ -120,6 +120,14 @@ import { BlogWallpaper } from './entities/blogs/Blog-wallpaper.entity';
 import { AddImagePostUseCase } from './domain/posts/use-cases/add-image-post-use-case';
 import { AddMainBlogImageUseCase } from './domain/blogs/use-cases/add-main-blog-image-use-case';
 import { AddBlogWallpaperUseCase } from './domain/blogs/use-cases/add-blog-wallpaper-use-case';
+import { TelegramController } from './controllers/telegram/telegram.controller';
+import { BlogSubscribersRepository } from './infrastructure/repositories/blogs/blog-subscribers.repository';
+import { GetTelegramLinkUseCase } from './domain/telegram/get-telegram-link-use-case';
+import { PopulateBlogSubscriberDataUseCase } from './domain/telegram/populate-blog-subscriber-data-use-case';
+import { SubscribeBlogUseCase } from './domain/blogs/use-cases/subscribe-blog-use-case';
+import { UnsubscribeBlogUseCase } from './domain/blogs/use-cases/unsubscribe-blog-use-case';
+import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
+import { BlogSubscription } from './entities/blogs/Blog-subscription.entity';
 
 const useCases = [
   CreatePostUseCase,
@@ -169,7 +177,12 @@ const useCases = [
   AddImagePostUseCase,
   AddMainBlogImageUseCase,
   AddBlogWallpaperUseCase,
+  GetTelegramLinkUseCase,
+  PopulateBlogSubscriberDataUseCase,
+  SubscribeBlogUseCase,
+  UnsubscribeBlogUseCase,
   FilesSaveAdapter,
+  TelegramAdapter,
   S3Adapter,
 ];
 
@@ -191,6 +204,7 @@ const entities = [
   PostImage,
   BlogMainImage,
   BlogWallpaper,
+  BlogSubscription,
 ];
 
 @Module({
@@ -204,7 +218,7 @@ const entities = [
     ]),
     configModule,
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot(globalBdOptions),
+    TypeOrmModule.forRoot(localBdOptions),
     TypeOrmModule.forFeature([...entities]),
   ],
   controllers: [
@@ -219,6 +233,7 @@ const entities = [
     DevicesController,
     QuestionsSaController,
     GameController,
+    TelegramController,
   ],
   providers: [
     UsersQueryRepository,
@@ -245,6 +260,7 @@ const entities = [
     CommentsTransactionsRepository,
     CommentLikesTransactionsRepository,
     CommentsQueryRepository,
+    BlogSubscribersRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,
