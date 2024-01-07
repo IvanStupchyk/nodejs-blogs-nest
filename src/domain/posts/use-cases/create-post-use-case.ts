@@ -102,16 +102,18 @@ export class CreatePostUseCase extends TransactionUseCase<
 
   async _sendMessageToTelegram(blogId: string, blogName: string) {
     const subscribers =
-      await this.blogSubscribersRepository.findSubscribersByBlogId(blogId);
+      await this.blogSubscribersRepository.findActiveSubscribersByBlogId(
+        blogId,
+      );
 
     if (!subscribers.length) {
       return null;
     }
 
     subscribers.forEach((s) => {
-      return this.telegramAdapter.sendMessage(
+      this.telegramAdapter.sendMessage(
         `New post published for blog ${blogName}`,
-        s.telegramId,
+        s.user.telegramId,
       );
     });
   }

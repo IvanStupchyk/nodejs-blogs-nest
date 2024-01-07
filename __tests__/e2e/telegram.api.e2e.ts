@@ -18,8 +18,8 @@ import { AppModule } from '../../src/app.module';
 import { DataSourceRepository } from '../../src/infrastructure/repositories/transactions/data-source.repository';
 import { BlogSubscribersRepository } from '../../src/infrastructure/repositories/blogs/blog-subscribers.repository';
 import { SubscriptionStatus } from '../../src/constants/subscription-status.enum';
-import { TelegramBotSubscribersRepository } from '../../src/infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 import { User } from '../../src/entities/users/User.entity';
+import { UsersRepository } from '../../src/infrastructure/repositories/users/users.repository';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
@@ -31,7 +31,7 @@ describe('tests for /blogs', () => {
   let blog2: BlogViewType;
   let dataSourceRepository: DataSourceRepository;
   let blogSubscribersRepository: BlogSubscribersRepository;
-  let telegramBotSubscribersRepository: TelegramBotSubscribersRepository;
+  let usersRepository: UsersRepository;
   const telegramId = 431924805; //my
   // const telegramId = 367481998; //ns
   const getRequest = () => {
@@ -63,10 +63,7 @@ describe('tests for /blogs', () => {
       BlogSubscribersRepository,
     );
 
-    telegramBotSubscribersRepository =
-      moduleFixture.get<TelegramBotSubscribersRepository>(
-        TelegramBotSubscribersRepository,
-      );
+    usersRepository = moduleFixture.get<UsersRepository>(UsersRepository);
   });
 
   afterAll(async () => {
@@ -117,9 +114,7 @@ describe('tests for /blogs', () => {
     const activationCode = res.body.link.split('start=')[1];
 
     const subscriber =
-      await telegramBotSubscribersRepository.findSubscriberByActivationCode(
-        activationCode,
-      );
+      await usersRepository.findUserByActivationBotCode(activationCode);
     subscriber.telegramId = telegramId;
     await dataSourceRepository.save(subscriber);
   });

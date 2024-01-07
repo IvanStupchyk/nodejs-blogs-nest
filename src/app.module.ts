@@ -127,8 +127,6 @@ import { PopulateBlogSubscriberDataUseCase } from './domain/telegram/populate-bl
 import { SubscribeBlogUseCase } from './domain/blogs/use-cases/subscribe-blog-use-case';
 import { UnsubscribeBlogUseCase } from './domain/blogs/use-cases/unsubscribe-blog-use-case';
 import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
-import { TelegramBotSubscriber } from './entities/telegram/Telegram-bot-subscriber.entity';
-import { TelegramBotSubscribersRepository } from './infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 import { BlogSubscription } from './entities/blogs/Blog-subscription.entity';
 
 const useCases = [
@@ -207,7 +205,6 @@ const entities = [
   BlogMainImage,
   BlogWallpaper,
   BlogSubscription,
-  TelegramBotSubscriber,
 ];
 
 @Module({
@@ -264,7 +261,6 @@ const entities = [
     CommentLikesTransactionsRepository,
     CommentsQueryRepository,
     BlogSubscribersRepository,
-    TelegramBotSubscribersRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

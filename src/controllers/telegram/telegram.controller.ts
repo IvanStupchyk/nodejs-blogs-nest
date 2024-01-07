@@ -2,12 +2,8 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
-  HttpStatus,
-  Param,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RouterPaths } from '../../constants/router.paths';
@@ -27,7 +23,7 @@ export class TelegramController {
     if (!payload?.message) {
       return null;
     }
-
+    console.log('payload', payload);
     if (payload.message.text.includes('/start')) {
       await this.commandBus.execute(
         new PopulateBlogSubscriberDataCommand(

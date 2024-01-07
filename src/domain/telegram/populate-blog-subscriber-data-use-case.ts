@@ -3,7 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionUseCase } from '../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../infrastructure/repositories/transactions/transactions.repository';
-import { TelegramBotSubscribersRepository } from '../../infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
+import { UsersRepository } from '../../infrastructure/repositories/users/users.repository';
+import process from 'process';
 
 export class PopulateBlogSubscriberDataCommand {
   constructor(
@@ -20,7 +21,7 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
   constructor(
     @InjectDataSource()
     protected readonly dataSource: DataSource,
-    private readonly telegramBotSubscribersRepository: TelegramBotSubscribersRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -31,27 +32,28 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
     manager: EntityManager,
   ): Promise<void> {
     const isUserAlreadyRegistered =
-      await this.telegramBotSubscribersRepository.findSubscriberByTelegramId(
-        command.telegramId,
-      );
+      await this.usersRepository.findUserByTelegramId(command.telegramId);
 
     if (isUserAlreadyRegistered) {
       return null;
     }
 
-    const activationCode = command.message?.split(' ')[1];
+    let activationCode: string;
+    if (process.env.TELEGRAM_ENV === 'local') {
+      activationCode = command.message?.split('')[1];
+    } else {
+      activationCode = command.message?.split('=')[1];
+    }
 
-    const blogTelegramSubscriber =
-      await this.telegramBotSubscribersRepository.findSubscriberByActivationCode(
-        activationCode,
-      );
+    const user =
+      await this.usersRepository.findUserByActivationBotCode(activationCode);
 
-    if (!blogTelegramSubscriber) {
+    if (!user) {
       return null;
     }
 
-    blogTelegramSubscriber.telegramId = command.telegramId;
-    await this.transactionsRepository.save(blogTelegramSubscriber, manager);
+    user.telegramId = command.telegramId;
+    await this.transactionsRepository.save(user, manager);
   }
 
   async execute(command: PopulateBlogSubscriberDataCommand) {

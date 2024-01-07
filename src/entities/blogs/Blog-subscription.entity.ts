@@ -3,15 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Blog } from './Blog.entity';
 import { User } from '../users/User.entity';
-import { TelegramBotSubscriber } from '../telegram/Telegram-bot-subscriber.entity';
 
 @Entity('blog-subscription')
 export class BlogSubscription {
@@ -29,16 +25,6 @@ export class BlogSubscription {
 
   @Column({ type: 'bigint', nullable: true })
   telegramId: number;
-
-  // @ManyToOne(
-  //   () => TelegramBotSubscriber,
-  //   (telegramBotSubscriber) => telegramBotSubscriber.blogSubscription,
-  //   {
-  //     onDelete: 'CASCADE',
-  //   },
-  // )
-  // @JoinColumn()
-  // telegramBotSubscriber: TelegramBotSubscriber;
 
   @ManyToOne(() => User, (user) => user.blogTelegramSubscriber, {
     onDelete: 'CASCADE',

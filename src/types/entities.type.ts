@@ -15,7 +15,6 @@ import { PostImage } from '../entities/posts/Post-image.entity';
 import { BlogMainImage } from '../entities/blogs/Blog-main-image.entity';
 import { BlogWallpaper } from '../entities/blogs/Blog-wallpaper.entity';
 import { BlogSubscription } from '../entities/blogs/Blog-subscription.entity';
-import { TelegramBotSubscriber } from '../entities/telegram/Telegram-bot-subscriber.entity';
 
 export type EntitiesType =
   | User
@@ -34,5 +33,4 @@ export type EntitiesType =
   | PostImage
   | BlogMainImage
   | BlogWallpaper
-  | BlogSubscription
-  | TelegramBotSubscriber;
+  | BlogSubscription;

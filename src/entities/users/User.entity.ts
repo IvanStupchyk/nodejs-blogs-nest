@@ -19,7 +19,6 @@ import { UserBanInfo } from './User-ban-info.entity';
 import { Post } from '../posts/Post.entity';
 import { UserBanByBlogger } from './User-ban-by-blogger.entity';
 import { BlogSubscription } from '../blogs/Blog-subscription.entity';
-import { TelegramBotSubscriber } from '../telegram/Telegram-bot-subscriber.entity';
 
 @Entity('users')
 export class User {
@@ -38,6 +37,12 @@ export class User {
   @Column({ type: 'boolean' })
   isConfirmed: boolean;
 
+  @Column({ type: 'uuid', nullable: true })
+  activationBotCode: string;
+
+  @Column({ type: 'bigint', nullable: true })
+  telegramId: number;
+
   @Column({ nullable: true, type: 'uuid' })
   confirmationCode: string | null;
 
@@ -52,12 +57,6 @@ export class User {
     (blogTelegramSubscriber) => blogTelegramSubscriber.user,
   )
   blogTelegramSubscriber: BlogSubscription[];
-
-  @OneToOne(
-    () => TelegramBotSubscriber,
-    (telegramBotSubscriber) => telegramBotSubscriber.user,
-  )
-  telegramBotSubscriber: TelegramBotSubscriber;
 
   @OneToOne(() => UserBanByBlogger, (userBanByBlogger) => userBanByBlogger.user)
   userBanByBlogger: UserBanByBlogger;

@@ -8,8 +8,6 @@ import { TransactionsRepository } from '../../infrastructure/repositories/transa
 import * as process from 'process';
 import { randomUUID } from 'crypto';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
-import { TelegramBotSubscriber } from '../../entities/telegram/Telegram-bot-subscriber.entity';
-import { TelegramBotSubscribersRepository } from '../../infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 
 export class GetTelegramLinkCommand {
   constructor(public userId: string) {}
@@ -26,7 +24,6 @@ export class GetTelegramLinkUseCase extends TransactionUseCase<
     @InjectDataSource()
     protected readonly dataSource: DataSource,
     private readonly usersTransactionRepository: UsersTransactionRepository,
-    private readonly telegramBotSubscribersRepository: TelegramBotSubscribersRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -47,28 +44,15 @@ export class GetTelegramLinkUseCase extends TransactionUseCase<
       return exceptionHandler(HttpStatus.NOT_FOUND);
     }
 
-    let blogTelegramSubscriber =
-      await this.telegramBotSubscribersRepository.findSubscriberByUserId(
-        user.id,
-      );
-
     const activationCode = randomUUID();
 
-    if (!blogTelegramSubscriber) {
-      blogTelegramSubscriber = new TelegramBotSubscriber();
-      blogTelegramSubscriber.user = user;
-    }
+    user.activationBotCode = activationCode;
+    await this.transactionsRepository.save(user, manager);
 
-    blogTelegramSubscriber.activationCode = activationCode;
-
-    await this.transactionsRepository.save(blogTelegramSubscriber, manager);
-
-    console.log(
-      'link',
-      `${process.env.TELEGRAM_BOT_LINK}?start=${activationCode}`,
-    );
     return {
-      link: `${process.env.TELEGRAM_BOT_LINK}?start=${activationCode}`,
+      link: `${process.env.TELEGRAM_BOT_LINK}?${
+        process.env.TELEGRAM_ENV === 'local' ? 'start=' : 'code='
+      }${activationCode}`,
     };
   }
 
