@@ -11,7 +11,7 @@ import {
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
 import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
-import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
+import { BlogSubscription } from '../../../entities/blogs/Blog-subscription.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -58,7 +58,7 @@ export class BlogsQueryRepository {
         (qb) =>
           qb
             .select(`count(*)`)
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
         'subscribers_count',
@@ -67,7 +67,7 @@ export class BlogsQueryRepository {
         (qb) =>
           qb
             .select('bs.subscriptionStatus')
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere('bs.userId = :userId', { userId }),
         'subscription_status',
@@ -180,7 +180,7 @@ export class BlogsQueryRepository {
         (qb) =>
           qb
             .select(`count(*)`)
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
         'subscribers_count',
@@ -189,7 +189,7 @@ export class BlogsQueryRepository {
         (qb) =>
           qb
             .select('bs.subscriptionStatus')
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere('bs.userId = :userId', { userId }),
         'subscription_status',

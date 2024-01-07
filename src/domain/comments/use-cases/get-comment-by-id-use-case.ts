@@ -7,7 +7,7 @@ import { CommentViewType } from '../../../types/comments.types';
 export class GetCommentByIdCommand {
   constructor(
     public commentId: string,
-    public accessTokenHeader: string | undefined,
+    public userId: string,
   ) {}
 }
 
@@ -25,15 +25,9 @@ export class GetCommentByIdUseCase
   ): Promise<CommentViewType | null> {
     if (!isUUID(command.commentId)) return null;
 
-    let userId;
-    if (command.accessTokenHeader) {
-      const accessToken = command.accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
     return await this.commentsRepository.findCommentById(
       command.commentId,
-      userId,
+      command.userId,
     );
   }
 }

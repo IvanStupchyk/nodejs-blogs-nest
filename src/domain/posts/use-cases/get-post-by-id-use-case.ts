@@ -8,7 +8,7 @@ import { PostViewType } from '../../../types/posts/posts.types';
 export class GetPostByIdCommand {
   constructor(
     public id: string,
-    public accessTokenHeader: string | undefined,
+    public userId: string,
   ) {}
 }
 
@@ -22,12 +22,6 @@ export class GetPostByIdUseCase implements ICommandHandler<GetPostByIdCommand> {
   async execute(command: GetPostByIdCommand): Promise<PostViewType | null> {
     if (!isUUID(command.id)) return null;
 
-    let userId = uuidv4();
-    if (command.accessTokenHeader) {
-      const accessToken = command.accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
-    return await this.postsRepository.getPost(command.id, userId);
+    return await this.postsRepository.getPost(command.id, command.userId);
   }
 }

@@ -121,13 +121,15 @@ import { AddImagePostUseCase } from './domain/posts/use-cases/add-image-post-use
 import { AddMainBlogImageUseCase } from './domain/blogs/use-cases/add-main-blog-image-use-case';
 import { AddBlogWallpaperUseCase } from './domain/blogs/use-cases/add-blog-wallpaper-use-case';
 import { TelegramController } from './controllers/telegram/telegram.controller';
-import { BlogTelegramSubscriber } from './entities/blogs/Blog-telegram-subscriber.entity';
 import { BlogSubscribersRepository } from './infrastructure/repositories/blogs/blog-subscribers.repository';
 import { GetTelegramLinkUseCase } from './domain/telegram/get-telegram-link-use-case';
 import { PopulateBlogSubscriberDataUseCase } from './domain/telegram/populate-blog-subscriber-data-use-case';
 import { SubscribeBlogUseCase } from './domain/blogs/use-cases/subscribe-blog-use-case';
 import { UnsubscribeBlogUseCase } from './domain/blogs/use-cases/unsubscribe-blog-use-case';
 import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
+import { TelegramBotSubscriber } from './entities/telegram/Telegram-bot-subscriber.entity';
+import { TelegramBotSubscribersRepository } from './infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
+import { BlogSubscription } from './entities/blogs/Blog-subscription.entity';
 
 const useCases = [
   CreatePostUseCase,
@@ -204,7 +206,8 @@ const entities = [
   PostImage,
   BlogMainImage,
   BlogWallpaper,
-  BlogTelegramSubscriber,
+  BlogSubscription,
+  TelegramBotSubscriber,
 ];
 
 @Module({
@@ -261,6 +264,7 @@ const entities = [
     CommentLikesTransactionsRepository,
     CommentsQueryRepository,
     BlogSubscribersRepository,
+    TelegramBotSubscribersRepository,
     JwtService,
     LocalStrategy,
     JwtStrategy,

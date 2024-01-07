@@ -14,7 +14,8 @@ import { UserBanInfo } from '../entities/users/User-ban-info.entity';
 import { PostImage } from '../entities/posts/Post-image.entity';
 import { BlogMainImage } from '../entities/blogs/Blog-main-image.entity';
 import { BlogWallpaper } from '../entities/blogs/Blog-wallpaper.entity';
-import { BlogTelegramSubscriber } from '../entities/blogs/Blog-telegram-subscriber.entity';
+import { BlogSubscription } from '../entities/blogs/Blog-subscription.entity';
+import { TelegramBotSubscriber } from '../entities/telegram/Telegram-bot-subscriber.entity';
 
 export type EntitiesType =
   | User
@@ -33,4 +34,5 @@ export type EntitiesType =
   | PostImage
   | BlogMainImage
   | BlogWallpaper
-  | BlogTelegramSubscriber;
+  | BlogSubscription
+  | TelegramBotSubscriber;

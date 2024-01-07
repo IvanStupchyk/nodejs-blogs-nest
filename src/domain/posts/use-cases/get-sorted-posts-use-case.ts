@@ -7,7 +7,7 @@ import { JwtService } from '../../../infrastructure/jwt.service';
 export class GetSortedPostsCommand {
   constructor(
     public params: PostsQueryDto,
-    public accessTokenHeader: string | undefined,
+    public userId: string,
   ) {}
 }
 
@@ -21,12 +21,9 @@ export class GetSortedPostsUseCase
   ) {}
 
   async execute(command: GetSortedPostsCommand): Promise<any> {
-    let userId = uuidv4();
-    if (command.accessTokenHeader) {
-      const accessToken = command.accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
-    return await this.postsRepository.getSortedPosts(command.params, userId);
+    return await this.postsRepository.getSortedPosts(
+      command.params,
+      command.userId,
+    );
   }
 }

@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpStatus,
   Param,
   Put,
@@ -25,6 +24,7 @@ import { GetCommentByIdCommand } from '../../domain/comments/use-cases/get-comme
 import { ChangeCommentLikesCountCommand } from '../../domain/comments/use-cases/change-comment-likes-count-use-case';
 import { DeleteCommentCommand } from '../../domain/comments/use-cases/delete-comment-use-case';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
+import { UserIdFromHeaders } from '../../auth/user-id-from-headers.decorator';
 
 @Controller(RouterPaths.comments)
 export class CommentsController {
@@ -33,10 +33,10 @@ export class CommentsController {
   @Get(':id')
   async getCurrentComment(
     @Param() params: GetCommentParamsDto,
-    @Headers() headers: any,
+    @UserIdFromHeaders() userId: string,
   ) {
     const foundComment = await this.commandBus.execute(
-      new GetCommentByIdCommand(params.id, headers?.authorization),
+      new GetCommentByIdCommand(params.id, userId),
     );
 
     if (!foundComment) {

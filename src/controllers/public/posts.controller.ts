@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpStatus,
   Param,
   Post,
@@ -28,22 +27,29 @@ import { GetPostByIdCommand } from '../../domain/posts/use-cases/get-post-by-id-
 import { CreateCommentCommand } from '../../domain/comments/use-cases/create-comment-use-case';
 import { GetSortedCommentsCommand } from '../../domain/comments/use-cases/get-sorted-comments-use-case';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
+import { UserIdFromHeaders } from '../../auth/user-id-from-headers.decorator';
 
 @Controller(RouterPaths.posts)
 export class PostsController {
   constructor(private commandBus: CommandBus) {}
 
   @Get()
-  async getPosts(@Query() query: PostsQueryDto, @Headers() headers: any) {
+  async getPosts(
+    @Query() query: PostsQueryDto,
+    @UserIdFromHeaders() userId: string,
+  ) {
     return await this.commandBus.execute(
-      new GetSortedPostsCommand(query, headers?.authorization),
+      new GetSortedPostsCommand(query, userId),
     );
   }
 
   @Get(':id')
-  async getPost(@Param() params: PostParamsDto, @Headers() headers: any) {
+  async getPost(
+    @Param() params: PostParamsDto,
+    @UserIdFromHeaders() userId: string,
+  ) {
     const foundPost = await this.commandBus.execute(
-      new GetPostByIdCommand(params.id, headers?.authorization),
+      new GetPostByIdCommand(params.id, userId),
     );
 
     if (!foundPost) {
@@ -57,10 +63,10 @@ export class PostsController {
   async getComments(
     @Param() params: CommentParamsDto,
     @Query() query: CommentsQueryDto,
-    @Headers() headers: any,
+    @UserIdFromHeaders() userId: string,
   ) {
     const foundComments = await this.commandBus.execute(
-      new GetSortedCommentsCommand(params.id, query, headers?.authorization),
+      new GetSortedCommentsCommand(params.id, query, userId),
     );
 
     if (!foundComments) {

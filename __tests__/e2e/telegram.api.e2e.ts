@@ -1,42 +1,37 @@
 import request from 'supertest';
-import { HTTP_STATUSES } from '../../src/utils/utils';
 import { blogsTestManager } from '../utils/blogs-test-manager';
-import { mockGetItems } from '../../src/constants/blanks';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { RouterPaths } from '../../src/constants/router.paths';
 import { postsTestManager } from '../utils/posts-test-manager';
 import {
-  invalidBlogData,
   userData1,
   userData2,
   validBlogData,
   validPostData,
 } from '../mockData/mock-data';
 import { serverStarter } from '../utils/server-starter';
-import { PostType } from '../../src/types/posts/posts.types';
 import { BlogViewType } from '../../src/types/blogs/blogs.types';
 import { userCreator } from '../utils/user-creator';
 import * as process from 'process';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
-import { UsersRepository } from '../../src/infrastructure/repositories/users/users.repository';
 import { DataSourceRepository } from '../../src/infrastructure/repositories/transactions/data-source.repository';
 import { BlogSubscribersRepository } from '../../src/infrastructure/repositories/blogs/blog-subscribers.repository';
 import { SubscriptionStatus } from '../../src/constants/subscription-status.enum';
+import { TelegramBotSubscribersRepository } from '../../src/infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
+import { User } from '../../src/entities/users/User.entity';
 
 describe('tests for /blogs', () => {
   let app: INestApplication;
   let httpServer;
-  let user1;
-  let user2;
+  let user1: User;
   let accessTokenUser1: string;
   let accessTokenUser2: string;
   let blog1: BlogViewType;
   let blog2: BlogViewType;
-  let newPost: PostType;
-  let secondPost: PostType;
   let dataSourceRepository: DataSourceRepository;
   let blogSubscribersRepository: BlogSubscribersRepository;
+  let telegramBotSubscribersRepository: TelegramBotSubscribersRepository;
   const telegramId = 431924805; //my
   // const telegramId = 367481998; //ns
   const getRequest = () => {
@@ -59,7 +54,6 @@ describe('tests for /blogs', () => {
     accessTokenUser1 = resp.accessToken;
 
     const resp2 = await userCreator(httpServer, userData2);
-    user2 = resp2.user;
     accessTokenUser2 = resp2.accessToken;
 
     dataSourceRepository =
@@ -68,6 +62,11 @@ describe('tests for /blogs', () => {
     blogSubscribersRepository = moduleFixture.get<BlogSubscribersRepository>(
       BlogSubscribersRepository,
     );
+
+    telegramBotSubscribersRepository =
+      moduleFixture.get<TelegramBotSubscribersRepository>(
+        TelegramBotSubscribersRepository,
+      );
   });
 
   afterAll(async () => {
@@ -118,7 +117,7 @@ describe('tests for /blogs', () => {
     const activationCode = res.body.link.split('start=')[1];
 
     const subscriber =
-      await blogSubscribersRepository.findSubscriberByActivationCode(
+      await telegramBotSubscribersRepository.findSubscriberByActivationCode(
         activationCode,
       );
     subscriber.telegramId = telegramId;
@@ -148,57 +147,53 @@ describe('tests for /blogs', () => {
       })
       .expect(HttpStatus.NO_CONTENT);
 
-    const subscriber =
-      await blogSubscribersRepository.findSubscriberByTelegramId(telegramId);
-    expect(subscriber.subscriptionStatus).toBe(SubscriptionStatus.Subscribed);
+    const resp0 = await getRequest()
+      .get(`${RouterPaths.blogs}/${blog1.id}`)
+      .expect(HttpStatus.OK);
 
-    // const resp0 = await getRequest()
-    //   .get(`${RouterPaths.blogs}/${blog1.id}`)
-    //   .expect(HttpStatus.OK);
-    //
-    // expect(resp0.body).toEqual({
-    //   ...blog1,
-    //   subscribersCount: 1,
-    // });
-    //
-    // const resp = await getRequest()
-    //   .get(`${RouterPaths.blogs}/${blog1.id}`)
-    //   .set('Authorization', `Bearer ${accessTokenUser1}`)
-    //   .expect(HttpStatus.OK);
-    //
-    // expect(resp.body).toEqual({
-    //   ...blog1,
-    //   subscribersCount: 1,
-    //   currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
-    // });
-    //
-    // const resp2 = await getRequest()
-    //   .get(`${RouterPaths.blogs}`)
-    //   .expect(HttpStatus.OK);
-    //
-    // expect(resp2.body.items).toEqual([
-    //   blog2,
-    //   {
-    //     ...blog1,
-    //     subscribersCount: 1,
-    //   },
-    // ]);
-    //
-    // const resp3 = await getRequest()
-    //   .get(`${RouterPaths.blogger}/blogs`)
-    //   .set({
-    //     Authorization: `Bearer ${accessTokenUser1}`,
-    //   })
-    //   .expect(HttpStatus.OK);
-    //
-    // expect(resp3.body.items).toEqual([
-    //   blog2,
-    //   {
-    //     ...blog1,
-    //     subscribersCount: 1,
-    //     currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
-    //   },
-    // ]);
+    expect(resp0.body).toEqual({
+      ...blog1,
+      subscribersCount: 1,
+    });
+
+    const resp = await getRequest()
+      .get(`${RouterPaths.blogs}/${blog1.id}`)
+      .set('Authorization', `Bearer ${accessTokenUser1}`)
+      .expect(HttpStatus.OK);
+
+    expect(resp.body).toEqual({
+      ...blog1,
+      subscribersCount: 1,
+      currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
+    });
+
+    const resp2 = await getRequest()
+      .get(`${RouterPaths.blogs}`)
+      .expect(HttpStatus.OK);
+
+    expect(resp2.body.items).toEqual([
+      blog2,
+      {
+        ...blog1,
+        subscribersCount: 1,
+      },
+    ]);
+
+    const resp3 = await getRequest()
+      .get(`${RouterPaths.blogger}/blogs`)
+      .set({
+        Authorization: `Bearer ${accessTokenUser1}`,
+      })
+      .expect(HttpStatus.OK);
+
+    expect(resp3.body.items).toEqual([
+      blog2,
+      {
+        ...blog1,
+        subscribersCount: 1,
+        currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
+      },
+    ]);
   });
 
   it('should not unsubscribe to blog if blog does not exist or user did not activate a bot or not authorized', async () => {
@@ -242,10 +237,6 @@ describe('tests for /blogs', () => {
       currentUserSubscriptionStatus: SubscriptionStatus.Unsubscribed,
     });
 
-    const subscriber =
-      await blogSubscribersRepository.findSubscriberByTelegramId(telegramId);
-    expect(subscriber.subscriptionStatus).toBe(SubscriptionStatus.Unsubscribed);
-
     await getRequest()
       .post(`${RouterPaths.blogs}/${blog1.id}/subscription`)
       .set({
@@ -283,7 +274,7 @@ describe('tests for /blogs', () => {
 
     expect(resp.body).toEqual({
       ...blog1,
-      subscribersCount: 1,
+      subscribersCount: 2,
     });
 
     const resp2 = await getRequest()
@@ -297,7 +288,7 @@ describe('tests for /blogs', () => {
       },
       {
         ...blog1,
-        subscribersCount: 1,
+        subscribersCount: 2,
       },
     ]);
 
@@ -315,7 +306,7 @@ describe('tests for /blogs', () => {
       },
       {
         ...blog1,
-        subscribersCount: 1,
+        subscribersCount: 2,
         currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
       },
     ]);
@@ -333,7 +324,11 @@ describe('tests for /blogs', () => {
         subscribersCount: 1,
         currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
       },
-      { ...blog1, subscribersCount: 1 },
+      {
+        ...blog1,
+        subscribersCount: 2,
+        currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
+      },
     ]);
 
     await postsTestManager.createPostForSpecifiedBlog(

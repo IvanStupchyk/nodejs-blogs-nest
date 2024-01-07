@@ -2,15 +2,14 @@ import { CommandHandler } from '@nestjs/cqrs';
 import { HttpStatus } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
-import { BlogSubscribersRepository } from '../../infrastructure/repositories/blogs/blog-subscribers.repository';
 import { UsersTransactionRepository } from '../../infrastructure/repositories/users/users.transaction.repository';
 import { TransactionUseCase } from '../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../infrastructure/repositories/transactions/transactions.repository';
 import * as process from 'process';
 import { randomUUID } from 'crypto';
-import { BlogTelegramSubscriber } from '../../entities/blogs/Blog-telegram-subscriber.entity';
 import { exceptionHandler } from '../../utils/errors/exception.handler';
-import { SubscriptionStatus } from '../../constants/subscription-status.enum';
+import { TelegramBotSubscriber } from '../../entities/telegram/Telegram-bot-subscriber.entity';
+import { TelegramBotSubscribersRepository } from '../../infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 
 export class GetTelegramLinkCommand {
   constructor(public userId: string) {}
@@ -27,7 +26,7 @@ export class GetTelegramLinkUseCase extends TransactionUseCase<
     @InjectDataSource()
     protected readonly dataSource: DataSource,
     private readonly usersTransactionRepository: UsersTransactionRepository,
-    private readonly blogSubscribersTransactionsRepository: BlogSubscribersRepository,
+    private readonly telegramBotSubscribersRepository: TelegramBotSubscribersRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -49,16 +48,15 @@ export class GetTelegramLinkUseCase extends TransactionUseCase<
     }
 
     let blogTelegramSubscriber =
-      await this.blogSubscribersTransactionsRepository.findSubscriberByUserId(
+      await this.telegramBotSubscribersRepository.findSubscriberByUserId(
         user.id,
       );
 
     const activationCode = randomUUID();
 
     if (!blogTelegramSubscriber) {
-      blogTelegramSubscriber = new BlogTelegramSubscriber();
+      blogTelegramSubscriber = new TelegramBotSubscriber();
       blogTelegramSubscriber.user = user;
-      blogTelegramSubscriber.subscriptionStatus = SubscriptionStatus.None;
     }
 
     blogTelegramSubscriber.activationCode = activationCode;

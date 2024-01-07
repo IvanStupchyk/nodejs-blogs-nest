@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from '../../../entities/blogs/Blog.entity';
 import { BlogMainImage } from '../../../entities/blogs/Blog-main-image.entity';
-import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
+import { BlogSubscription } from '../../../entities/blogs/Blog-subscription.entity';
 
 @Injectable()
 export class BlogsRepository {
@@ -37,7 +37,7 @@ export class BlogsRepository {
         (qb) =>
           qb
             .select(`count(*)`)
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere(`bs.subscriptionStatus = 'Subscribed'`),
         'subscribers_count',
@@ -46,7 +46,7 @@ export class BlogsRepository {
         (qb) =>
           qb
             .select('bs.subscriptionStatus')
-            .from(BlogTelegramSubscriber, 'bs')
+            .from(BlogSubscription, 'bs')
             .where('bs.blogId = b.id')
             .andWhere('bs.userId = :userId', { userId }),
         'subscription_status',

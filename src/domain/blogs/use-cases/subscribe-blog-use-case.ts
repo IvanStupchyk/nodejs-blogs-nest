@@ -10,7 +10,8 @@ import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
 import { BlogSubscribersRepository } from '../../../infrastructure/repositories/blogs/blog-subscribers.repository';
 import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
-import { BlogTelegramSubscriber } from '../../../entities/blogs/Blog-telegram-subscriber.entity';
+import { BlogSubscription } from '../../../entities/blogs/Blog-subscription.entity';
+import { TelegramBotSubscribersRepository } from '../../../infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 
 export class SubscribeBlogCommand {
   constructor(
@@ -30,6 +31,7 @@ export class SubscribeBlogUseCase extends TransactionUseCase<
     private readonly blogsTransactionsRepository: BlogsTransactionsRepository,
     private readonly usersRepository: UsersRepository,
     private readonly blogSubscribersRepository: BlogSubscribersRepository,
+    private readonly telegramBotSubscribersRepository: TelegramBotSubscribersRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -61,14 +63,23 @@ export class SubscribeBlogUseCase extends TransactionUseCase<
     }
 
     let subscriber =
-      await this.blogSubscribersRepository.findSubscriberByUserId(userId);
+      await this.blogSubscribersRepository.findSubscriberByUserIdAndBlogId(
+        userId,
+        blogId,
+      );
+
+    const botSubscriber =
+      await this.telegramBotSubscribersRepository.findSubscriberByUserId(
+        userId,
+      );
 
     if (!subscriber) {
-      subscriber = new BlogTelegramSubscriber();
+      subscriber = new BlogSubscription();
       subscriber.user = user;
     }
 
     subscriber.blog = blog;
+    subscriber.telegramId = botSubscriber?.telegramId;
     subscriber.subscriptionStatus = SubscriptionStatus.Subscribed;
 
     await this.transactionsRepository.save(subscriber, manager);

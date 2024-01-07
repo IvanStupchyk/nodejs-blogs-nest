@@ -10,7 +10,7 @@ import { JwtService } from '../../../infrastructure/jwt.service';
 export class FindBlogByIdCommand {
   constructor(
     public id: string,
-    public accessTokenHeader: string,
+    public userId: string,
   ) {}
 }
 
@@ -26,13 +26,10 @@ export class FindBlogByIdUseCase
   async execute(command: FindBlogByIdCommand): Promise<BlogViewType | null> {
     if (!isUUID(command.id)) return null;
 
-    let userId;
-    if (command.accessTokenHeader) {
-      const accessToken = command.accessTokenHeader.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
-    const blog = await this.blogsRepository.findBlogById(command.id, userId);
+    const blog = await this.blogsRepository.findBlogById(
+      command.id,
+      command.userId,
+    );
     if (!blog || blog.b_isBanned) {
       exceptionHandler(HttpStatus.NOT_FOUND);
     }

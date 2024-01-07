@@ -5,7 +5,7 @@ import * as ngrok from 'ngrok';
 import * as process from 'process';
 import { TelegramAdapter } from './infrastructure/telegram/telegram.adapter';
 
-const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000/';
+let appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000/';
 
 async function connectToNgrok() {
   return ngrok.connect(3000);
@@ -19,12 +19,12 @@ async function bootstrap() {
   const telegramAdapter = await app.resolve(TelegramAdapter);
 
   if (process.env.NODE_ENV === 'development') {
-    // appBaseUrl = await connectToNgrok();
+    appBaseUrl = await connectToNgrok();
     console.log('appBaseUrl', appBaseUrl);
   }
 
-  // await telegramAdapter.setWebhook(
-  //   appBaseUrl + '/integrations/telegram/webhook',
-  // );
+  await telegramAdapter.setWebhook(
+    appBaseUrl + '/integrations/telegram/webhook',
+  );
 }
 bootstrap();

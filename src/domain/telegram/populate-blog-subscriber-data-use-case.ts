@@ -1,9 +1,9 @@
 import { CommandHandler } from '@nestjs/cqrs';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
-import { BlogSubscribersRepository } from '../../infrastructure/repositories/blogs/blog-subscribers.repository';
 import { TransactionUseCase } from '../transaction/use-case/transaction-use-case';
 import { TransactionsRepository } from '../../infrastructure/repositories/transactions/transactions.repository';
+import { TelegramBotSubscribersRepository } from '../../infrastructure/repositories/telegram/telegram-bot-subscribers.repository';
 
 export class PopulateBlogSubscriberDataCommand {
   constructor(
@@ -20,7 +20,7 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
   constructor(
     @InjectDataSource()
     protected readonly dataSource: DataSource,
-    private readonly blogSubscribersTransactionsRepository: BlogSubscribersRepository,
+    private readonly telegramBotSubscribersRepository: TelegramBotSubscribersRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -31,7 +31,7 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
     manager: EntityManager,
   ): Promise<void> {
     const isUserAlreadyRegistered =
-      await this.blogSubscribersTransactionsRepository.findSubscriberByTelegramId(
+      await this.telegramBotSubscribersRepository.findSubscriberByTelegramId(
         command.telegramId,
       );
 
@@ -42,7 +42,7 @@ export class PopulateBlogSubscriberDataUseCase extends TransactionUseCase<
     const activationCode = command.message?.split(' ')[1];
 
     const blogTelegramSubscriber =
-      await this.blogSubscribersTransactionsRepository.findSubscriberByActivationCode(
+      await this.telegramBotSubscribersRepository.findSubscriberByActivationCode(
         activationCode,
       );
 

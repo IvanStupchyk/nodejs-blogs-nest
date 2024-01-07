@@ -2,7 +2,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -35,50 +34,22 @@ export class BlogController {
     private commandBus: CommandBus,
   ) {}
 
-  // simple form
-  // @Get('change-page')
-  // async ChangeAvatarPage() {
-  //   const htmlContent = await readTextFileAsync(
-  //     join('views', 'avatars', 'change-page.html'),
-  //   );
-  //   return htmlContent;
-  // }
-
-  // process form with a file
-  // @Post('avatars')
-  // @UseInterceptors(FileInterceptor('avatar'))
-  // async SaveAvatar(@UploadedFile() avatarFile: Express.Multer.File) {
-  //   const userId = '10';
-  //   await this.saveUserAvatarUseCase.execute(
-  //     userId,
-  //     avatarFile.originalname,
-  //     avatarFile.buffer,
-  //     avatarFile.mimetype,
-  //   );
-  //
-  //   return 'avatar saved';
-  // }
-
   @UseGuards(ThrottlerGuard)
   @Get()
-  async getBlogs(@Query() params: BlogsQueryDto, @Headers() headers: any) {
-    let userId;
-
-    if (headers?.authorization) {
-      const accessToken = headers?.authorization.split(' ')[1];
-      userId = await this.jwtService.getUserIdByAccessToken(accessToken);
-    }
-
+  async getBlogs(
+    @Query() params: BlogsQueryDto,
+    @UserIdFromHeaders() userId: string,
+  ) {
     return await this.blogsQueryRepository.getSortedBlogs(params, userId);
   }
 
   @Get(':id')
   async getCurrentBlog(
     @Param() params: GetBlogParamsDto,
-    @Headers() headers: any,
+    @UserIdFromHeaders() userId: string,
   ) {
     const foundBlog = await this.commandBus.execute(
-      new FindBlogByIdCommand(params.id, headers?.authorization),
+      new FindBlogByIdCommand(params.id, userId),
     );
 
     if (!foundBlog) {
@@ -92,14 +63,10 @@ export class BlogController {
   async getPostsForSpecifiedBlogForAllUsers(
     @Param() params: GetBlogParamsDto,
     @Query() query: PostsQueryDto,
-    @Headers() headers: any,
+    @UserIdFromHeaders() userId: string,
   ) {
     const posts = await this.commandBus.execute(
-      new GetPostsForSpecifiedBlogCommand(
-        query,
-        params.id,
-        headers?.authorization,
-      ),
+      new GetPostsForSpecifiedBlogCommand(query, params.id, userId),
     );
 
     if (!posts) {
