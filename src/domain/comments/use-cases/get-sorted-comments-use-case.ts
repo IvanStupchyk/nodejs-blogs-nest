@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { CommentsQueryDto } from '../../../application/dto/comments/comments.query.dto';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
 import { isUUID } from '../../../utils/utils';
@@ -20,7 +19,6 @@ export class GetSortedCommentsUseCase
 {
   constructor(
     private readonly postsRepository: PostsRepository,
-    private readonly jwtService: JwtService,
     private readonly commentsRepository: CommentsRepository,
   ) {}
 

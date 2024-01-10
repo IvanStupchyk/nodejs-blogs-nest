@@ -1,11 +1,11 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { Request } from 'express';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
 import { InvalidRefreshTokensTransactionsRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
+import { JwtService } from '@nestjs/jwt';
 
 export class LogOutUserCommand {
   constructor(public req: Request) {}
@@ -35,9 +35,8 @@ export class LogOutUserUseCase extends TransactionUseCase<
     if (!req.cookies?.refreshToken) return false;
 
     try {
-      const result: any = await this.jwtService.verifyRefreshToken(
-        req.cookies.refreshToken,
-      );
+      const result: any = this.jwtService.decode(req.cookies.refreshToken);
+
       if (!result?.userId) return false;
 
       const invalidRefreshTokens =

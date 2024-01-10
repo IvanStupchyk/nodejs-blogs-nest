@@ -1,7 +1,7 @@
 import { Request } from 'express';
-import { JwtService } from '../infrastructure/jwt.service';
 import { Injectable } from '@nestjs/common';
 import { DevicesRepository } from '../infrastructure/repositories/devices/devices.repository';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class RefreshTokenMiddleware {
@@ -17,9 +17,7 @@ export class RefreshTokenMiddleware {
       return null;
     }
 
-    const result: any = await this.jwtService.verifyRefreshToken(
-      req.cookies.refreshToken,
-    );
+    const result: any = this.jwtService.decode(req.cookies.refreshToken);
 
     if (result?.userId) {
       const session = await this.devicesRepository.findDeviceById(

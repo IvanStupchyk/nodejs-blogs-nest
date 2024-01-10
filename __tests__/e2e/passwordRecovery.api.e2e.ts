@@ -7,8 +7,9 @@ import { RouterPaths } from '../../src/constants/router.paths';
 import { errorsConstants } from '../../src/constants/errors.contants';
 import { UserType, UserViewType } from '../../src/types/users.types';
 import { userData1 } from '../mockData/mock-data';
-import { JwtService } from '../../src/infrastructure/jwt.service';
 import { serverStarter } from '../utils/server-starter';
+import { JwtService } from '@nestjs/jwt';
+import { settings } from '../../src/constants/settings';
 
 describe('tests for /auth password recovery', () => {
   let app: INestApplication;
@@ -141,9 +142,15 @@ describe('tests for /auth password recovery', () => {
       isConfirmed: true,
     };
     const jwtService = new JwtService();
-    const recoveryCode = await jwtService.createPasswordRecoveryJWT(
-      superAdminUser.id,
-    );
+    const codePayload = {
+      userId: superAdminUser.id,
+    };
+
+    const recoveryCode = jwtService.sign(codePayload, {
+      secret: settings.JWT_PASSWORD_RECOVERY,
+      expiresIn: '2h',
+    });
+
     const newPassword = '777777';
 
     await emailTemplatesManager.sendPasswordRecoveryMessage(

@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { emailTemplatesManager } from '../../../infrastructure/email-templates-manager';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { UsersRepository } from '../../../infrastructure/repositories/users/users.repository';
+import { JwtService } from '@nestjs/jwt';
+import { settings } from '../../../constants/settings';
 
 export class SendRecoveryPasswordCodeCommand {
   constructor(public email: string) {}
@@ -23,9 +24,14 @@ export class SendRecoveryPasswordCodeUseCase
 
     if (user) {
       try {
-        const recoveryCode = await this.jwtService.createPasswordRecoveryJWT(
-          user.id,
-        );
+        const codePayload = {
+          userId: user.id,
+        };
+
+        const recoveryCode = this.jwtService.sign(codePayload, {
+          secret: settings.JWT_PASSWORD_RECOVERY,
+          expiresIn: '2h',
+        });
 
         await emailTemplatesManager.sendPasswordRecoveryMessage(
           user,

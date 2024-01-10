@@ -1,5 +1,4 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { InvalidRefreshToken } from '../../../entities/users/Invalid-refresh-tokens.entity';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -7,6 +6,8 @@ import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { InvalidRefreshTokensTransactionsRepository } from '../../../infrastructure/repositories/users/invalid-refresh-tokens-transactions.repository';
 import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
+import { JwtService } from '@nestjs/jwt';
+import { settings } from '../../../constants/settings';
 
 export class RefreshTokenCommand {
   constructor(
@@ -52,15 +53,23 @@ export class RefreshTokenUseCase extends TransactionUseCase<
       return null;
     }
 
-    const accessToken = await this.jwtService.createAccessJWT(userId);
-    const refreshToken = await this.jwtService.createRefreshJWT(
-      userId,
-      deviceId,
-    );
+    const accessTokenPayload = { sub: userId };
+    const refreshTokenPayload = {
+      userId: userId,
+      deviceId: deviceId,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      secret: settings.JWT_ACCESS_SECRET,
+      expiresIn: 100000,
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      secret: settings.JWT_REFRESH_SECRET,
+      expiresIn: 200000,
+    });
 
     try {
-      const result: any =
-        await this.jwtService.verifyRefreshToken(refreshToken);
+      const result: any = this.jwtService.decode(refreshToken);
       const device = await this.devicesTransactionsRepository.findDeviceById(
         deviceId,
         manager,

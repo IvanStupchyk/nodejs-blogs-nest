@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { isUUID } from '../../../utils/utils';
 import { CommentsRepository } from '../../../infrastructure/repositories/comments/comments.repository';
 import { CommentViewType } from '../../../types/comments.types';
@@ -15,10 +14,7 @@ export class GetCommentByIdCommand {
 export class GetCommentByIdUseCase
   implements ICommandHandler<GetCommentByIdCommand>
 {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly commentsRepository: CommentsRepository,
-  ) {}
+  constructor(private readonly commentsRepository: CommentsRepository) {}
 
   async execute(
     command: GetCommentByIdCommand,
