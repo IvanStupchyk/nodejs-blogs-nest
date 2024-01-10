@@ -2,12 +2,12 @@ import { HttpStatus } from '@nestjs/common';
 import { CommandHandler } from '@nestjs/cqrs';
 import { isUUID } from '../../../utils/utils';
 import { Request } from 'express';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { JwtService } from '@nestjs/jwt';
 
 export class DeleteDeviceCommand {
   constructor(
@@ -38,7 +38,7 @@ export class DeleteDeviceUseCase extends TransactionUseCase<
     if (!command.req.cookies.refreshToken) return HttpStatus.UNAUTHORIZED;
     if (!command.deviceId) return HttpStatus.NOT_FOUND;
 
-    const result: any = await this.jwtService.verifyRefreshToken(
+    const result: any = this.jwtService.decode(
       command.req.cookies.refreshToken,
     );
     if (!result?.userId) return HttpStatus.UNAUTHORIZED;

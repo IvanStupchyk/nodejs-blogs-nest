@@ -14,7 +14,6 @@ import { BlogsQueryDto } from '../../application/dto/blogs/blogs.query.dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CommandBus } from '@nestjs/cqrs';
 import { RouterPaths } from '../../constants/router.paths';
-import { JwtService } from '../../infrastructure/jwt.service';
 import { BindBlogParamsDto } from '../../application/dto/blogs/bind-blog.params.dto';
 import { BindBlogWithUserCommand } from '../../domain/blogs/use-cases/bind-blog-with-user-use-case';
 import { SaUserBanBlogInputDto } from '../../application/dto/users/sa-user-ban-blog.input.dto';
@@ -24,7 +23,6 @@ import { BanBlogBySaCommand } from '../../domain/blogs/use-cases/ban-blog-by-sa-
 export class BlogSaController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
 

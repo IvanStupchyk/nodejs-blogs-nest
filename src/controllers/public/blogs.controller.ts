@@ -24,13 +24,11 @@ import { CurrentUserId } from '../../auth/current-user-param.decorator';
 import { SubscribeBlogCommand } from '../../domain/blogs/use-cases/subscribe-blog-use-case';
 import { UnsubscribeBlogCommand } from '../../domain/blogs/use-cases/unsubscribe-blog-use-case';
 import { UserIdFromHeaders } from '../../auth/user-id-from-headers.decorator';
-import { JwtService } from '../../infrastructure/jwt.service';
 
 @Controller(RouterPaths.blogs)
 export class BlogController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
-    private readonly jwtService: JwtService,
     private commandBus: CommandBus,
   ) {}
 

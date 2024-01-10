@@ -5,7 +5,6 @@ import { BlogViewType } from '../../../types/blogs/blogs.types';
 import { exceptionHandler } from '../../../utils/errors/exception.handler';
 import { HttpStatus } from '@nestjs/common';
 import { SubscriptionStatus } from '../../../constants/subscription-status.enum';
-import { JwtService } from '../../../infrastructure/jwt.service';
 
 export class FindBlogByIdCommand {
   constructor(
@@ -18,10 +17,7 @@ export class FindBlogByIdCommand {
 export class FindBlogByIdUseCase
   implements ICommandHandler<FindBlogByIdCommand>
 {
-  constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: FindBlogByIdCommand): Promise<BlogViewType | null> {
     if (!isUUID(command.id)) return null;

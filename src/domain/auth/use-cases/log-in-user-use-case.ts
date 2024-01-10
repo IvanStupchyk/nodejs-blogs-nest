@@ -1,5 +1,4 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { JwtService } from '../../../infrastructure/jwt.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Device } from '../../../entities/devices/Device.entity';
 import { TransactionUseCase } from '../../transaction/use-case/transaction-use-case';
@@ -7,6 +6,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionsRepository } from '../../../infrastructure/repositories/transactions/transactions.repository';
 import { UsersTransactionRepository } from '../../../infrastructure/repositories/users/users.transaction.repository';
+import { JwtService } from '@nestjs/jwt';
+import { settings } from '../../../constants/settings';
 
 export class LogInUserCommand {
   constructor(
@@ -44,11 +45,21 @@ export class LogInUserUseCase extends TransactionUseCase<
     if (!user.isConfirmed) return null;
 
     const deviceId = uuidv4();
-    const accessToken = await this.jwtService.createAccessJWT(userId);
-    const refreshToken = await this.jwtService.createRefreshJWT(
-      userId,
-      deviceId,
-    );
+
+    const accessTokenPayload = { userId: userId };
+    const refreshTokenPayload = {
+      userId: userId,
+      deviceId: deviceId,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      secret: settings.JWT_ACCESS_SECRET,
+      expiresIn: 100000,
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      secret: settings.JWT_REFRESH_SECRET,
+      expiresIn: 200000,
+    });
 
     const newDevice = await this._createDevice(
       userAgent,
@@ -73,7 +84,7 @@ export class LogInUserUseCase extends TransactionUseCase<
     refreshToken: string,
     ip: string,
   ) {
-    const result: any = await this.jwtService.verifyRefreshToken(refreshToken);
+    const result: any = this.jwtService.decode(refreshToken);
 
     return Device.create(
       deviceId,
