@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { FilesSaveAdapter } from './filesSaveAdapter';
-import { dirname, join } from 'node:path';
 import { S3Adapter } from '../../../infrastructure/aws/s3.adapter';
 
 @Injectable()

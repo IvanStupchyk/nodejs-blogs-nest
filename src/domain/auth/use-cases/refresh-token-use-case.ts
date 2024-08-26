@@ -8,6 +8,7 @@ import { InvalidRefreshTokensTransactionsRepository } from '../../../infrastruct
 import { DevicesTransactionsRepository } from '../../../infrastructure/repositories/devices/devices-transactions.repository';
 import { JwtService } from '@nestjs/jwt';
 import { settings } from '../../../constants/settings';
+import { UsersTransactionRepository } from "../../../infrastructure/repositories/users/users.transaction.repository";
 
 export class RefreshTokenCommand {
   constructor(
@@ -28,6 +29,7 @@ export class RefreshTokenUseCase extends TransactionUseCase<
     private readonly jwtService: JwtService,
     private readonly devicesTransactionsRepository: DevicesTransactionsRepository,
     private readonly invalidRefreshTokensTransactionsRepository: InvalidRefreshTokensTransactionsRepository,
+    private readonly usersTransactionRepository: UsersTransactionRepository,
     private readonly transactionsRepository: TransactionsRepository,
   ) {
     super(dataSource);
@@ -53,7 +55,17 @@ export class RefreshTokenUseCase extends TransactionUseCase<
       return null;
     }
 
-    const accessTokenPayload = { sub: userId };
+    const user = await this.usersTransactionRepository.fetchAllUserDataById(
+      userId,
+      manager,
+    );
+
+    const accessTokenPayload = {
+      sub: userId,
+      email: user.email,
+      login: user.login,
+      deviceId: deviceId,
+    };
     const refreshTokenPayload = {
       userId: userId,
       deviceId: deviceId,
@@ -61,11 +73,11 @@ export class RefreshTokenUseCase extends TransactionUseCase<
 
     const accessToken = this.jwtService.sign(accessTokenPayload, {
       secret: settings.JWT_ACCESS_SECRET,
-      expiresIn: 100000,
+      expiresIn: 800,
     });
     const refreshToken = this.jwtService.sign(refreshTokenPayload, {
       secret: settings.JWT_REFRESH_SECRET,
-      expiresIn: 200000,
+      expiresIn: 20000,
     });
 
     try {

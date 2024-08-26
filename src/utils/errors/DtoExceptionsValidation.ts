@@ -1,5 +1,5 @@
-import { ValidateDtoFields } from "./validate-dto-fields";
-import { errorMessageGenerator } from "./error-message-generator";
+import { ValidateDtoFields } from './validate-dto-fields';
+import { errorMessageGenerator } from './error-message-generator';
 
 export const dtoExceptionsValidation = (dtoName: string, dto: any) => {
   const validate = new ValidateDtoFields();

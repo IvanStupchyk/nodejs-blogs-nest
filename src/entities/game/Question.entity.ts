@@ -1,7 +1,15 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Answer } from "./Answer.entity";
-import { Game } from "./Game.entity";
-import { dtoExceptionsValidation } from "../../utils/errors/DtoExceptionsValidation";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Answer } from './Answer.entity';
+import { Game } from './Game.entity';
+import { dtoExceptionsValidation } from '../../utils/errors/DtoExceptionsValidation';
 
 @Entity('questions')
 export class Question {

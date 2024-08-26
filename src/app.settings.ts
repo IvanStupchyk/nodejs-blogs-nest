@@ -32,6 +32,12 @@ export const appSettings = (app: INestApplication) => {
       },
     }),
   );
+
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.enableCors();
+  // app.enableCors()
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 };

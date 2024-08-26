@@ -1,5 +1,5 @@
-import { QuestionInputDto } from "../../application/dto/question/question.input.dto";
-import { ErrorsNotification } from "./Errors.notification";
+import { QuestionInputDto } from '../../application/dto/question/question.input.dto';
+import { ErrorsNotification } from './Errors.notification';
 
 export class ValidateDtoFields {
   questionDtoValidation(dto: QuestionInputDto): ErrorsNotification {
