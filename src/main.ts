@@ -19,12 +19,12 @@ async function bootstrap() {
   const telegramAdapter = await app.resolve(TelegramAdapter);
 
   if (process.env.NODE_ENV === 'development') {
-    appBaseUrl = await connectToNgrok();
+    // appBaseUrl = await connectToNgrok();
     console.log('appBaseUrl', appBaseUrl);
   }
-
-  await telegramAdapter.setWebhook(
-    `${appBaseUrl}${process.env.TELEGRAM_WEBHOOK}`,
-  );
+  //
+  // await telegramAdapter.setWebhook(
+  //   `${appBaseUrl}${process.env.TELEGRAM_WEBHOOK}`,
+  // );
 }
 bootstrap();

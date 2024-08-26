@@ -46,7 +46,12 @@ export class LogInUserUseCase extends TransactionUseCase<
 
     const deviceId = uuidv4();
 
-    const accessTokenPayload = { userId: userId };
+    const accessTokenPayload = {
+      sub: userId,
+      email: user.email,
+      login: user.login,
+      deviceId: deviceId,
+    };
     const refreshTokenPayload = {
       userId: userId,
       deviceId: deviceId,
@@ -54,11 +59,11 @@ export class LogInUserUseCase extends TransactionUseCase<
 
     const accessToken = this.jwtService.sign(accessTokenPayload, {
       secret: settings.JWT_ACCESS_SECRET,
-      expiresIn: 100000,
+      expiresIn: 800,
     });
     const refreshToken = this.jwtService.sign(refreshTokenPayload, {
       secret: settings.JWT_REFRESH_SECRET,
-      expiresIn: 200000,
+      expiresIn: 20000,
     });
 
     const newDevice = await this._createDevice(

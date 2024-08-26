@@ -47,7 +47,7 @@ export class AuthController {
   async login(
     @Ip() ip: string,
     @Headers() headers: any,
-    @CurrentUserId() currentUserId,
+    @CurrentUserId() currentUserId: string,
     @Res() res: Response,
   ) {
     const userAgent = headers['user-agent'] || 'unknown';
@@ -71,7 +71,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getOwnData(@CurrentUserId() currentUserId) {
+  async getOwnData(@CurrentUserId() currentUserId: string) {
     return await this.commandBus.execute(
       new GetCurrentUserCommand(currentUserId),
     );

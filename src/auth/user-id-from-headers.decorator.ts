@@ -11,6 +11,6 @@ export const UserIdFromHeaders = createParamDecorator(
       userId = jwtService.decode(accessToken);
     }
 
-    return userId?.userId;
+    return userId?.sub;
   },
 );
